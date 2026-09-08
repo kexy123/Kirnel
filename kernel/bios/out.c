@@ -1,6 +1,6 @@
 #include "out.h"
 
-const char *new_line = "\n\r"; // New line + carriage return.
+const char *NEW_LINE = "\n\r"; // New line + carriage return.
 
 /// @brief Prints a null-terminating message to the BIOS.
 /// @param message The null-terminating string.
@@ -22,5 +22,5 @@ void print_c(char character)
 
 void print_newl()
 {
-    out_chp(new_line);
+    out_chp(NEW_LINE);
 }

@@ -1,7 +1,7 @@
 #ifndef kernel_bios_out_h
 #define kernel_bios_out_h
 
-const char *new_line;
+const char *NEW_LINE;
 
 /// @brief Prints a null-terminating message to the BIOS.
 /// @param message The null-terminating string.
