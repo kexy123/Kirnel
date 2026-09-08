@@ -14,7 +14,7 @@ kernel_boot_loader:
 
     ; https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=02h:_Read_Sectors_From_Drive
     mov ah, 0x02    ; BIOS disk reading
-    mov al, 1       ; Read 1 sector at
+    mov al, 2       ; Read 2 sectors at
     mov ch, 0       ; Cylinder 0
     mov cl, 2       ; Sector 2
     mov dh, 0       ; Head 0
