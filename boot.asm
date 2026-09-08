@@ -1,5 +1,5 @@
-[bits 16]
-[org 0x7C00]
+[BITS 16]
+[ORG 0x7C00]
 
 _start:
 kernel_boot_loader:
@@ -19,7 +19,7 @@ kernel_boot_loader:
     mov cl, 2       ; Sector 2
     mov dh, 0       ; Head 0
 
-    int 13h
+    int 0x13
     jc disk_read_error
 
     jmp 0x0000:0x8000
@@ -31,7 +31,7 @@ disk_read_error:
     jmp boot_halt
 
 
-; Similar implementation to ./bootload/bios_log.asm
+; Similar implementation to kernel/bios/print_chp.asm
 bios_log:
     lodsb
 
