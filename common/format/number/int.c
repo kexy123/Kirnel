@@ -1,5 +1,4 @@
 #include "int.h"
-// #include "kernel/bios/kill.h"
 
 const char *uint_to_str(unsigned int num)
 {
@@ -53,7 +52,7 @@ unsigned int str_to_uint(const char *num)
             result *= 10;
             result += num[i] - '0';
             break;
-            
+
         default:
             return 0;
         }
