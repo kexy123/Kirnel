@@ -12,10 +12,11 @@ char read_char()
     return in_ch();
 }
 
-const char *read_line_and_output()
+const char *read_line()
 {
     static char buffer[256];
 
+    // Can only read up to 255 characters.
     unsigned int i = 0;
     for (; i < 255; i++)
     {
@@ -24,6 +25,7 @@ const char *read_line_and_output()
 
         if (input == CARRIAGE_RETURN)
         {
+            // End early on the carraige return pressed via the Enter key.
             print_c('\n');
             break;
         }
