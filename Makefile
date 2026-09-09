@@ -39,7 +39,7 @@ boot.bin: boot.asm
 
 # LINK BOOT ASSEMBLIES
 boot_record/kernel.elf: $(BOOT_OBJECTS)
-	$(LD) -T linker.ld boot_record/kernel_boot.o $(filter-out boot_record/kernel_boot.o,$(BOOT_C_OBJECTS)) $(BOOT_ASM_OBJECTS) -o $@
+	$(LD) -T boot_record/linker.ld boot_record/kernel_boot.o $(filter-out boot_record/kernel_boot.o,$(BOOT_C_OBJECTS)) $(BOOT_ASM_OBJECTS) -o $@
 
 boot_record/kernel.bin: boot_record/kernel.elf
 	$(OBJCOPY) -O binary boot_record/kernel.elf boot_record/kernel.bin
