@@ -7,7 +7,7 @@ NASM := nasm
 CFLAGS := -ffreestanding -mcmodel=small -Icommon -Ikernel -std=c11
 
 # OBJECTS
-C_SOURCES := $(shell find kernel common -name '*.c')
+C_SOURCES := $(shell find kernel common boot_record -name '*.c')
 C_OBJECTS := $(C_SOURCES:.c=.o)
 
 ASM_SOURCES := $(shell find kernel common -name '*.asm')
@@ -26,21 +26,21 @@ all: disk.img
 
 
 # LINK ASSEMBLIES
-kernel.elf: $(OBJECTS)
-	$(LD) -T linker.ld kernel/kernel.o $(filter-out kernel/kernel.o,$(C_OBJECTS)) $(ASM_OBJECTS) -o $@
+boot_record/kernel.elf: $(OBJECTS)
+	$(LD) -T linker.ld boot_record/kernel_boot.o $(filter-out boot_record/kernel_boot.o,$(C_OBJECTS)) $(ASM_OBJECTS) -o $@
 
-kernel.bin: kernel.elf
-	$(OBJCOPY) -O binary kernel.elf kernel.bin
+boot_record/kernel.bin: boot_record/kernel.elf
+	$(OBJCOPY) -O binary boot_record/kernel.elf boot_record/kernel.bin
 
 
 # COMPILE BOOT
-boot.bin: boot.asm
-	$(NASM) -f bin boot.asm -o boot.bin
+boot_record/boot.bin: boot_record/boot.asm
+	$(NASM) -f bin boot_record/boot.asm -o boot_record/boot.bin
 
-disk.img: boot.bin kernel.bin
-	cat boot.bin kernel.bin > disk.img
+disk.img: boot_record/boot.bin boot_record/kernel.bin
+	cat boot_record/boot.bin boot_record/kernel.bin > disk.img
 
 
 clean:
 	rm -f kernel/*.o common/*.o
-	rm -f kernel.elf kernel.bin boot.bin disk.img
+	rm -f boot_record/kernel.elf boot_record/kernel.bin boot_record/boot.bin disk.img
