@@ -4,13 +4,13 @@ LD := ia16-elf-ld
 OBJCOPY := ia16-elf-objcopy
 NASM := nasm
 
-CFLAGS := -ffreestanding -mcmodel=small -Icommon -Ikernel -std=c11
+CFLAGS := -ffreestanding -mcmodel=small -IkirnelOS -std=c11
 
 # OBJECTS
-C_SOURCES := $(shell find kernel common -name '*.c')
+C_SOURCES := $(shell find root/kirnelOS -name '*.c')
 C_OBJECTS := $(C_SOURCES:.c=.o)
 
-ASM_SOURCES := $(shell find kernel common -name '*.asm')
+ASM_SOURCES := $(shell find root/kirnelOS -name '*.asm')
 ASM_OBJECTS := $(ASM_SOURCES:.asm=.o)
 
 OBJECTS := $(C_OBJECTS) $(ASM_OBJECTS)
@@ -54,12 +54,13 @@ boot_record/boot.img: boot.bin boot_record/kernel.bin
 # 16 SECTORS
 	truncate -s 8192 boot_record/boot.img
 
-floppy.img: boot_record/boot.img
+floppy.img: boot_record/boot.img $(OBJECTS)
 	truncate -s 1440K floppy.img
 	mkfs.fat -F 12 -R 16 -S 512 floppy.img
 	dd if=boot_record/boot.img of=floppy.img bs=512 count=16 conv=notrunc
+	mcopy -i floppy.img -s root/* ::/
 
 
 clean:
-	rm -f $(OBJECTS) boot_record/*.o
+	rm -f $(OBJECTS) $(BOOT_OBJECTS) boot_record/*.o
 	rm -f boot_record/kernel.elf boot_record/kernel.bin boot.bin boot_record/boot.img
