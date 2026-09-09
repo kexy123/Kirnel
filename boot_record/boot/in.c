@@ -9,7 +9,10 @@ extern char in_ch();
 
 char read_char()
 {
-    return in_ch();
+    char input = in_ch();
+    print_c(input);
+
+    return input;
 }
 
 const char *read_line()
