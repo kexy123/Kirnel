@@ -1,5 +1,10 @@
 @echo off
 
+if "%1" == "-no" (
+    qemu-system-i386 -drive format=raw,file=disk.img
+    exit /b
+)
+
 wsl make
 
 if "%1" == "-d" (
