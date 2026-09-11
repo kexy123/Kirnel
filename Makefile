@@ -5,6 +5,7 @@ OBJCOPY := ia16-elf-objcopy
 NASM := nasm
 
 CFLAGS := -ffreestanding -mcmodel=small -IkirnelOS -std=c11
+BOOT_CFLAGS := -ffreestanding -mcmodel=small -Iboot_record -std=c11
 
 # OBJECTS
 C_SOURCES := $(shell find root/kirnelOS -name '*.c')
@@ -29,8 +30,11 @@ all: floppy.img
 boot.bin: boot.asm
 	$(NASM) -f bin $< -o $@
 
+boot_record/%.o: boot_record/%.c
+	$(CC) $(BOOT_CFLAGS) -c $< -o $@
+
 # COMPILE C AND ASM
-%.o: %.c
+root/kirnelOS/%.o: root/kirnelOS/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o: %.asm
