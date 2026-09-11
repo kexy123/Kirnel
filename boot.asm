@@ -11,13 +11,13 @@ oem_name:               db "KIRNELOS"       ; 8 bytes.
 bytes_per_sector:       dw 512
 sectors_per_cluster:    db 1                ; 1-to-1 scale.
 reserved_sectors:       dw 16               ; The first 16 sectors are for the boot_record.
-number_of_fats:         db 2                ; FAT usually contains two tables historically for redundancy and recovery.
-root_entries:           dw 224              ; 224 32-bytes directory entries can exist in the root.
+fat_count:              db 2                ; FAT usually contains two tables historically for redundancy and recovery.
+root_entry_count:       dw 224              ; 224 32-bytes directory entries can exist in the root.
 total_sectors:          dw 2880             ; 2880 sectors corresponds to about 1.5 MB.
 media_descriptor:       db 0xF0             ;                                                                       ???
 sectors_per_fat:        dw 9                ; How many sectors each FAT has. This includes the two FATs.
 sectors_per_track:      dw 18               ;                                                                       ???
-number_of_heads:        dw 2                ;                                                                       ???
+head_count:             dw 2                ;                                                                       ???
 hidden_sectors:         dd 0                ; Not necessary; this OS is currently not possible in partitions.
 large_sectors:          dd 0                ; Extra field for storing the number of total sectors.
 
