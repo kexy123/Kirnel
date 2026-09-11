@@ -34,6 +34,8 @@ _start:
 kernel_boot_loader:
     cli
 
+    mov [drive_number], dl;
+
     xor ax, ax
     mov ds, ax
 
