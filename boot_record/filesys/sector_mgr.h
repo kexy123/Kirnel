@@ -24,9 +24,14 @@ typedef struct __attribute__((packed))
     unsigned long long  AbsoluteLogicalBlockAddress;
 } DiskReadAddressPacket;
 
-/// @brief Loads sectors given a DiskReadAddressPacket.
-/// @param drap The DiskReadAddressPacket.
-extern void read_sector(const DiskReadAddressPacket *drap);
+/// @brief The status when reading the sector via a DiskReadAddressPacket; should be OK.
+typedef enum
+{
+    OK = 0x0,
+
+    /// @brief A disk error happened while reading sectors.
+    DISK_ERROR = 0x1
+} SectorReadStatus;
 
 /// @brief Instantiates the DiskReadAddressPacket for read_sector().
 /// @param drap The DiskReadAddressPacket to instantiate
