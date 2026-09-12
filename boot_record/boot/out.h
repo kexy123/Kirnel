@@ -19,6 +19,10 @@ void print_newl();
         char *: print_s, \
         const char *: print_s, \
         char: print_c \
-    )(message)
+    )(message);
+
+#define print_ln(message) \
+    print(message); \
+    print_newl();
 
 #endif
