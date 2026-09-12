@@ -1,6 +1,8 @@
 #include "cluster.h"
-#include "structure.h"
+#include "dir.h"
+#include "fat.h"
 #include "filesys/sector_mgr.h"
+#include "structure.h"
 
 _Bool is_end_of_cluster(DiskCluster diskCluster)
 {
@@ -30,6 +32,31 @@ ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster)
     }
 
     if (status == SECTOR_OK)
+    {
+        return CLUSTER_OK;
+    }
+
+    return CLUSTER_INTERNAL_ERROR;
+}
+
+ReadClusterStatus load_entire_entry(Entry *entry, char *location)
+{
+    DiskCluster diskCluster = entry->FirstClusterLow;
+
+    NextClusterStatus nextCluster;
+    do
+    {
+        ReadClusterStatus readCluster = read_cluster(diskCluster, location);
+        if (readCluster != CLUSTER_OK)
+        {
+            return CLUSTER_INTERNAL_ERROR;
+        }
+
+        location += BYTES_PER_CLUSTER;
+        nextCluster = get_next_cluster(&diskCluster);
+    } while (nextCluster == NEXTCLUSTER_OK);
+
+    if (nextCluster == NEXTCLUSTER_END_OF_CLUSTER)
     {
         return CLUSTER_OK;
     }

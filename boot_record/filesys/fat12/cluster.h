@@ -1,5 +1,7 @@
 #pragma once
 
+#include "dir.h"
+
 #define ROOT_CLUSTER 1  // Although not a cluster, the value that is used to read the root directory as if it was a cluster.
 #define START_CLUSTER 2 // The starting cluster that exists in the cluster segment of FAT12.
 
@@ -36,4 +38,4 @@ ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster);
 /// @param entry The entry whose contents to load.
 /// @param location The location of where to load the contents onto.
 /// @return The status of the cluster's reading.
-ReadClusterStatus load_entire_entry(Entry *entry, const char *location);
+ReadClusterStatus load_entire_entry(Entry *entry, char *location);
