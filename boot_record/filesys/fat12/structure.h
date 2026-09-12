@@ -9,9 +9,9 @@
 
 #define SECTORS_IN_ROOT (BPB->RootEntryCount * sizeof(Entry) / BPB->BytesPerSector) // The number of sectors in the root.
 
-#define FAT1_START_SECT (BPB->ReservedSectors)                            // The FAT1 table lives directly after the reserved sectors.
-#define ROOT_START_SECT (FAT1_START + BPB->FATCount * BPB->SectorsPerFAT) // The root directory lives directly after the FATs.
-#define CLUSTER_START_SECT (ROOT_START + SECTORS_IN_ROOT)                 // The starting cluster lives directly after the root directory.
+#define FAT1_START_SECT (BPB->ReservedSectors)                                 // The FAT1 table lives directly after the reserved sectors.
+#define ROOT_START_SECT (FAT1_START_SECT + BPB->FATCount * BPB->SectorsPerFAT) // The root directory lives directly after the FATs.
+#define CLUSTER_START_SECT (ROOT_START_SECT + SECTORS_IN_ROOT)                 // The starting cluster lives directly after the root directory.
 
 /// @brief A uint8_t.
 typedef unsigned char byte;
