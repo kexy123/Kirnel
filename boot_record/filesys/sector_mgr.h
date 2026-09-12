@@ -27,10 +27,10 @@ typedef struct __attribute__((packed))
 /// @brief The status when reading the sector via a DiskReadAddressPacket; should be OK.
 typedef enum
 {
-    OK = 0x0,
+    SECTOR_OK = 0x0,
 
     /// @brief A disk error happened while reading sectors.
-    DISK_ERROR = 0x1
+    CLUSTER_DISK_ERROR = 0x1
 } SectorReadStatus;
 
 /// @brief Reads the given number of sectors at a starting point onto the buffer.

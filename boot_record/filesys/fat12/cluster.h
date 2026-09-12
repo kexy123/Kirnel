@@ -13,13 +13,13 @@ typedef char *MemCluster;
 /// @brief The status when reading a cluster via read_cluster(); should be OK.
 typedef enum
 {
-    OK,
+    CLUSTER_OK = 0x0,
 
-    /// @brief A disk error occurred while reading sectors.
-    DISK_ERROR,
+    /// @brief An internal error (usually a disk read error) occurred while reading clusters.
+    CLUSTER_INTERNAL_ERROR,
 
     /// @brief The given disk cluster is invalid.
-    INVALID_DISK_CLUSTER
+    CLUSTER_INVALID_DISK_CLUSTER
 } ReadClusterStatus;
 
 /// @brief Loads the contents from the given disk cluster position into memory.
