@@ -4,6 +4,8 @@
 
 #define BPB ((const BIOSParameterBlock *const)BOOT_SECTOR)
 
+#define DRIVE_NUMBER (BPB->Extended.DriveNumber)
+
 /// @brief A uint8_t.
 typedef unsigned char byte;
 
@@ -11,7 +13,20 @@ typedef unsigned char byte;
 typedef unsigned short word;
 
 /// @brief A double word; a uint32_t.
-typedef unsigned int dWord;
+typedef unsigned long dWord;
+
+/// @brief The extended BIOS parameter block.
+typedef struct __attribute((packed))
+{
+    /// @brief The drive number.
+    byte DriveNumber;
+
+    /// @brief Reserved.
+    byte Reserved;
+
+    /// @brief The boot signature, which defines the format of the fields under this struct.
+    byte BootSignature;
+} ExtendedBIOSParameterBlock;
 
 /// @brief The structure of the BIOS parameter block from the FAT12 file system.
 typedef struct __attribute__((packed))
@@ -61,16 +76,3 @@ typedef struct __attribute__((packed))
     /// @brief The extended parameter block.
     ExtendedBIOSParameterBlock Extended;
 } BIOSParameterBlock;
-
-/// @brief The extended BIOS parameter block.
-typedef struct __attribute((packed))
-{
-    /// @brief The drive number.
-    byte DriveNumber;
-
-    /// @brief Reserved.
-    byte Reserved;
-
-    /// @brief The boot signature, which defines the format of the fields under this struct.
-    byte BootSignature;
-} ExtendedBIOSParameterBlock;
