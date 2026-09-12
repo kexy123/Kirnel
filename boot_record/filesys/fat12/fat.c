@@ -31,5 +31,10 @@ NextClusterStatus get_next_cluster(DiskCluster *cluster)
         *cluster &= 0x0FFF;
     }
 
+    if (is_end_of_cluster(*cluster))
+    {
+        return NEXTCLUSTER_END_OF_CLUSTER;
+    }
+
     return NEXTCLUSTER_OK;
 }

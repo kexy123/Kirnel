@@ -132,5 +132,10 @@ FindEntryStatus find_entry_by_path(EntryName *path, Entry *entryBuffer)
         path++;
     }
 
+    if (findEntry != FINDENTRY_FOUND)
+    {
+        return FINDENTRY_NOT_FOUND;
+    }
+
     return FINDENTRY_FOUND;
 }
