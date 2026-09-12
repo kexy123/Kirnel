@@ -17,7 +17,7 @@ ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster)
     }
     else
     {
-        LBASector sectorPosition = CLUSTER_START_SECT + diskCluster - START_CLUSTER;
+        LBASector sectorPosition = CLUSTER_START_SECT + diskCluster - START_CLUSTER + 1;
         status = read_sectors(DRIVE_NUMBER, BPB->SectorsPerCluster, sectorPosition, memCluster);
     }
 
