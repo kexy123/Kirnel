@@ -34,10 +34,10 @@ _start:
 kernel_boot_loader:
     cli
 
-    mov [drive_number], dl;
-
     xor ax, ax
     mov ds, ax
+
+    mov [drive_number], dl
 
     ; Kernel boot address is at 0x0000:0x8000
     mov es, ax
@@ -45,7 +45,7 @@ kernel_boot_loader:
 
     ; https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=02h:_Read_Sectors_From_Drive
     mov ah, 0x02    ; BIOS disk reading
-    mov al, 2       ; Read 2 sectors at
+    mov al, [reserved_sectors]
     mov ch, 0       ; Cylinder 0
     mov cl, 2       ; Sector 2
     mov dh, 0       ; Head 0
