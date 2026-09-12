@@ -8,17 +8,17 @@ typedef struct __attribute__((packed))
     /// @brief The size of the Disk Address Packet (0x10).
     unsigned char       DAPSize;
 
-    /// @brief Unused.
+    /// @brief Unused; must be 0x00.
     unsigned char       Unused;
 
     /// @brief The number of sectors to read.
     unsigned short      SectorCount;
 
-    /// @brief The segment pointer of where to load the sectors onto.
-    unsigned short      BufferSegment;
-
     /// @brief The offset pointer of where to load the sectors onto.
     unsigned short      BufferOffset;
+
+    /// @brief The segment pointer of where to load the sectors onto.
+    unsigned short      BufferSegment;
 
     /// @brief The starting position of the first sector to read using logical block addressing.
     unsigned long long  AbsoluteLogicalBlockAddress;
