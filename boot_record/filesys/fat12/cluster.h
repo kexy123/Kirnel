@@ -10,7 +10,7 @@ typedef unsigned long DiskCluster;
 /// @brief Refers to the address of the starting byte of a loaded cluster in memory.
 typedef char *MemCluster;
 
-/// @brief The status when reading a cluster via read_cluster(); should be OK.
+/// @brief The status when reading a cluster via read_cluster(); should be CLUSTER_OK.
 typedef enum
 {
     CLUSTER_OK = 0x0,

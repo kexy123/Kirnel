@@ -27,7 +27,7 @@ typedef struct __attribute__((packed))
     LBASector AbsoluteLogicalBlockAddress;
 } DiskReadAddressPacket;
 
-/// @brief The status when reading the sector via a DiskReadAddressPacket; should be OK.
+/// @brief The status when reading the sector via a DiskReadAddressPacket; should be SECTOR_OK.
 typedef enum
 {
     SECTOR_OK = 0x0,
