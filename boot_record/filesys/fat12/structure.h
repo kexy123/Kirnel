@@ -1,10 +1,17 @@
 #pragma once
 
 #include "filesys/sector_mgr.h"
+#include "dir.h"
 
-#define BPB ((const BIOSParameterBlock *const)BOOT_SECTOR)
+#define BPB ((const BIOSParameterBlock *const)BOOT_SECTOR) // The BIOS Parameter Block.
 
-#define DRIVE_NUMBER (BPB->Extended.DriveNumber)
+#define DRIVE_NUMBER (BPB->Extended.DriveNumber) // The drive number.
+
+#define SECTORS_IN_ROOT (BPB->RootEntryCount * sizeof(Entry) / BPB->BytesPerSector) // The number of sectors in the root.
+
+#define FAT1_START_SECT (BPB->ReservedSectors)                            // The FAT1 table lives directly after the reserved sectors.
+#define ROOT_START_SECT (FAT1_START + BPB->FATCount * BPB->SectorsPerFAT) // The root directory lives directly after the FATs.
+#define CLUSTER_START_SECT (ROOT_START + SECTORS_IN_ROOT)                 // The starting cluster lives directly after the root directory.
 
 /// @brief A uint8_t.
 typedef unsigned char byte;
@@ -47,7 +54,7 @@ typedef struct __attribute__((packed))
     word ReservedSectors;
 
     /// @brief The number of FATs (File Allocation Tables) that exist.
-    byte FatCount;
+    byte FATCount;
 
     /// @brief The number of entries that can exist in the root directory.
     word RootEntryCount;
@@ -59,7 +66,7 @@ typedef struct __attribute__((packed))
     byte MediaDescriptor;
 
     /// @brief The number of sectors that each FAT has.
-    word SectorsPerFat;
+    word SectorsPerFAT;
 
     /// @brief ???
     word SectorsPerTrack;
