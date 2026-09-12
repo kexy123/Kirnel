@@ -21,12 +21,19 @@ typedef enum
     CLUSTER_INVALID_DISK_CLUSTER
 } ReadClusterStatus;
 
-/// @brief Loads the contents from the given disk cluster position into memory.
-/// @param diskCluster The disk cluster position whose contents to load.
-/// @param memCluster The memomry buffer to load onto.
-ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster);
-
 /// @brief Determines if the given disk cluster is an ending cluster.
 /// @param diskCluster The end cluster.
 /// @return 1 if it is an end cluster; otherwise 0.
 _Bool is_end_of_cluster(DiskCluster diskCluster);
+
+/// @brief Loads the contents from the given disk cluster position into memory.
+/// @param diskCluster The disk cluster position whose contents to load.
+/// @param memCluster The memory buffer to load onto.
+/// @return The status of the cluster's reading.
+ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster);
+
+/// @brief Loads the entire contents of the entry into memory at the given location.
+/// @param entry The entry whose contents to load.
+/// @param location The location of where to load the contents onto.
+/// @return The status of the cluster's reading.
+ReadClusterStatus load_entire_entry(Entry *entry, const char *location);
