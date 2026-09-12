@@ -11,7 +11,7 @@ extern SectorReadStatus read_sectors_from_drap(const unsigned char driveNumber, 
 /// @param sectorCount How many sectors to read.
 /// @param startingSector The starting sector.
 /// @param buffer The buffer to load into.
-void init_drap(DiskReadAddressPacket *drap, unsigned short sectorCount, unsigned long long startingSector, char *buffer)
+void init_drap(DiskReadAddressPacket *drap, unsigned short sectorCount, LBASector startingSector, char *buffer)
 {
     drap->DAPSize = 0x10;
     drap->Unused = 0x00;
@@ -22,7 +22,7 @@ void init_drap(DiskReadAddressPacket *drap, unsigned short sectorCount, unsigned
     nearptr_to_seg_off(buffer, &(drap->BufferSegment), &(drap->BufferOffset));
 }
 
-SectorReadStatus read_sectors(const unsigned char driveNumber, unsigned short sectorCount, unsigned long long startingSector, char *buffer)
+SectorReadStatus read_sectors(const unsigned char driveNumber, unsigned short sectorCount, LBASector startingSector, char *buffer)
 {
     static DiskReadAddressPacket drap;
 

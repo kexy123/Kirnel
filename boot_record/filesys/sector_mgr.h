@@ -2,6 +2,9 @@
 
 #define BOOT_SECTOR ((unsigned char *const)0x7C00) // The position of the boot sector when loaded into memory.
 
+/// @brief The position of a logical block address sector.
+typedef unsigned long long LBASector;
+
 /// @brief The DiskAddressPacket (DAP) for reading sectors via the INT 13h AH=42h.
 typedef struct __attribute__((packed))
 {
@@ -21,7 +24,7 @@ typedef struct __attribute__((packed))
     unsigned short BufferSegment;
 
     /// @brief The starting position of the first sector to read using logical block addressing.
-    unsigned long long AbsoluteLogicalBlockAddress;
+    LBASector AbsoluteLogicalBlockAddress;
 } DiskReadAddressPacket;
 
 /// @brief The status when reading the sector via a DiskReadAddressPacket; should be OK.
@@ -39,4 +42,4 @@ typedef enum
 /// @param startingSector The starting sector.
 /// @param buffer The buffer to load onto.
 /// @return The sector read status.
-SectorReadStatus read_sectors(const unsigned char driveNumber, unsigned short sectorCount, unsigned long long startingSector, char *buffer);
+SectorReadStatus read_sectors(const unsigned char driveNumber, unsigned short sectorCount, LBASector startingSector, char *buffer);
