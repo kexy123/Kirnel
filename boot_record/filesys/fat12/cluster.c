@@ -4,7 +4,7 @@
 
 ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster)
 {
-    if (diskCluster == END_OF_CLUSTER)
+    if (is_end_of_cluster(diskCluster))
     {
         return CLUSTER_INVALID_DISK_CLUSTER;
     }
@@ -27,4 +27,12 @@ ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster)
     }
 
     return CLUSTER_INTERNAL_ERROR;
+}
+
+_Bool is_end_of_cluster(DiskCluster diskCluster)
+{
+    // In FAT12, a cluster is considered an end cluster when it is greater than or equal to this binary value:
+    // 0x F    F    8
+    // 0b 1111_1111_1000
+    return diskCluster >= 0xFF8;
 }

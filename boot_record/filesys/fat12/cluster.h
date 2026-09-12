@@ -1,8 +1,7 @@
 #pragma once
 
-#define END_OF_CLUSTER 0 // The sentinel when reading a linked list of DiskCluster positions.
-#define ROOT_CLUSTER 1   // Although not a cluster, the value that is used to read the root directory as if it was a cluster.
-#define START_CLUSTER 2  // The starting cluster that exists in the cluster segment of FAT12.
+#define ROOT_CLUSTER 1  // Although not a cluster, the value that is used to read the root directory as if it was a cluster.
+#define START_CLUSTER 2 // The starting cluster that exists in the cluster segment of FAT12.
 
 /// @brief Refers to the position of a cluster in the disk.
 typedef unsigned long DiskCluster;
@@ -26,3 +25,8 @@ typedef enum
 /// @param diskCluster The disk cluster position whose contents to load.
 /// @param memCluster The memomry buffer to load onto.
 ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster);
+
+/// @brief Determines if the given disk cluster is an ending cluster.
+/// @param diskCluster The end cluster.
+/// @return 1 if it is an end cluster; otherwise 0.
+_Bool is_end_of_cluster(DiskCluster diskCluster);
