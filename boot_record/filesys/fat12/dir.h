@@ -50,5 +50,5 @@ typedef struct __attribute__((packed))
     unsigned short FirstClusterLow;
 
     /// @brief The size of the file.
-    unsigned int FileSize;
+    unsigned long FileSize;
 } Entry;
