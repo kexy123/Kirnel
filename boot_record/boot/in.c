@@ -20,7 +20,7 @@ const char *read_line()
     static char buffer[256];
 
     // Can only read up to 255 characters.
-    unsigned int i = 0;
+    unsigned short i = 0;
     for (; i < 255; i++)
     {
         char input = in_ch();
