@@ -1,3 +1,5 @@
+#pragma once
+
 /// @brief Reads one keyboard character input from the boot menu.
 /// @return The ASCII character of the keyboard press.
 char read_char();

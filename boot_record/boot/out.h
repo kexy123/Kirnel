@@ -1,5 +1,17 @@
-#ifndef kernel_boot_out_h
-#define kernel_boot_out_h
+#pragma once
+
+#define print(message) \
+    _Generic((message), \
+        char *: print_s, \
+        const char *: print_s, \
+        char: print_c, \
+        unsigned char: print_uint, \
+        unsigned short: print_uint \
+    )(message);
+
+#define print_ln(message) \
+    print(message); \
+    print_newl();
 
 const char *NEW_LINE;
 
@@ -11,18 +23,9 @@ void print_s(const char *message);
 /// @param character The character to print.
 void print_c(char character);
 
+/// @brief Prints an unsigned integer to the boot menu in base-10.
+/// @param num The number to print in base-10.
+void print_uint(unsigned short num);
+
 /// @brief Prints a new line feed to the boot menu.
 void print_newl();
-
-#define print(message) \
-    _Generic((message), \
-        char *: print_s, \
-        const char *: print_s, \
-        char: print_c \
-    )(message);
-
-#define print_ln(message) \
-    print(message); \
-    print_newl();
-
-#endif
