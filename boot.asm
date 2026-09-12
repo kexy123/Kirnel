@@ -53,7 +53,13 @@ kernel_boot_loader:
     int 0x13
     jc disk_read_error
 
-    jmp 0x0000:0x8000
+    call 0x0000:0x8000 ; Run krnl_boot from kernel_boot.c.
+
+    ; Shift the data segment register.
+    mov ax, 0x0D00
+    mov ds, ax
+
+    jmp 0x0D00:0x0000 ; Go to the kernel that was loaded into memory at 0x0D000.
 
 
 disk_read_error:
@@ -62,7 +68,7 @@ disk_read_error:
     jmp boot_halt
 
 
-; Similar implementation to kernel/bios/print_chp.asm
+; Similar implementation to boot_record/bios/print_chp.asm
 bios_log:
     lodsb
 
