@@ -52,3 +52,24 @@ typedef struct __attribute__((packed))
     /// @brief The size of the file.
     unsigned long FileSize;
 } Entry;
+
+/// @brief The status when finding an entry in a folder; should be FINDENTRY_FOUND.
+typedef enum
+{
+    FINDENTRY_FOUND = 0x0,
+
+    /// @brief The entry was not found anywhere in the folder.
+    FINDENTRY_NOT_FOUND = 0x1,
+
+    /// @brief The entry was not found in the cluster. Note that this doesn't immediately mark the entry as nonexistent in the folder.
+    FINDENTRY_NOT_FOUND_IN_CLUSTER = 0x2,
+
+    /// @brief An internal error occurred while trying to find an entry.
+    FINDENTRY_INTERNAL_ERROR = 0x3
+} FindEntryStatus;
+
+/// @brief Finds an entry by an array of EntryNames forming an absolute path.
+/// @param path The absolute path which is an array of EntryNames.
+/// @param entryBuffer The Entry buffer that will be loaded onto when the entry is found; otherwise returns the last common directory.
+/// @return The status of when the entry was found or not.
+FindEntryStatus find_entry_by_path(EntryName *path, Entry *entryBuffer);
