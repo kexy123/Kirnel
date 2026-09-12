@@ -4,7 +4,7 @@
 #define START_CLUSTER 2 // The starting cluster that exists in the cluster segment of FAT12.
 
 /// @brief Refers to the position of a cluster in the disk.
-typedef unsigned long DiskCluster;
+typedef unsigned short DiskCluster;
 
 /// @brief Refers to the address of the starting byte of a loaded cluster in memory.
 typedef char *MemCluster;
