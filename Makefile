@@ -4,8 +4,8 @@ LD := ia16-elf-ld
 OBJCOPY := ia16-elf-objcopy
 NASM := nasm
 
-CFLAGS := -ffreestanding -mcmodel=small -IkirnelOS -std=c11
-BOOT_CFLAGS := -ffreestanding -mcmodel=small -Iboot_record -std=c11
+CFLAGS := -ffreestanding -nostdlib -mcmodel=small -IkirnelOS -std=c11
+BOOT_CFLAGS := -ffreestanding -nostdlib -mcmodel=small -Iboot_record -std=c11
 
 # OBJECTS
 C_SOURCES := $(shell find root/kirnelOS -name '*.c')
