@@ -8,11 +8,13 @@ CFLAGS := -ffreestanding -nostdlib -mcmodel=small -IkirnelOS -std=c11
 BOOT_CFLAGS := -ffreestanding -nostdlib -mcmodel=small -Iboot_record -std=c11
 
 # OBJECTS
-C_SOURCES := $(shell find root/kirnelOS -name '*.c')
+C_SOURCES := $(shell find kirnelOS -name '*.c')
 C_OBJECTS := $(C_SOURCES:.c=.o)
+C_OBJECTS := $(C_OBJECTS:kirnelOS/%=build/kirnelOS/%)
 
-ASM_SOURCES := $(shell find root/kirnelOS -name '*.asm')
-ASM_OBJECTS := $(ASM_SOURCES:.asm=.o)
+ASM_SOURCES := $(shell find kirnelOS -name '*.asm')
+ASM_OBJECTS := $(ASM_SOURCES:.asm=.bin)
+ASM_OBJECTS := $(ASM_OBJECTS:kirnelOS/%=build/kirnelOS/%)
 
 OBJECTS := $(C_OBJECTS) $(ASM_OBJECTS)
 
@@ -33,12 +35,17 @@ boot.bin: boot.asm
 boot_record/%.o: boot_record/%.c
 	$(CC) $(BOOT_CFLAGS) -c $< -o $@
 
+boot_record/%.o: boot_record/%.asm
+	$(NASM) -f elf $< -o $@
+
 # COMPILE C AND ASM
-root/kirnelOS/%.o: root/kirnelOS/%.c
+build/kirnelOS/%.o: kirnelOS/%.c
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: %.asm
-	$(NASM) -f elf $< -o $@
+build/kirnelOS/%.bin: kirnelOS/%.asm
+	mkdir -p $(dir $@)
+	$(NASM) -f bin $< -o $@
 
 
 # LINK BOOT ASSEMBLIES
@@ -62,9 +69,10 @@ floppy.img: boot_record/boot.img $(OBJECTS)
 	truncate -s 1440K floppy.img
 	mkfs.fat -F 12 -R 16 -S 512 floppy.img
 	dd if=boot_record/boot.img of=floppy.img bs=512 count=16 conv=notrunc
-	mcopy -i floppy.img -s root/* ::/
+	mcopy -i floppy.img -s build/* ::/
 
 
 clean:
-	rm -f $(OBJECTS) $(BOOT_OBJECTS) boot_record/*.o
+	rm -rf build/
+	rm -f $(BOOT_OBJECTS) boot_record/*.o
 	rm -f boot_record/kernel.elf boot_record/kernel.bin boot.bin boot_record/boot.img

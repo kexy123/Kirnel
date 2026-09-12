@@ -4,5 +4,7 @@
 *.img
 *.o
 
+build/
+
 # Visual Studio Code
 .vscode/
