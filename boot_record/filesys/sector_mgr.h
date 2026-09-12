@@ -33,9 +33,10 @@ typedef enum
     DISK_ERROR = 0x1
 } SectorReadStatus;
 
-/// @brief Instantiates the DiskReadAddressPacket for read_sector().
-/// @param drap The DiskReadAddressPacket to instantiate
+/// @brief Reads the given number of sectors at a starting point onto the buffer.
+/// @param driveNumber The drive number. Should be DRIVE_NUMBER.
 /// @param sectorCount How many sectors to read.
 /// @param startingSector The starting sector.
-/// @param buffer The buffer to load into.
-void init_drap(DiskReadAddressPacket *drap, unsigned short sectorCount, unsigned long long startingSector, char *buffer);
+/// @param buffer The buffer to load onto.
+/// @return The sector read status.
+SectorReadStatus read_sectors(const unsigned char driveNumber, unsigned short sectorCount, unsigned long long startingSector, char *buffer);

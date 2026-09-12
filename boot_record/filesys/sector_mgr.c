@@ -19,5 +19,17 @@ void init_drap(DiskReadAddressPacket *drap, unsigned short sectorCount, unsigned
     drap->SectorCount = sectorCount;
     drap->AbsoluteLogicalBlockAddress = startingSector; // 1 LBA = 1 disk sector.
 
-    ptr_to_seg_off(buffer, &(drap->BufferSegment), &(drap->BufferOffset));
+    nearptr_to_seg_off(buffer, &(drap->BufferSegment), &(drap->BufferOffset));
+}
+
+SectorReadStatus read_sectors(const unsigned char driveNumber, unsigned short sectorCount, unsigned long long startingSector, char *buffer)
+{
+    static DiskReadAddressPacket drap;
+
+    init_drap(&drap, sectorCount, startingSector, buffer);
+
+    unsigned short drapSegment, drapOffset;
+    nearptr_to_seg_off(&drap, &drapSegment, &drapOffset);
+
+    return read_sectors_from_drap(driveNumber, drapSegment, drapOffset);
 }
