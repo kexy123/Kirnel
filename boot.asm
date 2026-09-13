@@ -15,7 +15,7 @@ fat_count:              db 2                ; FAT usually contains two tables hi
 root_entry_count:       dw 224              ; 224 32-bytes directory entries can exist in the root.
 total_sectors:          dw 2880             ; 2880 sectors corresponds to about 1.5 MB.
 media_descriptor:       db 0xF0             ;                                                                       ???
-sectors_per_fat:        dw 9                ; How many sectors each FAT has. This includes the two FATs.
+sectors_per_fat:        dw 9                ; How many sectors each FAT has.
 sectors_per_track:      dw 18               ;                                                                       ???
 head_count:             dw 2                ;                                                                       ???
 hidden_sectors:         dd 0                ; Not necessary; this OS is currently not possible in partitions.
@@ -59,7 +59,7 @@ gdt_start:
         ; 0      | A   | Accessed bit               | 1 | The CPU sets it when the segment is accessed.
 
         ;    GDLR
-        db 0b1000_1111 ; Extra flags and Limit address high
+        db 0b1100_1111 ; Extra flags and Limit address high
         ; Offset | ID | Name        | # | Description
         ; -------|----|-------------|---|-------------------------------------------------------------------------------
         ; 3      | G  | Granularity | 1 | The size of the limit address should be multiplied by 4 KiB (1) or not (0).
@@ -155,16 +155,20 @@ enable_a20_line:
 
 load_gdt:
     lgdt [gdt_descriptor]
-    jmp 0x0D00:0x0000 ; Go to the kernel that was loaded into memory at 0x0D000.
 
 set_cr0_register:
     ; https://en.wikipedia.org/wiki/Control_register#CR0
     mov eax, cr0
     or eax, 1
     mov cr0, eax
-    jmp KERNEL_CODE_SELECTOR:NEXT_BOOTLOADER_ENTRY
+; [BITS 32]
 
-[BITS 32]
+    ; mov al, 0x41
+    ; mov ah, 0x0F
+    ; mov [0xB8000], ax
+
+    jmp 0x08:0x8000
+    ; jmp KERNEL_CODE_SELECTOR:NEXT_BOOTLOADER_ENTRY
 
 halt:
     cli
