@@ -128,6 +128,10 @@ enable_a20_line:
 
     ret
 
+load_gdt:
+    lgdt [gdt_descriptor]
+    ret
+
 disk_read_error:
     mov si, disk_error
     jmp bios_log
