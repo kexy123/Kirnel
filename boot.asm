@@ -106,31 +106,7 @@ kernel_boot_loader:
     mov dh, 0       ; Head 0
 
     int 0x13
-    jc disk_read_error
-
-    call 0x0000:0x8000 ; Run krnl_boot from kernel_boot.c.
-
-    ; Shift the data segment register.
-    mov ax, 0x0D00
-    mov ds, ax
-
-    jmp 0x0D00:0x0000 ; Go to the kernel that was loaded into memory at 0x0D000.
-
-; https://en.wikipedia.org/wiki/A20_line
-enable_a20_line:
-    cli
-    in al, 0x92
-
-    ; Enable the 2nd bit of the 0x92 IO port to enable the A20 line.
-    ; 0x02 = 0b00000010
-    or al, 0x02
-    out 0x92, al
-
-    ret
-
-load_gdt:
-    lgdt [gdt_descriptor]
-    ret
+    jnc enable_protected_mode ; If the next stage of the boot loader was loaded into memory, begin enabling protected mode.
 
 disk_read_error:
     mov si, disk_error
@@ -160,6 +136,21 @@ boot_halt:
     jmp boot_halt
 
 disk_error db "Kernel boot sector not found. Please restart the OS.", 0
+
+enable_protected_mode:
+enable_a20_line:
+    ; https://en.wikipedia.org/wiki/A20_line
+    cli
+    in al, 0x92
+
+    ; Enable the 2nd bit of the 0x92 IO port to enable the A20 line.
+    ; 0x02 = 0b00000010
+    or al, 0x02
+    out 0x92, al
+
+load_gdt:
+    lgdt [gdt_descriptor]
+    jmp 0x0D00:0x0000 ; Go to the kernel that was loaded into memory at 0x0D000.
 
 ; Pad boot sector
 times 510 - ($ - $$) db 0
