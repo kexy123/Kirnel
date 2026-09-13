@@ -1,3 +1,5 @@
+export PATH := /usr/local/i386-elf/bin:$(PATH)
+
 # COMMANDS
 CC := i386-elf-gcc
 LD := i386-elf-ld
