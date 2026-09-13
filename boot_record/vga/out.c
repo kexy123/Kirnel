@@ -50,5 +50,9 @@ void print_uint(unsigned short num)
 
 void print_newl()
 {
-    vgaBuffer += VGA_WIDTH - (vgaBuffer - VGA_START) % VGA_WIDTH;
+    unsigned short numSpaces = VGA_WIDTH - (vgaBuffer - VGA_START) % VGA_WIDTH;
+    for (unsigned short i = 0; i < numSpaces; i++)
+    {
+        print_c(' ');
+    }
 }

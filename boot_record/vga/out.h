@@ -35,5 +35,5 @@ void print_c(char character);
 /// @param num The number to print in base-10.
 void print_uint(unsigned short num);
 
-/// @brief Moves the cursor to the next line in the VGA.
+/// @brief Fills the text after the cursor in the current line with spaces and moves the cursor to the next line in the VGA.
 void print_newl();

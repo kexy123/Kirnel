@@ -1,19 +1,15 @@
-#include "boot/in.h"
-#include "boot/out.h"
+#include "vga/out.h"
 #include "filesys/fat12/cluster.h"
 #include "filesys/fat12/dir.h"
 #include "kernel_boot.h"
 
 void krnl_boot(void)
 {
-    print("Enter key to continue: ");
-    read_char();
+    print_ln("Locating kernel. . .");
+    // load_kernel();
 
-    print_newl();
-
-    load_kernel();
-
-    return;
+    while (1)
+        ;
 }
 
 void load_kernel()
