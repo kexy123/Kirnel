@@ -1,3 +1,5 @@
+#pragma once
+
 /// @brief The starting method upon boot being initiated by the boot sector.
 void krnl_boot(void);
 
