@@ -37,6 +37,7 @@ gdt_start:
     null_descriptor:
         dq 0
 
+    KERNEL_CODE_SELECTOR equ 0x08
     kernel_code:
         dw 0xFFFF ; Limit address low
 
@@ -94,9 +95,10 @@ kernel_boot_loader:
 
     mov [drive_number], dl
 
+    NEXT_BOOTLOADER_ENTRY equ 0x8000
     ; Kernel boot address is at 0x0000:0x8000
     mov es, ax
-    mov bx, 0x8000
+    mov bx, NEXT_BOOTLOADER_ENTRY
 
     ; https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=02h:_Read_Sectors_From_Drive
     mov ah, 0x02    ; BIOS disk reading
