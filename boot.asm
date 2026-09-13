@@ -139,6 +139,9 @@ boot_halt:
 
 disk_error db "Kernel boot sector not found. Please restart the OS.", 0
 
+
+;;;;; ENABLING PROTECTED MODE ;;;;;
+
 enable_protected_mode:
 enable_a20_line:
     ; https://en.wikipedia.org/wiki/A20_line
@@ -154,6 +157,21 @@ load_gdt:
     lgdt [gdt_descriptor]
     jmp 0x0D00:0x0000 ; Go to the kernel that was loaded into memory at 0x0D000.
 
-; Pad boot sector
+set_cr0_register:
+    ; https://en.wikipedia.org/wiki/Control_register#CR0
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    jmp KERNEL_CODE_SELECTOR:NEXT_BOOTLOADER_ENTRY
+
+[BITS 32]
+
+halt:
+    cli
+    hlt
+    jmp halt
+
+
+;;;;; PAD BOOT SECTOR ;;;;;
 times 510 - ($ - $$) db 0
 dw 0xAA55
