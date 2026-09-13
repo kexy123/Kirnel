@@ -1,5 +1,15 @@
 #pragma once
 
+/// @brief A character in the [VGA (video graphics array)](https://en.wikipedia.org/wiki/Video_Graphics_Array).
+typedef struct __attribute__((packed))
+{
+    /// @brief The character at this array.
+    unsigned char Character;
+
+    /// @brief The foreground and background color for the given character.
+    unsigned char Color;
+} VGACharacter;
+
 #define print(message) \
     _Generic((message), \
         char *: print_s, \
@@ -13,19 +23,17 @@
     print(message); \
     print_newl();
 
-const char *NEW_LINE;
-
-/// @brief Prints a null-terminating message to the boot menu.
+/// @brief Prints a null-terminating message to the VGA and moves the cursor to the end of the string.
 /// @param message The null-terminating string.
 void print_s(const char *message);
 
-/// @brief Prints a single character to the boot menu.
+/// @brief Prints a single character to the VGA and moves the cursor.
 /// @param character The character to print.
 void print_c(char character);
 
-/// @brief Prints an unsigned integer to the boot menu in base-10.
+/// @brief Prints an unsigned integer to the VGA in base-10 and moves the cursor.
 /// @param num The number to print in base-10.
 void print_uint(unsigned short num);
 
-/// @brief Prints a new line feed to the boot menu.
+/// @brief Moves the cursor to the next line in the VGA.
 void print_newl();

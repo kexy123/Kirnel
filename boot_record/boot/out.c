@@ -1,23 +1,30 @@
 #include "out.h"
 
-const char *NEW_LINE = "\n\r"; // New line + carriage return.
+#define VGA_START ((VGACharacter *)(0xB8000)) // The pointer of the starting character of the VGA.
+#define VGA_WIDTH (80)                        // The VGA width.
+#define VGA_HEIGHT (25)                       // The VGA height.
 
-/// @brief Prints a null-terminating message to the boot menu.
-/// @param message The null-terminating string.
-extern void out_chp(const char *message);
-
-/// @brief Prints a character to the boot menu.
-/// @param character The character.
-extern void out_ch(char character);
+/// @brief The current position of where to output text in the VGA.
+VGACharacter *vgaBuffer = VGA_START;
 
 void print_s(const char *message)
 {
-    out_chp(message);
+    while (*message != '\0')
+    {
+        vgaBuffer->Color = 0x0F;
+        vgaBuffer->Character = *message;
+
+        // Move the vgaBuffer and message.
+        vgaBuffer++;
+        message++;
+    }
 }
 
 void print_c(char character)
 {
-    out_ch(character);
+    vgaBuffer->Color = 0x0F;
+    vgaBuffer->Character = character;
+    vgaBuffer++;
 }
 
 void print_uint(unsigned short num)
@@ -37,11 +44,11 @@ void print_uint(unsigned short num)
     while (i > 0)
     {
         i--;
-        out_ch(result[i]);
+        print_c(result[i]);
     }
 }
 
 void print_newl()
 {
-    out_chp(NEW_LINE);
+    vgaBuffer += VGA_WIDTH - (vgaBuffer - VGA_START) % VGA_WIDTH;
 }
