@@ -1,11 +1,11 @@
 # COMMANDS
-CC := ia16-elf-gcc
-LD := ia16-elf-ld
-OBJCOPY := ia16-elf-objcopy
+CC := i386-elf-gcc
+LD := i386-elf-ld
+OBJCOPY := i386-elf-objcopy
 NASM := nasm
 
-CFLAGS := -ffreestanding -nostdlib -mcmodel=small -IkirnelOS -std=c11
-BOOT_CFLAGS := -ffreestanding -nostdlib -mcmodel=small -Iboot_record -std=c11
+CFLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS -std=c11
+BOOT_CFLAGS := -ffreestanding -nostdlib -m32 -Iboot_record -std=c11
 
 # OBJECTS
 C_SOURCES := $(shell find kirnelOS -name '*.c')
@@ -36,7 +36,7 @@ boot_record/%.o: boot_record/%.c
 	$(CC) $(BOOT_CFLAGS) -c $< -o $@
 
 boot_record/%.o: boot_record/%.asm
-	$(NASM) -f elf $< -o $@
+	$(NASM) -f elf32 $< -o $@
 
 # COMPILE C AND ASM
 build/kirnelOS/%.o: kirnelOS/%.c
