@@ -2,8 +2,8 @@
 #include "boot/out.h"
 #include "filesys/fat12/cluster.h"
 #include "filesys/fat12/dir.h"
+#include "kernel_boot.h"
 
-/// @brief The starting method upon boot being initiated by the boot sector.
 void krnl_boot(void)
 {
     print("Enter key to continue: ");
@@ -11,8 +11,15 @@ void krnl_boot(void)
 
     print_newl();
 
-    // TODO: Read from FAT12 the kirnelOS/sysmgr/krnlload.bin file.
-    const char *kernelPath = "KIRNELOS   SYSMGR     KRNLLOADBIN";
+    load_kernel();
+
+    return;
+}
+
+void load_kernel()
+{
+    // Read from FAT12 the kirnelOS/sysmgr32/krnlload.bin file.
+    const char *kernelPath = "KIRNELOS   SYSMGR32   KRNLLOADBIN";
 
     Entry kernel;
     FindEntryStatus findEntry = find_entry_by_path((EntryName *)kernelPath, &kernel);
@@ -26,6 +33,4 @@ void krnl_boot(void)
         char *kernel_location = (char *)0xD000;
         load_entire_entry(&kernel, kernel_location);
     }
-
-    return;
 }
