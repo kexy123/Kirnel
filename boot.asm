@@ -30,6 +30,61 @@ volume_label:           db "KIRNEL OS  "    ; 11 bytes
 filesystem:             db "FAT12   "       ; 8 bytes
 
 
+;;;;; GLOBAL DESCRIPTOR TABLE ;;;;;
+
+; https://wiki.osdev.org/Global_Descriptor_Table#Segment_Descriptor
+gdt_start:
+    null_descriptor:
+        dq 0
+
+    kernel_code:
+        dw 0xFFFF ; Limit address low
+
+        dw 0x0000 ; Base address low
+        db 0x00 ; Base address mid
+
+        ;    PD SECRA
+        db 0b10011010 ; Access flags
+        ; Offset | ID  | Name                       | # | Description
+        ; -------|-----|----------------------------|---|-----------------------------------------------------------------------------------------------------------------
+        ; 7      | P   | Present bit                | 1 | Should be set to make this segment present.
+        ; 6      | DPL | Descriptor privilege level | 2 | Part of the protection ring (https://en.wikipedia.org/wiki/Protection_ring).
+        ; 4      | S   | Descriptor type bit        | 1 | 0 to define a system segment; 1 to define a code or data segment.
+        ; 3      | E   | Executable bit             | 1 | 0 to declare that it's a data segment; 1 to declare that it's executable code.
+        ; 2      | D/C | Direction/conforming bit   | 1 | Dependent on E: if E is 0 (data), this bit is the direction that grows the segment up (0) or down (1).
+        ;                                                 If E is 1 (code), this bit determines if code can only be run in its protection ring (0) or the ring lower (1).
+        ; 1      | R/W | Read/write access bit      | 1 | Dependent on E: if E is 0 (data), this bit determines if the data is writable (1) or not (0).
+        ;                                                 If E is 1 (code), this bit determines if code is only readable (1) or not (0).
+        ; 0      | A   | Accessed bit               | 1 | The CPU sets it when the segment is accessed.
+
+        ;    GDLR
+        db 0b1000_1111 ; Extra flags and Limit address high
+        ; Offset | ID | Name        | # | Description
+        ; -------|----|-------------|---|-------------------------------------------------------------------------------
+        ; 3      | G  | Granularity | 1 | The size of the limit address should be multiplied by 4 KiB (1) or not (0).
+        ; 2      | DB | Size flag   | 1 | Defines a 16-bit (0) or 32-bit (1) protected mode segment.
+        ; 1      | L  | Long-mode   | 1 | Defines a 64-bit (1) code segment or not (0). DB and L are mutually exclusive.
+        ; 0      | R  | Reserved    | 1 | Reserved.
+
+        db 0x00 ; Base address high
+
+    kernel_data:
+        dw 0xFFFF
+        dw 0x0000
+        db 0x00
+        db 0b10010010
+        db 0b1000_1111
+        db 0x00
+gdt_end:
+
+; https://wiki.osdev.org/Global_Descriptor_Table#GDTR
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1 ; The size of the global descriptor table
+    dd gdt_start ; The pointer to the first entry in the global descriptor table
+
+
+;;;;; MAIN BOOT LOADER ;;;;;
+
 _start:
 kernel_boot_loader:
     cli
