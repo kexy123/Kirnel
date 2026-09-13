@@ -61,6 +61,17 @@ kernel_boot_loader:
 
     jmp 0x0D00:0x0000 ; Go to the kernel that was loaded into memory at 0x0D000.
 
+; https://en.wikipedia.org/wiki/A20_line
+enable_a20_line:
+    cli
+    in al, 0x92
+
+    ; Enable the 2nd bit of the 0x92 IO port to enable the A20 line.
+    ; 0x02 = 0b00000010
+    or al, 0x02
+    out 0x92, al
+
+    ret
 
 disk_read_error:
     mov si, disk_error
