@@ -5,6 +5,8 @@ section .text
 global setup_dma
 global pass_command
 
+extern port_call
+
 reset_flip_flop:
     ; Reset DMA flip-flop. This is to preserve the sections of the values being passed in that have to be split into multiple bytes.
     mov dx, 0x0C ; Flip-flop reset register.
@@ -69,11 +71,5 @@ pass_command:
     test al, 0b0100_0000
     jnz pass_command ; The direction of data transfer must be the CPU -> FIFO IO port (0).
 
-pass:
     ; Pass in command.
-    mov dx, [esp + 4] ; The port.
-    mov al, [esp + 8] ; The byte.
-
-    out dx, al
-
-    ret
+    jmp port_call

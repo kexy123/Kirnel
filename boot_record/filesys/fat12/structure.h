@@ -1,6 +1,6 @@
 #pragma once
 
-#include "filesys/sector_mgr.h"
+#include "disksys/sector_mgr.h"
 #include "dir.h"
 
 #define BPB ((const BIOSParameterBlock *const)BOOT_SECTOR) // The BIOS Parameter Block.

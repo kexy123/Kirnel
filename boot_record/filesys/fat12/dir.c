@@ -1,7 +1,7 @@
 #include "dir.h"
 #include "cluster.h"
 #include "fat.h"
-#include "memory/copy.h"
+#include "utils/memcopy.h"
 
 /// @brief Compares if two entry names are equal in value.
 /// @param a The first EntryName.
