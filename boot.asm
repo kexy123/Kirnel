@@ -38,7 +38,7 @@ gdt_start:
         dq 0
 
     KERNEL_CODE_SELECTOR equ 0x08
-    kernel_code:
+    kernel_code: ; At 0x08
         dw 0xFFFF ; Limit address low
 
         dw 0x0000 ; Base address low
@@ -69,7 +69,7 @@ gdt_start:
 
         db 0x00 ; Base address high
 
-    kernel_data:
+    kernel_data: ; At 0x10
         dw 0xFFFF
         dw 0x0000
         db 0x00
