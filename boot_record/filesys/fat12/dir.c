@@ -68,7 +68,7 @@ FindEntryStatus find_entry_in_folder(Entry *folder, EntryName *name, Entry *entr
     {
         // Check current cluster.
         ReadClusterStatus readStatus = read_cluster(cluster, memCluster);
-        if (readStatus != SECTOR_OK)
+        if (readStatus != CLUSTER_OK)
         {
             return FINDENTRY_INTERNAL_ERROR;
         }
@@ -98,7 +98,7 @@ FindEntryStatus find_entry_in_root(EntryName *name, Entry *entryBuffer)
 
     // Read cluster, which is the entirety of the root directory.
     ReadClusterStatus readStatus = read_cluster(ROOT_CLUSTER, memCluster);
-    if (readStatus != SECTOR_OK)
+    if (readStatus != CLUSTER_OK)
     {
         return FINDENTRY_INTERNAL_ERROR;
     }

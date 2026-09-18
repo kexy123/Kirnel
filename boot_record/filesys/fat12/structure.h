@@ -1,8 +1,9 @@
 #pragma once
 
-#include "disksys/sector_mgr.h"
+#include "disksys/floppy_disk/disk_data.h"
 #include "dir.h"
 
+#define BOOT_SECTOR (0x7C00)                               // The location of the boot sector.
 #define BPB ((const BIOSParameterBlock *const)BOOT_SECTOR) // The BIOS Parameter Block.
 
 #define DRIVE_NUMBER (BPB->Extended.DriveNumber) // The drive number.
