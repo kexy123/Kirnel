@@ -16,7 +16,9 @@ typedef struct __attribute__((packed))
         const char *: print_s, \
         char: print_c, \
         unsigned char: print_uint, \
-        unsigned short: print_uint \
+        unsigned short: print_uint, \
+        unsigned long: print_uint, \
+        unsigned int: print_uint \
     )(message);
 
 #define print_ln(message) \
@@ -33,7 +35,7 @@ void print_c(char character);
 
 /// @brief Prints an unsigned integer to the VGA in base-10 and moves the cursor.
 /// @param num The number to print in base-10.
-void print_uint(unsigned short num);
+void print_uint(unsigned long num);
 
 /// @brief Fills the text after the cursor in the current line with spaces and moves the cursor to the next line in the VGA.
 void print_newl();

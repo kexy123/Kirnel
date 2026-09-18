@@ -27,9 +27,9 @@ void print_c(char character)
     vgaBuffer++;
 }
 
-void print_uint(unsigned short num)
+void print_uint(unsigned long num)
 {
-    char result[5];
+    static char result[10];
 
     // Base-10 conversion.
     short i = 0;
