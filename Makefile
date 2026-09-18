@@ -14,6 +14,8 @@ C_SOURCES := $(shell find kirnelOS -name '*.c')
 C_OBJECTS := $(C_SOURCES:.c=.o)
 C_OBJECTS := $(C_OBJECTS:kirnelOS/%=build/kirnelOS/%)
 
+H_SOURCES := $(shell find kirnelOS -name '*.h')
+
 ASM_SOURCES := $(shell find kirnelOS -name '*.asm')
 ASM_OBJECTS := $(ASM_SOURCES:.asm=.bin)
 ASM_OBJECTS := $(ASM_OBJECTS:kirnelOS/%=build/kirnelOS/%)
@@ -22,6 +24,8 @@ OBJECTS := $(C_OBJECTS) $(ASM_OBJECTS)
 
 BOOT_ASM_SOURCES := $(shell find boot_record -name '*.asm')
 BOOT_ASM_OBJECTS := $(BOOT_ASM_SOURCES:.asm=.o)
+
+BOOT_H_SOURCES := $(shell find boot_record -name '*.h')
 
 BOOT_C_SOURCES := $(shell find boot_record -name '*.c')
 BOOT_C_OBJECTS := $(BOOT_C_SOURCES:.c=.o)
@@ -51,7 +55,7 @@ build/kirnelOS/%.bin: kirnelOS/%.asm
 
 
 # LINK BOOT ASSEMBLIES
-boot_record/kernel.elf: $(BOOT_OBJECTS)
+boot_record/kernel.elf: $(BOOT_OBJECTS) $(BOOT_H_SOURCES)
 	$(LD) -T boot_record/linker.ld boot_record/kernel_boot.o $(filter-out boot_record/kernel_boot.o,$(BOOT_C_OBJECTS)) $(BOOT_ASM_OBJECTS) -o $@
 
 boot_record/kernel.bin: boot_record/kernel.elf
