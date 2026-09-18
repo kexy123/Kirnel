@@ -5,6 +5,7 @@
 *.o
 
 build/
+boot_record_build/
 
 # Visual Studio Code
 .vscode/
