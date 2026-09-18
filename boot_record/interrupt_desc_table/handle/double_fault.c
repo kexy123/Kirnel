@@ -1,10 +1,5 @@
-#include "handles.h"
+#include "double_fault.h"
 #include "vga/out.h"
-
-void fdc_interrupt_handle(InterruptCPUState *state)
-{
-    print_ln("FDC interrupt handled!")
-}
 
 void double_fault_handle(InterruptCPUState *state)
 {
