@@ -1,5 +1,7 @@
 #pragma once
 
+#define INTERRUPT_REQUEST_START (0x20) // The starting interrupt request vector.
+
 /// @brief Specification of an [interrupt descriptor table entry](https://wiki.osdev.org/Interrupt_Descriptor_Table#Gate_Descriptor).
 typedef struct __attribute__((packed))
 {

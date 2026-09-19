@@ -83,5 +83,4 @@ isr_cpu_preserve:
     ; Restore CPU state.
     popa
     add esp, 8
-    sti
     iret

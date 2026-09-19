@@ -47,8 +47,8 @@ void init_idt()
     port_call(0x20, 0x11);
     port_call(0xA0, 0x11);
 
-    port_call(0x21, 0x20); // Start first 8 interrupt requests at 0x20 (0 to 7)
-    port_call(0xA1, 0x28); // Start next 8 interrupt requests at 0x28 (8 to 15)
+    port_call(0x21, INTERRUPT_REQUEST_START); // Start first 8 interrupt requests at 0x20 (0 to 7)
+    port_call(0xA1, INTERRUPT_REQUEST_START + 0x08); // Start next 8 interrupt requests at 0x28 (8 to 15)
 
     port_call(0x21, 0x04);
     port_call(0xA1, 0x02);
