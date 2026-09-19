@@ -10,10 +10,15 @@ typedef enum : unsigned short
     DATA_FIFO = 0x3F5
 } FloppyDiskRegisters;
 
-/// @brief Sends a command to the floppy disk controller of the given port and byte if the FDC allows it.
+/// @brief Sends a byte to the floppy disk controller of the given port if the FDC allows it.
 /// @param port The port to send the byte to.
 /// @param byte The byte to send.
 extern void send_fdc_command(unsigned short port, unsigned char byte);
+
+/// @brief Reads the byte from a port in the floppy disk controller if it allows it.
+/// @param port The port to read from.
+/// @return The returned byte.
+extern unsigned char read_fdc_command(unsigned short port);
 
 /// @brief Waits until the floppy disk controller has completed its operation and raised an IRQ6.
 /// @param senseInterrupt Once IRQ6 is raised, should a sense interrupt command (0x08) be sent to the DATA_FIFO.

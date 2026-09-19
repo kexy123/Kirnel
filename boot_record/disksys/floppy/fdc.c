@@ -34,8 +34,8 @@ void reset_fdc()
     {
         send_fdc_command(DATA_FIFO, 0x08); // Acknowledge interrupt.
 
-        port_read(DATA_FIFO); // The status of the drive.
-        port_read(DATA_FIFO); // The present cylinder of the drive.
+        read_fdc_command(DATA_FIFO); // The status of the drive.
+        read_fdc_command(DATA_FIFO); // The present cylinder of the drive.
     }
 }
 
@@ -55,8 +55,8 @@ void calibrate_fdc()
     send_fdc_command(DATA_FIFO, 0x00); // Drive 0.
     yield_fdc_finish(1);
 
-    unsigned char status = port_read(DATA_FIFO);
-    unsigned char presentCylinder = port_read(DATA_FIFO);
+    unsigned char status = read_fdc_command(DATA_FIFO);
+    unsigned char presentCylinder = read_fdc_command(DATA_FIFO);
 
     if (presentCylinder != 0)
     {
