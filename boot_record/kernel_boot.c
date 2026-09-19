@@ -2,7 +2,7 @@
 #include "disksys/floppy/fdc.h"
 #include "filesys/fat12/cluster.h"
 #include "filesys/fat12/dir.h"
-#include "interrupt_desc_table/structure.h"
+#include "interrupts/structure.h"
 #include "kernel_boot.h"
 #include "utils/next_stage.h"
 

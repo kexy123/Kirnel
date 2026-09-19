@@ -1,5 +1,5 @@
 #include "fdc.h"
-#include "interrupt_desc_table/handle/fdc_interrupts.h"
+#include "interrupts/handle/fdc_interrupts.h"
 #include "utils/flow.h"
 #include "utils/portcall.h"
 

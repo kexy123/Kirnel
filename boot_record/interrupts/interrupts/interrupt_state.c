@@ -1,4 +1,4 @@
-#include "interrupt_desc_table/structure.h"
+#include "interrupts/structure.h"
 #include "interrupt_state.h"
 #include "utils/portcall.h"
 
