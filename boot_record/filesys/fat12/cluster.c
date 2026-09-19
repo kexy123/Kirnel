@@ -1,7 +1,7 @@
 #include "cluster.h"
 #include "dir.h"
 #include "fat.h"
-#include "disksys/floppy_disk/disk_data.h"
+#include "disksys/floppy/fdc_read.h"
 #include "structure.h"
 
 _Bool is_end_of_cluster(DiskCluster diskCluster)
@@ -19,21 +19,19 @@ ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster)
         return CLUSTER_INVALID_DISK_CLUSTER;
     }
 
-    DataAccessStatus status;
+    FloppyDiskReadStatus status;
     if (diskCluster == ROOT_CLUSTER)
     {
         // Read the root cluster instead.
-        // status = read_data(DRIVE_NUMBER, SECTORS_IN_ROOT, ROOT_START_SECT, memCluster);
-        status = read_data(DRIVE_NUMBER, ROOT_START_SECT, memCluster);
+        status = read_data(DRIVE_NUMBER, ROOT_START_SECT, SECTORS_IN_ROOT, memCluster);
     }
     else
     {
         LogicalBlockAddress sectorPosition = CLUSTER_START_SECT + diskCluster - START_CLUSTER;
-        // status = read_data(DRIVE_NUMBER, BPB->SectorsPerCluster, sectorPosition, memCluster);
-        status = read_data(DRIVE_NUMBER, sectorPosition, memCluster);
+        status = read_data(DRIVE_NUMBER, sectorPosition, BPB->SectorsPerCluster, memCluster);
     }
 
-    if (status == ACCESS_OK)
+    if (status == FLOPPY_READ_OK)
     {
         return CLUSTER_OK;
     }
