@@ -1,24 +1,29 @@
 [BITS 32]
+[ORG 0xD000]
 
 _start:
-    mov ax, cs
+    mov ax, 0x10
     mov ds, ax
     mov si, message
-    jmp log
 
-; Similar implementation to boot_record/bios/print_chp.asm
+    mov edi, 0xB8000
+    call log
+    jmp halt
+
+; Similar implementation to boot_record/vga/out.c
 log:
     lodsb
 
     cmp al, 0
     jne log_byte
 
-    jmp halt
-    ; ret
+    ret
 log_byte:
-    mov ah, 0x0E
-    mov bh, 0
-    int 0x10
+    mov [edi], al
+    inc edi
+
+    mov byte [edi], 0x0F
+    inc edi
 
     jmp log
 
