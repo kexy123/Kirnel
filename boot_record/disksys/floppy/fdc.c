@@ -2,6 +2,7 @@
 #include "interrupt_desc_table/handle/fdc_interrupts.h"
 #include "utils/flow.h"
 #include "utils/portcall.h"
+#include "vga/out.h"
 
 /// @brief Waits until the floppy disk controller has completed its operation and raised an IRQ6.
 void yield_fdc_finish()
@@ -21,16 +22,16 @@ void reset_fdc()
 {
     // https://wiki.osdev.org/Floppy_Disk_Controller#DOR_bitflag_definitions
     port_call(DIGITAL_OUTPUT_REGISTER, 0b00000000); // Enter reset mode.
-    port_call(DIGITAL_OUTPUT_REGISTER, 0b00011100); // Enable drive 0 and the IRQ and DMA.
+    port_call(DIGITAL_OUTPUT_REGISTER, 0b00001100); // Enable the IRQ and DMA.
     yield_fdc_finish();
 
-    // Clear the FDC results.
+    // Clear the FDC results of each drive from 0 to 3.
     for (int i = 0; i < 4; i++)
     {
         send_fdc_command(DATA_FIFO, 0x08); // Acknowledge interrupt.
 
-        port_read(DATA_FIFO);
-        port_read(DATA_FIFO);
+        port_read(DATA_FIFO); // The status of the drive.
+        port_read(DATA_FIFO); // The present cylinder of the drive.
     }
 }
 
@@ -66,6 +67,9 @@ void calibrate_fdc()
 void init_fdc()
 {
     reset_fdc();
+    print_ln("FDC RESET. . .");
     specify_fdc();
+    print_ln("FDC SPECIFIED. . .");
     calibrate_fdc();
+    print_ln("FDC CALIBRATED. . .");
 }
