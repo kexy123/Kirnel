@@ -2,7 +2,6 @@
 #include "interrupt_desc_table/handle/fdc_interrupts.h"
 #include "utils/flow.h"
 #include "utils/portcall.h"
-#include "vga/out.h"
 
 void yield_fdc_finish(_Bool senseInterrupt)
 {
@@ -69,9 +68,6 @@ void calibrate_fdc()
 void init_fdc()
 {
     reset_fdc();
-    print_ln("FDC RESET. . .");
     specify_fdc();
-    print_ln("FDC SPECIFIED. . .");
     calibrate_fdc();
-    print_ln("FDC CALIBRATED. . .");
 }
