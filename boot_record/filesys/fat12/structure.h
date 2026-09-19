@@ -1,6 +1,5 @@
 #pragma once
 
-#include "disksys/floppy_disk/disk_data.h"
 #include "dir.h"
 
 #define BOOT_SECTOR (0x7C00)                               // The location of the boot sector.
