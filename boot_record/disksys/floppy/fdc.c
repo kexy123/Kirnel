@@ -4,8 +4,7 @@
 #include "utils/portcall.h"
 #include "vga/out.h"
 
-/// @brief Waits until the floppy disk controller has completed its operation and raised an IRQ6.
-void yield_fdc_finish()
+void yield_fdc_finish(_Bool senseInterrupt)
 {
     while (!fdc_op_complete)
     {
@@ -13,6 +12,11 @@ void yield_fdc_finish()
     }
 
     fdc_op_complete = 0;
+
+    if (senseInterrupt)
+    {
+        send_fdc_command(DATA_FIFO, 0x08); // Sense interrupt command.
+    }
 }
 
 // FDC INITIALIZATION
@@ -22,8 +26,8 @@ void reset_fdc()
 {
     // https://wiki.osdev.org/Floppy_Disk_Controller#DOR_bitflag_definitions
     port_call(DIGITAL_OUTPUT_REGISTER, 0b00000000); // Enter reset mode.
-    port_call(DIGITAL_OUTPUT_REGISTER, 0b00001100); // Enable the IRQ and DMA.
-    yield_fdc_finish();
+    port_call(DIGITAL_OUTPUT_REGISTER, 0b00011100); // Enable the IRQ and DMA.
+    yield_fdc_finish(0);
 
     // Clear the FDC results of each drive from 0 to 3.
     for (int i = 0; i < 4; i++)
@@ -49,16 +53,14 @@ void calibrate_fdc()
 {
     send_fdc_command(DATA_FIFO, 0x07); // Calibrate command.
     send_fdc_command(DATA_FIFO, 0x00); // Drive 0.
-    yield_fdc_finish();
-
-    send_fdc_command(DATA_FIFO, 0x08); // Acknowledge interrupt.
+    yield_fdc_finish(1);
 
     unsigned char status = port_read(DATA_FIFO);
     unsigned char presentCylinder = port_read(DATA_FIFO);
 
     if (presentCylinder != 0)
     {
-        // Calibration failed; UNDEFINED BEHAVIOR!
+        // Calibration failed; TODO: undefined behavior.
         while (1)
             ;
     }
