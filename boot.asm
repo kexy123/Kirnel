@@ -161,14 +161,8 @@ set_cr0_register:
     mov eax, cr0
     or eax, 1
     mov cr0, eax
-; [BITS 32]
-
-    ; mov al, 0x41
-    ; mov ah, 0x0F
-    ; mov [0xB8000], ax
 
     jmp 0x08:0x8000
-    ; jmp KERNEL_CODE_SELECTOR:NEXT_BOOTLOADER_ENTRY
 
 halt:
     cli
