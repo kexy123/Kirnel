@@ -20,7 +20,8 @@ ASM_OBJECTS := $(ASM_SOURCES:.asm=.o)
 ASM_OBJECTS := $(ASM_OBJECTS:kirnelOS/%=build_sub/kirnelOS/%)
 
 # DEPENDENCIES
-all: build/kirnelOS/sysmgr32/syskrnl.bin
+first: $(C_OBJECTS) $(ASM_OBJECTS)
+final: build/kirnelOS/sysmgr32/syskrnl.bin
 
 # Compile all .asm to .elf files.
 build_sub/kirnelOS/%.o: kirnelOS/%.asm
@@ -35,7 +36,7 @@ build_sub/kirnelOS/%.o: kirnelOS/%.c
 # Link all to syskrnl.elf file.
 build_sub/kirnelOS/sysmgr32/syskrnl.elf: kirnelOS/sysmgr32/syskrnl/linker.ld $(C_OBJECTS) $(ASM_OBJECTS)
 	$(MAKE_DIR)
-	$(ELF_LD) -T kirnelOS/sysmgr32/syskrnl/linker.ld build_sub/kirnelOS/sysmgr32/syskrnl/entry.o $(C_OBJECTS) $(filter-out build_sub/kirnelOS/sysmgr32/syskrnl/entry.o,$(ASM_OBJECTS)) -o $@
+	$(ELF_LD) -T kirnelOS/sysmgr32/syskrnl/linker.ld build_sub/kirnelOS/sysmgr32/syskrnl/entry.o $(filter-out build_sub/kirnelOS/sysmgr32/syskrnl/entry.o,$(C_OBJECTS) $(ASM_OBJECTS)) -o $@
 
 # Convert to binary object.
 build/kirnelOS/sysmgr32/syskrnl.bin: build_sub/kirnelOS/sysmgr32/syskrnl.elf

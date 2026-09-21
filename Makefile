@@ -23,7 +23,12 @@ build/boot.bin: boot.asm
 
 build_all:
 	@for dir in $(SUBBUILD_LOCATIONS); do \
-		$(MAKE) -f "$$dir/Makefile"; \
+		$(MAKE) first -f "$$dir/Makefile"; \
+	done
+
+# Run final parts of the project. This is to ensure that they have the necessary files to link when the first pass was executed.
+	@for dir in $(SUBBUILD_LOCATIONS); do \
+		$(MAKE) final -f "$$dir/Makefile"; \
 	done
 
 # Compile the boot segment.
