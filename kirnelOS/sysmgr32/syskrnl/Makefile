@@ -8,7 +8,7 @@ ELF_OBJCPY := i386-elf-objcopy
 NASM := nasm
 MAKE_DIR = mkdir -p $(dir $@)
 
-C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syskrnl -IkirnelOS/kernel_utils -std=c11
+C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syskrnl -IkirnelOS/kernel_utils -std=c11 -fdata-sections -ffunction-sections
 
 # OBJECTS
 C_SOURCES := $(shell find kirnelOS/sysmgr32/syskrnl -name '*.c')
@@ -36,9 +36,9 @@ build_sub/kirnelOS/%.o: kirnelOS/%.c
 	$(ELF_GCC) $(C_FLAGS) -c $< -o $@
 
 # Link all to syskrnl.elf file.
-build_sub/kirnelOS/sysmgr32/syskrnl.elf: kirnelOS/sysmgr32/syskrnl/linker.ld $(C_OBJECTS) $(ASM_OBJECTS)
+build_sub/kirnelOS/sysmgr32/syskrnl.elf: kirnelOS/sysmgr32/syskrnl/linker.ld $(C_OBJECTS) $(ASM_OBJECTS) $(EXT_OBJECTS)
 	$(MAKE_DIR)
-	$(ELF_LD) -T kirnelOS/sysmgr32/syskrnl/linker.ld build_sub/kirnelOS/sysmgr32/syskrnl/entry.o $(filter-out build_sub/kirnelOS/sysmgr32/syskrnl/entry.o,$(C_OBJECTS) $(ASM_OBJECTS)) -o $@
+	$(ELF_LD) --gc-sections -T kirnelOS/sysmgr32/syskrnl/linker.ld build_sub/kirnelOS/sysmgr32/syskrnl/entry.o $(filter-out build_sub/kirnelOS/sysmgr32/syskrnl/entry.o,$(C_OBJECTS) $(ASM_OBJECTS)) $(EXT_OBJECTS) -o $@
 
 # Convert to binary object.
 build/kirnelOS/sysmgr32/syskrnl.bin: build_sub/kirnelOS/sysmgr32/syskrnl.elf
