@@ -5,7 +5,7 @@
 *.o
 
 build/
-boot_record_build/
+build_sub/
 
 # Visual Studio Code
 .vscode/
