@@ -39,3 +39,6 @@ void print_uint(unsigned long num);
 
 /// @brief Fills the text after the cursor in the current line with spaces and moves the cursor to the next line in the VGA.
 void print_newl();
+
+/// @brief Clears the VGA buffer and moves the cursor to the beginning.
+void clear_screen();

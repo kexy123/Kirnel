@@ -56,3 +56,12 @@ void print_newl()
         print_c(' ');
     }
 }
+
+void clear_screen()
+{
+    vgaBuffer = VGA_START;
+    for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++)
+    {
+        vgaBuffer[i].Character = ' ';
+    }
+}
