@@ -1,5 +1,6 @@
 [BITS 32]
-[ORG 0xD000]
+
+section .text
 
 _start:
     mov ax, 0x10

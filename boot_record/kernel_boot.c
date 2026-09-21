@@ -22,8 +22,8 @@ void krnl_boot(void)
 
 void load_kernel()
 {
-    // Read from FAT12 the kirnelOS/sysmgr32/krnlload.bin file.
-    const char *kernelPath = "KIRNELOS   SYSMGR32   KRNLLOADBIN";
+    // Read from FAT12 the kirnelOS/sysmgr32/syskrnl.bin file.
+    const char *kernelPath = "KIRNELOS   SYSMGR32   SYSKRNL BIN";
 
     Entry kernel;
     FindEntryStatus findEntry = find_entry_by_path((EntryName *)kernelPath, &kernel);
