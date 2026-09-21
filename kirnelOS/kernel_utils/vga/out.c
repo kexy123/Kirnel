@@ -1,11 +1,11 @@
 #include "out.h"
 
-#define VGA_START ((VGACharacter *)(0xB8000)) // The pointer of the starting character of the VGA.
-#define VGA_WIDTH (80)                        // The VGA width.
-#define VGA_HEIGHT (25)                       // The VGA height.
+#define VGA_START ((volatile VGACharacter *)(0xB8000)) // The pointer of the starting character of the VGA.
+#define VGA_WIDTH (80)                                 // The VGA width.
+#define VGA_HEIGHT (25)                                // The VGA height.
 
 /// @brief The current position of where to output text in the VGA.
-VGACharacter *vgaBuffer = VGA_START;
+volatile VGACharacter *vgaBuffer = VGA_START;
 
 void print_s(const char *message)
 {
