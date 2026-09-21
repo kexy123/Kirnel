@@ -1,25 +1,11 @@
-#include "vga/out.h"
 #include "disksys/floppy/fdc.h"
 #include "filesys/fat12/cluster.h"
 #include "filesys/fat12/dir.h"
 #include "interrupts/structure.h"
-#include "kernel_boot.h"
-#include "utils/next_stage.h"
+#include "next_stage.h"
+#include "vga/out.h"
 
-void krnl_boot(void)
-{
-    init_idt();
-    init_fdc();
-
-    print_ln("Locating kernel. . .");
-    load_kernel();
-
-    jump_next_stage();
-
-    while (1)
-        ;
-}
-
+/// @brief The starting method upon boot being initiated by the boot sector.
 void load_kernel()
 {
     // Read from FAT12 the kirnelOS/sysmgr32/syskrnl.bin file.
@@ -39,4 +25,23 @@ void load_kernel()
         char *kernel_location = (char *)0xD000;
         load_entire_entry(&kernel, kernel_location);
     }
+}
+
+/// @brief Loads the kernel into memory at 0xD000 to jump to later.
+__attribute__((section(".text.krnl_boot")))
+void krnl_boot(void)
+{
+    print_ln("Setting interrupts. . .");
+    init_idt();
+
+    print_ln("Setting disk. . .");
+    init_fdc();
+
+    print_ln("Locating kernel. . .");
+    load_kernel();
+
+    jump_next_stage();
+
+    while (1)
+        ;
 }

@@ -1,5 +1,5 @@
 OUTPUT_FORMAT(elf32-i386)
-ENTRY(_start)
+ENTRY(krnl_start)
 
 SECTIONS
 {
@@ -7,8 +7,8 @@ SECTIONS
 
     .text :
     {
-        *(.text._start)
-        *(.text)
+        KEEP(*(.text.krnl_start))
+        *(.text*)
     }
 
     .rodata :

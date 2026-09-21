@@ -7,8 +7,8 @@ SECTIONS
 
     .text :
     {
-        *(.text.krnl_boot)
-        *(.text)
+        KEEP(*(.text.krnl_boot))
+        *(.text*)
     }
 
     .rodata :
