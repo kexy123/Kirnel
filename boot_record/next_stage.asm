@@ -11,9 +11,9 @@ jump_next_stage:
     mov es, ax
     mov fs, ax
     mov gs, ax
-    mov ss, ax
 
-    mov esp, 0x90000
+    mov ss, ax
+    mov esp, 0xFFFF
 
     jmp 0x08:0xD000
     ret
