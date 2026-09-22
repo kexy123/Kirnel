@@ -25,13 +25,13 @@ typedef struct __attribute__((packed))
     print(message); \
     print_newl();
 
-/// @brief Prints a null-terminating message to the VGA and moves the cursor to the end of the string.
-/// @param message The null-terminating string.
-void print_s(const char *message);
-
 /// @brief Prints a single character to the VGA and moves the cursor.
 /// @param character The character to print.
 void print_c(char character);
+
+/// @brief Prints a null-terminating message to the VGA and moves the cursor to the end of the string.
+/// @param message The null-terminating string.
+void print_s(const char *message);
 
 /// @brief Prints an unsigned integer to the VGA in base-10 and moves the cursor.
 /// @param num The number to print in base-10.
