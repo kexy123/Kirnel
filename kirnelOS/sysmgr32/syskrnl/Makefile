@@ -6,7 +6,7 @@ ELF_LD := i386-elf-ld
 ELF_OBJCPY := i386-elf-objcopy
 
 NASM := nasm
-MAKE_DIR = mkdir -p $(dir $@)
+MAKE_DIR = @mkdir -p $(dir $@)
 
 C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syskrnl -IkirnelOS/kernel_utils -std=c11 -fdata-sections -ffunction-sections
 

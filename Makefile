@@ -6,7 +6,7 @@ ELF_LD := i386-elf-ld
 ELF_OBJCPY := i386-elf-objcopy
 
 NASM := nasm
-MAKE_DIR = mkdir -p $(dir $@)
+MAKE_DIR = @mkdir -p $(dir $@)
 
 # OBJECTS
 SUBBUILD_LOCATIONS := $(shell find . -mindepth 2 -name Makefile -printf '%h\n')

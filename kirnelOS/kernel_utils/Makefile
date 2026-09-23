@@ -4,7 +4,7 @@ export PATH := /usr/local/i386-elf/bin:$(PATH)
 ELF_GCC := i386-elf-gcc
 
 NASM := nasm
-MAKE_DIR = mkdir -p $(dir $@)
+MAKE_DIR = @mkdir -p $(dir $@)
 
 C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/kernel_utils -std=c11
 
