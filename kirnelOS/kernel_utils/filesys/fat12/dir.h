@@ -1,7 +1,7 @@
 #pragma once
 
-#define ENTRY_NAME_BYTES 8     // The maximum length that a file name can be.
-#define ENTRY_FILE_EXT_BYTES 3 // The maximum length that a file extension can be.
+#define ENTRY_NAME_BYTES (8)     // The maximum length that a file name can be.
+#define ENTRY_FILE_EXT_BYTES (3) // The maximum length that a file extension can be.
 
 /// @brief The naming format for an entry.
 typedef struct __attribute((packed))

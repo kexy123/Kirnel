@@ -2,7 +2,7 @@
 
 #include "disksys/structure.h"
 
-#define SECTORS_PER_CYLINDER 18 // Specification for CHS in a 1.44 MB floppy disk.
+#define SECTORS_PER_CYLINDER (18) // Specification for CHS in a 1.44 MB floppy disk.
 
 /// @brief Converts a logical block address to [CHS](https://en.wikipedia.org/wiki/Cylinder-head-sector) positioning for a floppy disk.
 /// @param address The logical block address to convert.

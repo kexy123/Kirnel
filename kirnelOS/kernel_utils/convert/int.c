@@ -1,3 +1,5 @@
+#include "int.h"
+
 const char *uint_to_str(unsigned long num)
 {
     static char result[11];

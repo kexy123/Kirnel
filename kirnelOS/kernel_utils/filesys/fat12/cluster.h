@@ -2,8 +2,8 @@
 
 #include "dir.h"
 
-#define ROOT_CLUSTER 1  // Although not a cluster, the value that is used to read the root directory as if it was a cluster.
-#define START_CLUSTER 2 // The starting cluster that exists in the cluster segment of FAT12.
+#define ROOT_CLUSTER (1)  // Although not a cluster, the value that is used to read the root directory as if it was a cluster.
+#define START_CLUSTER (2) // The starting cluster that exists in the cluster segment of FAT12.
 
 /// @brief Refers to the position of a cluster in the disk.
 typedef unsigned short DiskCluster;

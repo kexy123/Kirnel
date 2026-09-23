@@ -8,6 +8,8 @@ void krnl_start()
 
     print_ln("Hello from the SYSKRNL!");
 
+    print_uint(56);
+
     while (1)
         ;
 }
