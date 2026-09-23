@@ -108,7 +108,11 @@ kernel_boot_loader:
     mov dh, 0       ; Head 0
 
     int 0x13
-    jnc enable_protected_mode ; If the next stage of the boot loader was loaded into memory, begin enabling protected mode.
+    jc disk_read_error
+
+    call list_memory_map
+
+    jmp enable_protected_mode
 
 disk_read_error:
     mov si, disk_error
@@ -138,6 +142,37 @@ boot_halt:
     jmp boot_halt
 
 disk_error db "Kernel boot sector not found. Please restart the OS.", 0
+
+
+;;;;; GETTING MEMORY MAP ;;;;;
+list_memory_map:
+    xor ax, ax
+    mov es, ax
+
+    mov di, 0x7E00
+
+    xor ebx, ebx
+    mov edx, 0x534D4150 ; Magic number; "SMAP"
+
+get_memory_map:
+    ; https://wiki.osdev.org/Detecting_Memory_(x86)#BIOS_Function:_INT_0x15,_EAX_=_0xE820
+    mov eax, 0xE820
+    mov ecx, 24
+    int 0x15
+
+    jc halt
+
+    ; EAX register must be set to EDX.
+    cmp eax, 0x534D4150
+    jne halt
+
+    add di, 24 ; Each entry is at max 24 bytes.
+
+    ; If EBX is 0, we reached the end of the memory segment mapping.
+    test ebx, ebx
+    jnz get_memory_map
+
+    ret
 
 
 ;;;;; ENABLING PROTECTED MODE ;;;;;
