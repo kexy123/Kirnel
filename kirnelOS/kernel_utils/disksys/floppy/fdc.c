@@ -38,7 +38,7 @@ void reset_fdc()
     }
 }
 
-/// @brief Initializes part of the floppy disk controller to allow interrupt requests and the DMA.
+/// @brief Initialises part of the floppy disk controller to allow interrupt requests and the DMA.
 void specify_fdc()
 {
     // https://wiki.osdev.org/Floppy_Disk_Controller#Specify
