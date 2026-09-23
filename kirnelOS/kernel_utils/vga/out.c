@@ -2,8 +2,8 @@
 #include "out.h"
 
 #define VGA_START ((volatile VGACharacter *)(0x000B8000)) // The pointer of the starting character of the VGA.
-#define VGA_WIDTH (80)                                 // The VGA width.
-#define VGA_HEIGHT (25)                                // The VGA height.
+#define VGA_WIDTH (80)                                    // The VGA width.
+#define VGA_HEIGHT (25)                                   // The VGA height.
 
 /// @brief The current position of where to output text in the VGA.
 volatile VGACharacter *vgaBuffer = VGA_START;
@@ -56,6 +56,13 @@ void print_s(const char *message)
 void print_uint(unsigned long num)
 {
     const char *result = uint_to_str(num);
+    print_s(result);
+}
+
+void print_uintx(unsigned long num)
+{
+    const char *result = uint_to_strx(num);
+    print_s("0x");
     print_s(result);
 }
 

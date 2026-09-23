@@ -37,6 +37,10 @@ void print_s(const char *message);
 /// @param num The number to print in base-10.
 void print_uint(unsigned long num);
 
+/// @brief Prints an unsigned integer to the VGA in base-16 and moves the cursor.
+/// @param num The number to print in base-16.
+void print_uintx(unsigned long num);
+
 /// @brief Fills the text after the cursor in the current line with spaces and moves the cursor to the next line in the VGA.
 void print_newl();
 
