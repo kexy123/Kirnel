@@ -1,6 +1,7 @@
 #include "allocation.h"
 #include "mem_segments.h"
 #include "utils/bit.h"
+#include "utils/flow.h"
 
 #define ALLOC_START ((AllocationNode *)(0x00020000)) // Starting location of the memory allocation tree.
 #define PAGE_SIZE_EXP (12)                           // The exponent of the size of a page in bytes in memory.
@@ -22,6 +23,9 @@ AllocationNode *allocation_tree[MAXIMUM_ORDERS];
 
 /// @brief The highest order of the allocation tree.
 unsigned long highestOrder;
+
+/// @brief The number of bytes of the allocation tree.
+unsigned long allocationTreeLength;
 
 /// @brief Gets an AllocationNode by pointer at the given order and index.
 /// @param order The order to go in.
@@ -63,7 +67,51 @@ void dissolve(int order, AllocationNode *node)
     node->Next = 0;
 }
 
+/// @brief Computes the length of the allocation tree in bytes and the number of AllocationNodes for each existing order.
+void compute_allocation_tree_length()
+{
+    allocationTreeLength = 0;
+    for (int i = 0; i <= highestOrder; i++)
+    {
+        // Each order has one extra element on a power of two. Note that order 0 is the deepest in the tree.
+        allocation_tree[highestOrder - i] = (AllocationNode *)allocationTreeLength;
+        allocationTreeLength += ((1 << i) + 1) * sizeof(AllocationNode);
+    }
+}
+
+/// @brief Locates a sufficient memory segment that can store the allocation tree.
+/// @return The starting pointer of the memory segment that can be used.
+AllocationNode *find_sufficient_tree()
+{
+    for (int i = 0; i < numSegments; i++)
+    {
+        if (memorySegments[i].RegionType != Usable)
+        {
+            continue;
+        }
+
+        if (memorySegments[i].SegmentLength < allocationTreeLength)
+        {
+            continue;
+        }
+
+        return (AllocationNode *)(memorySegments[i].BaseAddress);
+    }
+
+    // No sufficient location to store the allocation tree.
+    panic();
+    return (AllocationNode *)0;
+}
+
 void init_allocator()
 {
     highestOrder = lowest_exp2(memoryEnd) - PAGE_SIZE_EXP;
+    compute_allocation_tree_length();
+
+    AllocationNode *start = find_sufficient_tree();
+    for (int i = 0; i <= highestOrder; i++)
+    {
+        // Add the offset to each order.
+        allocation_tree[i] += (unsigned long)start;
+    }
 }
