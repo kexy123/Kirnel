@@ -1,13 +1,32 @@
 #include "mem_segments.h"
 #include "utils/flow.h"
 
-#define MEMORY_SEGMENT_START ((MemorySegmentEntry *const)(0x00007E00))
+#define MEMORY_SEGMENT_START ((const MemorySegmentEntry *const)(0x00007E00))
 
-/// @brief The starting memory segment entry.
-MemorySegmentEntry *startSegment = MEMORY_SEGMENT_START;
+const MemorySegmentEntry *const memorySegments = MEMORY_SEGMENT_START;
+
+unsigned long numSegments;
 
 unsigned long memoryStart;
 unsigned long memoryEnd;
+
+/// @brief Counts the number of memory segments.
+void count_memory_segments()
+{
+    numSegments = 0;
+
+    const MemorySegmentEntry *memorySegment = memorySegments;
+    while (1)
+    {
+        if (!memorySegment->SegmentLength)
+        {
+            return;
+        }
+
+        memorySegment++;
+        numSegments++;
+    }
+}
 
 /// @brief Gets the range of memory that was specified by the BIOS.
 void get_memory_range()
@@ -15,28 +34,19 @@ void get_memory_range()
     unsigned long low = 0xFFFFFFFF;
     unsigned long high = 0x00000000;
 
-    MemorySegmentEntry *memorySegment = startSegment;
-    while (1)
+    for (int i = 0; i < numSegments; i++)
     {
-        if (!memorySegment->SegmentLength)
-        {
-            // Reached the end of the memory segment table.
-            break;
-        }
-
         // Update low if surpassed.
-        if ((unsigned long)memorySegment->BaseAddress < low)
+        if ((unsigned long)memorySegments[i].BaseAddress < low)
         {
-            low = (unsigned long)memorySegment->BaseAddress;
+            low = (unsigned long)memorySegments[i].BaseAddress;
         }
 
         // Update high if surpassed.
-        if ((unsigned long)memorySegment->BaseAddress + (unsigned long)memorySegment->SegmentLength > high)
+        if ((unsigned long)memorySegments[i].BaseAddress + (unsigned long)memorySegments[i].SegmentLength > high)
         {
-            high = (unsigned long)memorySegment->BaseAddress + (unsigned long)memorySegment->SegmentLength;
+            high = (unsigned long)memorySegments[i].BaseAddress + (unsigned long)memorySegments[i].SegmentLength;
         }
-
-        memorySegment++;
     }
 
     if (high < low)
@@ -50,5 +60,7 @@ void get_memory_range()
 
 void analyse_mem_segments()
 {
+    count_memory_segments();
+
     get_memory_range();
 }

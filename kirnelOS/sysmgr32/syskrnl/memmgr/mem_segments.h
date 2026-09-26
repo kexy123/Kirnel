@@ -38,6 +38,11 @@ typedef struct __attribute__((packed))
     unsigned long ExtendedAttributes;
 } MemorySegmentEntry;
 
+extern const MemorySegmentEntry *const memorySegments;
+
+/// @brief The number of memory segments.
+extern unsigned long numSegments;
+
 /// @brief The start of the physical memory.
 extern unsigned long memoryStart;
 
