@@ -11,11 +11,11 @@
 /// @brief An allocation node. The position of the allocation node and in its order determines the size of the starting page it's pointing to.
 typedef struct __attribute__((packed))
 {
-    /// @brief The previous allocation node in its order list; 0 to mark the start.
-    unsigned long Previous;
+    /// @brief The previous allocation node in its order list.
+    AllocationNode *Previous;
 
-    /// @brief The next allocation node in its order list; 0 to mark the end.
-    unsigned long Next;
+    /// @brief The next allocation node in its order list.
+    AllocationNode *Next;
 } AllocationNode;
 
 /// @brief The starting pointers of the allocation tree in terms of order.
@@ -39,7 +39,7 @@ inline AllocationNode *get_allocation_node(int order, unsigned long index)
 /// @brief Gets the starting AllocationNode index at the given order.
 /// @param order The order to go in.
 /// @return The index of the starting AllocationNode.
-inline unsigned long get_start(int order)
+inline AllocationNode *get_start(int order)
 {
     return get_allocation_node(order, 0)->Next;
 }
@@ -47,12 +47,12 @@ inline unsigned long get_start(int order)
 /// @brief Gets the ending AllocationNode index at the given order.
 /// @param order The order to go in.
 /// @return The index of the last AllocationNode.
-inline unsigned long get_end(int order)
+inline AllocationNode *get_end(int order)
 {
     return get_allocation_node(order, 0)->Previous;
 }
 
-/// @brief Zero out and connect the adjacent nodes of the AllocationNode together.
+/// @brief Clears and connects the adjacent nodes of the AllocationNode together.
 /// @param order The order that the AllocationNode is in.
 /// @param node The AllocationNode to dissolve.
 void dissolve(int order, AllocationNode *node)
@@ -60,11 +60,13 @@ void dissolve(int order, AllocationNode *node)
     AllocationNode *previous = get_allocation_node(order, node->Previous);
     AllocationNode *next = get_allocation_node(order, node->Next);
 
+    // Turn previous <-> node <-> next to previous <-> next.
     previous->Next = node->Next;
     next->Previous = node->Previous;
 
-    node->Previous = 0;
-    node->Next = 0;
+    // Zero-out the AllocationNode.
+    node->Previous = (AllocationNode *)0UL;
+    node->Next = (AllocationNode *)0UL;
 }
 
 /// @brief Computes the length of the allocation tree in bytes and the number of AllocationNodes for each existing order.
@@ -114,4 +116,6 @@ void init_allocator()
         // Add the offset to each order.
         allocation_tree[i] += (unsigned long)start;
     }
+
+    // TODO: Functions that allow allocation at specific locations.
 }
