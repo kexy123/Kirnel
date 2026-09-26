@@ -37,3 +37,12 @@ typedef struct __attribute__((packed))
     /// @brief Extended attributes by the [ACPI](https://en.wikipedia.org/wiki/ACPI).
     unsigned long ExtendedAttributes;
 } MemorySegmentEntry;
+
+/// @brief The start of the physical memory.
+extern unsigned long memoryStart;
+
+/// @brief The end of the physical memory.
+extern unsigned long memoryEnd;
+
+/// @brief Analyses the memory segments given by the BIOS.
+void analyse_mem_segments();
