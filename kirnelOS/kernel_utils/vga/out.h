@@ -19,11 +19,11 @@ typedef struct __attribute__((packed))
         unsigned short: print_uint, \
         unsigned long: print_uint, \
         unsigned int: print_uint \
-    )(message);
+    )(message)
 
 #define print_ln(message) \
     print(message); \
-    print_newl();
+    print_newl()
 
 /// @brief Prints a single character to the VGA and moves the cursor.
 /// @param character The character to print.
