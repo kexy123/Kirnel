@@ -69,6 +69,24 @@ void dissolve(int order, AllocationNode *node)
     node->Next = (AllocationNode *)0UL;
 }
 
+/// @brief Inserts an AllocationNode at the given index, without performing any cascading merge operations, to the end of the linked list of its order.
+/// @param order The order to insert the AllocationNode in.
+/// @param index The page that the AllocationNode points to.
+void append(int order, unsigned long index)
+{
+    AllocationNode *node = get_allocation_node(order, index);
+
+    AllocationNode *central = get_allocation_node(order, 0);
+    AllocationNode *end = central->Previous;
+
+    // Turn central <-> end to central <-> node <-> end.
+    central->Next = node;
+    node->Previous = end;
+
+    end->Previous = node;
+    node->Next = central;
+}
+
 /// @brief Computes the length of the allocation tree in bytes and the number of AllocationNodes for each existing order.
 void compute_allocation_tree_length()
 {
@@ -93,6 +111,12 @@ AllocationNode *find_sufficient_tree()
         }
 
         if (memorySegments[i].SegmentLength < allocationTreeLength)
+        {
+            continue;
+        }
+
+        // Do not start the tree at the boot sector.
+        if (memorySegments[i].BaseAddress == 0)
         {
             continue;
         }
