@@ -9,13 +9,13 @@
 #define MAXIMUM_ORDERS (21)                          // The maximum number of orders in the buddy allocation tree for 32-bit memory.
 
 /// @brief An allocation node. The position of the allocation node and in its order determines the size of the starting page it's pointing to.
-typedef struct __attribute__((packed))
+typedef struct __attribute__((packed)) AllocNode
 {
     /// @brief The previous allocation node in its order list.
-    AllocationNode *Previous;
+    struct AllocNode *Previous;
 
     /// @brief The next allocation node in its order list.
-    AllocationNode *Next;
+    struct AllocNode *Next;
 } AllocationNode;
 
 /// @brief The starting pointers of the allocation tree in terms of order.
@@ -29,11 +29,11 @@ unsigned long allocationTreeLength;
 
 /// @brief Gets an AllocationNode by pointer at the given order and index.
 /// @param order The order to go in.
-/// @param index The index in the order free list.
+/// @param index The index in the order free list. Note that it is 1-indexed.
 /// @return The pointer to the AllocationNode.
 inline AllocationNode *get_allocation_node(int order, unsigned long index)
 {
-    return allocation_tree[order] + index;
+    return allocation_tree[order] + index - 1;
 }
 
 /// @brief Gets the starting AllocationNode index at the given order.
@@ -41,7 +41,7 @@ inline AllocationNode *get_allocation_node(int order, unsigned long index)
 /// @return The index of the starting AllocationNode.
 inline AllocationNode *get_start(int order)
 {
-    return get_allocation_node(order, 0)->Next;
+    return get_allocation_node(order, 1)->Next;
 }
 
 /// @brief Gets the ending AllocationNode index at the given order.
@@ -49,16 +49,15 @@ inline AllocationNode *get_start(int order)
 /// @return The index of the last AllocationNode.
 inline AllocationNode *get_end(int order)
 {
-    return get_allocation_node(order, 0)->Previous;
+    return get_allocation_node(order, 1)->Previous;
 }
 
 /// @brief Clears and connects the adjacent nodes of the AllocationNode together.
-/// @param order The order that the AllocationNode is in.
 /// @param node The AllocationNode to dissolve.
-void dissolve(int order, AllocationNode *node)
+void dissolve(AllocationNode *node)
 {
-    AllocationNode *previous = get_allocation_node(order, node->Previous);
-    AllocationNode *next = get_allocation_node(order, node->Next);
+    AllocationNode *previous = node->Previous;
+    AllocationNode *next = node->Next;
 
     // Turn previous <-> node <-> next to previous <-> next.
     previous->Next = node->Next;
@@ -76,7 +75,7 @@ void append(int order, unsigned long index)
 {
     AllocationNode *node = get_allocation_node(order, index);
 
-    AllocationNode *central = get_allocation_node(order, 0);
+    AllocationNode *central = get_allocation_node(order, 1);
     AllocationNode *end = central->Previous;
 
     // Turn central <-> end to central <-> node <-> end.
@@ -101,7 +100,7 @@ void compute_allocation_tree_length()
 
 /// @brief Locates a sufficient memory segment that can store the allocation tree.
 /// @return The starting pointer of the memory segment that can be used.
-AllocationNode *find_sufficient_tree()
+const MemorySegmentEntry *find_sufficient_tree()
 {
     for (int i = 0; i < numSegments; i++)
     {
@@ -121,12 +120,12 @@ AllocationNode *find_sufficient_tree()
             continue;
         }
 
-        return (AllocationNode *)(memorySegments[i].BaseAddress);
+        return &memorySegments[i];
     }
 
     // No sufficient location to store the allocation tree.
     panic();
-    return (AllocationNode *)0;
+    return (MemorySegmentEntry *)0;
 }
 
 void init_allocator()
@@ -134,7 +133,8 @@ void init_allocator()
     highestOrder = lowest_exp2(memoryEnd) - PAGE_SIZE_EXP;
     compute_allocation_tree_length();
 
-    AllocationNode *start = find_sufficient_tree();
+    const MemorySegmentEntry *segment = find_sufficient_tree();
+    AllocationNode *start = (AllocationNode *)(unsigned long)segment->BaseAddress;
     for (int i = 0; i <= highestOrder; i++)
     {
         // Add the offset to each order.
