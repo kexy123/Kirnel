@@ -11,21 +11,24 @@
 /// @param global The page entry is global regardless of when switching between page directories.
 void create_page_entry(PageTable *table, unsigned short index, Page *pageAddress, _Bool canWrite, _Bool userAccessible, _Bool global)
 {
-    if ((*table)[index].Present)
+    unsigned long address = ((unsigned long)pageAddress) >> PAGE_SIZE_EXP;
+
+    PageTableEntry *entry = &(*table)[index];
+    if (entry->Present && entry->Page != address)
     {
-        // The page entry must be empty.
+        // The page entry must be empty or it must be pointing to the same pageAddress.
         panic();
         return;
     }
 
-    (*table)[index] = (PageTableEntry){
+    *entry = (PageTableEntry){
         .Present = 1,
         .ReadOrWrite = canWrite,
         .UserOrSuper = userAccessible,
         .Dirty = 0,
         .Accessed = 0,
         .Global = global,
-        .Page = ((unsigned long)pageAddress) >> PAGE_SIZE_EXP,
+        .Page = address,
     };
 }
 
@@ -37,14 +40,15 @@ void create_page_entry(PageTable *table, unsigned short index, Page *pageAddress
 /// @return The created/already existing page table.
 PageTable *try_create_directory_entry(PageDirectory *directory, unsigned short index, _Bool canWrite, _Bool userAccessible)
 {
-    if ((*directory)[index].Present)
+    PageDirectoryEntry *entry = &(*directory)[index];
+    if (entry->Present)
     {
         // There's already a directory entry here.
-        return (PageTable *)((*directory)[index].Page << PAGE_SIZE_EXP);
+        return (PageTable *)(entry->Page << PAGE_SIZE_EXP);
     }
 
     PageTable *address = allocate_strict(1);
-    (*directory)[index] = (PageDirectoryEntry){
+    *entry = (PageDirectoryEntry){
         .Present = 1,
         .ReadOrWrite = canWrite,
         .UserOrSuper = userAccessible,
