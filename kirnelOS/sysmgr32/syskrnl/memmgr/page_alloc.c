@@ -4,8 +4,6 @@
 #include "utils/flow.h"
 
 #define ALLOC_START ((AllocationNode *)(0x00020000)) // Starting location of the memory allocation tree.
-#define PAGE_SIZE_EXP (12)                           // The exponent of the size of a page in bytes in memory.
-#define PAGE_SIZE (1 << PAGE_SIZE_EXP)               // The number of bytes in a page in memory.
 #define MAXIMUM_ORDERS (21)                          // The maximum number of orders in the buddy allocation tree for 32-bit memory.
 
 /// @brief An allocation node. The position of the allocation node and in its order determines the size of the starting page it's pointing to.
