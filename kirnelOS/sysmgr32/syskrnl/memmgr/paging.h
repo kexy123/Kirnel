@@ -81,3 +81,21 @@ typedef PageDirectoryEntry PageDirectory[MAX_ENTRIES];
 
 /// @brief A physical page.
 typedef unsigned char Page[PAGE_SIZE];
+
+/// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
+/// @param root The PageDirectory to modify.
+/// @param virtualPage The starting virtual page-aligned address.
+/// @param physicalPage The starting physical page-aligned address.
+/// @param contiguous The number of physical contiguous pages to map.
+/// @param canWrite The entry can be written to; otherwise it is read-only.
+/// @param userAccessible The entry can be accessed by the user; otherwise it is only accessible to the supervisor.
+/// @param global The page entry is global regardless of when switching between page directories.
+void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global);
+
+/// @brief Creates an empty PageDirectory.
+/// @return The created PageDirectory.
+PageDirectory *create_directory();
+
+/// @brief Enables paging to the given PageDirectory.
+/// @param pageDirectory The PageDirectory to use.
+void enable_paging(PageDirectory *pageDirectory);

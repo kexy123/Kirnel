@@ -60,3 +60,34 @@ PageTable *try_create_directory_entry(PageDirectory *directory, unsigned short i
 
     return (PageTable *)address;
 }
+
+void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global)
+{
+    unsigned long virtualAddress = (unsigned long)virtualPage;
+
+    unsigned short directoryEntry = virtualAddress >> 22;            // Extract first 10 bits.
+    unsigned short tableEntry = (virtualAddress >> 12) & 0x000003FF; // Extract next 10 bits.
+
+    // Map the physical page onto the virtual page.
+    PageTable *table = try_create_directory_entry(root, directoryEntry, canWrite, userAccessible);
+    for (unsigned long current = 0; current < contiguous; current++)
+    {
+        create_page_entry(table, tableEntry, physicalPage, canWrite, userAccessible, global);
+
+        physicalPage++;
+        tableEntry++;
+        if (tableEntry >= MAX_ENTRIES)
+        {
+            // Go to the next page table.
+            tableEntry = 0;
+
+            directoryEntry++;
+            table = try_create_directory_entry(root, directoryEntry, canWrite, userAccessible);
+        }
+    }
+}
+
+PageDirectory *create_directory()
+{
+    return (PageDirectory *)allocate_strict(1);
+}
