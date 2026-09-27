@@ -29,7 +29,7 @@ unsigned long allocationTreeLength;
 
 /// @brief Gets an AllocationNode by pointer at the given order and index.
 /// @param order The order to go in.
-/// @param index The index in the order free list. Note that it is 1-indexed.
+/// @param index The index in the order free list. Note that it is 1-indexed, and the first element is not a usable AllocationNode.
 /// @return The pointer to the AllocationNode.
 static inline AllocationNode *get_allocation_node(int order, unsigned long index)
 {
@@ -52,7 +52,7 @@ static inline AllocationNode *get_end(int order)
     return get_allocation_node(order, 1)->Previous;
 }
 
-/// @brief Gets the 0-based index of the given AllocationNode in the givne order.
+/// @brief Gets the 0-based index of the given AllocationNode in the given order.
 /// @param order The order the AllocationNode is in.
 /// @param node The AllocationNode.
 /// @return The index of the AllocationNode.
@@ -88,11 +88,11 @@ void dissolve(AllocationNode *node)
 
 /// @brief Inserts an AllocationNode at the given index, without performing any cascading merge operations, to the end of the linked list of its order.
 /// @param order The order to insert the AllocationNode in.
-/// @param index The page that the AllocationNode points to.
+/// @param index The 0-indexed page that the AllocationNode points to.
 /// @return The new AllocationNode.
 AllocationNode *append(int order, unsigned long index)
 {
-    AllocationNode *node = get_allocation_node(order, index);
+    AllocationNode *node = get_allocation_node(order, index + 2);
 
     AllocationNode *central = get_allocation_node(order, 1);
     AllocationNode *end = central->Previous;
@@ -181,6 +181,11 @@ void add_range(unsigned long baseAddress, unsigned long endAddress)
     {
         unsigned long maxOrder = __builtin_ctz(current);
         unsigned long rangeMaxOrder = 31 - __builtin_clz(range);
+
+        if (current == 0) // 0 is aligned to the highest possible order.
+        {
+            maxOrder = rangeMaxOrder;
+        }
 
         if (maxOrder > rangeMaxOrder)
         {
