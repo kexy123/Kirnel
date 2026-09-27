@@ -18,7 +18,7 @@ extern void load_idt(IDTDescriptor *descriptor);
 /// @param handle The interrupt handle to install.
 /// @param segmentSelector The segment selector of this entry.
 /// @param flags The flags of this interrupt entry.
-void create_idt_gate(unsigned char interruptCode, unsigned long offset, InterruptHandle handle, unsigned short segmentSelector, unsigned char flags)
+void create_idt_gate(unsigned char interruptCode, unsigned long offset, InterruptHandle handle, unsigned short segmentSelector, IDTEntryFlags flags)
 {
     IDTEntry *entry = &idtTable[interruptCode];
 
@@ -47,7 +47,7 @@ void init_idt()
     port_call(0x20, 0x11);
     port_call(0xA0, 0x11);
 
-    port_call(0x21, INTERRUPT_REQUEST_START); // Start first 8 interrupt requests at 0x20 (0 to 7)
+    port_call(0x21, INTERRUPT_REQUEST_START);        // Start first 8 interrupt requests at 0x20 (0 to 7)
     port_call(0xA1, INTERRUPT_REQUEST_START + 0x08); // Start next 8 interrupt requests at 0x28 (8 to 15)
 
     port_call(0x21, 0x04);
@@ -60,8 +60,8 @@ void init_idt()
     port_call(0x21, 0b10111111);
     port_call(0xA1, 0b11111111);
 
-    create_idt_gate(0x08, (unsigned long)service8, double_fault_handle, 0x08, 0b10001110); // Interrupt 8 (#DF): double fault.
-    create_idt_gate(0x26, (unsigned long)irq6, fdc_interrupt_handle, 0x08, 0b10001110); // IRQ6: floppy disk controller.
+    create_idt_gate(0x08, (unsigned long)service8, double_fault_handle, 0x08, (IDTEntryFlags){.Raw = 0b10001110}); // Interrupt 8 (#DF): double fault.
+    create_idt_gate(0x26, (unsigned long)irq6, fdc_interrupt_handle, 0x08, (IDTEntryFlags){.Raw = 0b10001110});    // IRQ6: floppy disk controller.
 
     load_idt(descriptor);
 }

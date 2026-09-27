@@ -2,6 +2,28 @@
 
 #define INTERRUPT_REQUEST_START (0x20) // The starting interrupt request vector.
 
+/// @brief The IDT entry flags.
+typedef union
+{
+    /// @brief The IDT flags as a raw byte.
+    unsigned char Raw;
+
+    struct __attribute__((packed))
+    {
+        /// @brief The gate type.
+        unsigned GateType : 4;
+
+        /// @brief Reserved; always 0.
+        unsigned ZeroReserved : 1;
+
+        /// @brief The CPU privilege level of this interrupt.
+        unsigned PrivilegeLevel : 2;
+
+        /// @brief The interrupt is present. Must be set in order to be used.
+        unsigned Present : 1;
+    };
+} IDTEntryFlags;
+
 /// @brief Specification of an [interrupt descriptor table entry](https://wiki.osdev.org/Interrupt_Descriptor_Table#Gate_Descriptor).
 typedef struct __attribute__((packed))
 {
@@ -14,17 +36,8 @@ typedef struct __attribute__((packed))
     /// @brief Reserved; always 0.
     unsigned char Reserved;
 
-    /// @brief The gate type.
-    unsigned GateType : 4;
-
-    /// @brief Reserved; always 0.
-    unsigned ZeroReserved : 1;
-
-    /// @brief The CPU privilege level of this interrupt.
-    unsigned PrivilegeLevel : 2;
-
-    /// @brief The interrupt is present. Must be set in order to be used.
-    unsigned Present : 1;
+    /// @brief The flags of the IDT entry.
+    IDTEntryFlags Flags;
 
     /// @brief The high bits of the address to the entry point for when the interrupt is called.
     unsigned short OffsetHigh;
