@@ -3,18 +3,7 @@
 #include "utils/bit.h"
 #include "utils/flow.h"
 
-#define ALLOC_START ((AllocationNode *)(0x00020000)) // Starting location of the memory allocation tree.
 #define MAXIMUM_ORDERS (21)                          // The maximum number of orders in the buddy allocation tree for 32-bit memory.
-
-/// @brief An allocation node. The position of the allocation node and in its order determines the size of the starting page it's pointing to.
-typedef struct __attribute__((packed)) AllocNode
-{
-    /// @brief The previous allocation node in its order list.
-    struct AllocNode *Previous;
-
-    /// @brief The next allocation node in its order list.
-    struct AllocNode *Next;
-} AllocationNode;
 
 /// @brief The starting pointers of the allocation tree in terms of order.
 AllocationNode *allocation_tree[MAXIMUM_ORDERS];
@@ -22,7 +11,6 @@ AllocationNode *allocation_tree[MAXIMUM_ORDERS];
 /// @brief The highest order of the allocation tree. This means that there are orders between 0..highestOrder, and the number of total orders is highestOrder + 1.
 unsigned long highestOrder;
 
-/// @brief The number of bytes of the allocation tree.
 unsigned long allocationTreeLength;
 
 /// @brief Gets an AllocationNode by pointer at the given order and index.
