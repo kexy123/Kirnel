@@ -107,6 +107,57 @@ AllocationNode *append(int order, unsigned long index)
     return node;
 }
 
+/// @brief Bisects the AllocationNode and puts its split parts into the lower order.
+/// @param order The order the AllocationNode is in.
+/// @param node The AllocationNode to split.
+/// @return The left AllocationNode.
+AllocationNode *split(int order, AllocationNode *node)
+{
+    unsigned long index = get_index_of_node(order, node);
+
+    AllocationNode *left = append(order - 1, index * 2); // Left child.
+    append(order - 1, index * 2 + 1);                    // Right child.
+
+    dissolve(node);
+
+    return left;
+}
+
+/// @brief Finds and splits a higher-order block down to the block of the desired target.
+/// @param orderTarget The order to split down to.
+/// @return The AllocationNode that has been created from the split.
+AllocationNode *cascade_split(int orderTarget)
+{
+    AllocationNode *start, *candidate;
+    int order = orderTarget;
+    while (1)
+    {
+        // Find a higher AllocationNode.
+        if (order > highestOrder)
+        {
+            panic();
+        }
+
+        start = get_allocation_node(order, 1);
+        candidate = start->Next;
+        if (start != candidate)
+        {
+            break;
+        }
+
+        order++;
+    }
+
+    // Split down to orderTarget.
+    while (order > orderTarget)
+    {
+        candidate = split(order, candidate);
+        order--;
+    }
+
+    return candidate;
+}
+
 /// @brief Adds the usable range to the memory allocation tree.
 /// @param baseAddress The starting address of the usable range.
 /// @param endAddress The ending address of the usable range.
@@ -183,6 +234,17 @@ const MemorySegmentEntry *find_sufficient_tree()
     // No sufficient location to store the allocation tree.
     panic();
     return (MemorySegmentEntry *)0;
+}
+
+void *allocate_strict(unsigned long numPages)
+{
+    unsigned long order = lowest_exp2(numPages);
+
+    AllocationNode *candidate = cascade_split(order);
+    void *location = get_page_location(order, candidate);
+
+    dissolve(candidate);
+    return location;
 }
 
 void init_allocator()
