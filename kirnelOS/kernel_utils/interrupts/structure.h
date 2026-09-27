@@ -14,8 +14,17 @@ typedef struct __attribute__((packed))
     /// @brief Reserved; always 0.
     unsigned char Reserved;
 
-    /// @brief The present bit, privilege level, unset bit, and gate type.
-    unsigned char Flags;
+    /// @brief The gate type.
+    unsigned GateType : 4;
+
+    /// @brief Reserved; always 0.
+    unsigned ZeroReserved : 1;
+
+    /// @brief The CPU privilege level of this interrupt.
+    unsigned PrivilegeLevel : 2;
+
+    /// @brief The interrupt is present. Must be set in order to be used.
+    unsigned Present : 1;
 
     /// @brief The high bits of the address to the entry point for when the interrupt is called.
     unsigned short OffsetHigh;

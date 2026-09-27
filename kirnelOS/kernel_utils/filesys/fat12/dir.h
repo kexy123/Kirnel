@@ -4,7 +4,7 @@
 #define ENTRY_FILE_EXT_BYTES (3) // The maximum length that a file extension can be.
 
 /// @brief The naming format for an entry.
-typedef struct __attribute((packed))
+typedef struct __attribute__((packed))
 {
     /// @brief The name of the file/folder, padded with trailing spaces.
     char Name[ENTRY_NAME_BYTES];
@@ -13,17 +13,42 @@ typedef struct __attribute((packed))
     char FileExtension[ENTRY_FILE_EXT_BYTES];
 } EntryName;
 
+/// @brief The attributes for an entry.
+typedef struct __attribute__((packed))
+{
+    /// @brief The entry is read-only.
+    unsigned ReadOnly : 1;
+
+    /// @brief The entry is hidden.
+    unsigned Hidden : 1;
+
+    /// @brief The entry is a system file.
+    unsigned System : 1;
+
+    /// @brief The entry is the volume label.
+    unsigned VolumeID : 1;
+
+    /// @brief The entry is a directory and its contents are other entries.
+    unsigned Directory : 1;
+
+    /// @brief The entry is archived.
+    unsigned Archived : 1;
+
+    /// @brief Reserved.
+    unsigned LFNReserved : 2;
+} EntryAttributes;
+
 /// @brief Data format for a file/folder entry in the FAT12 file system.
 typedef struct __attribute__((packed))
 {
     /// @brief The name of the entry.
     EntryName Name;
 
-    /// @brief The attributes of this file/folder.
-    unsigned char Attributes;
+    /// @brief The attributes of the entry.
+    EntryAttributes Attributes;
 
     /// @brief Reserved.
-    unsigned char Reserved;
+    unsigned char NTReserved;
 
     /// @brief The time of creation of this file/folder in 10 ms units.
     unsigned char CreationTimeTenths;
