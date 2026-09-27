@@ -31,7 +31,7 @@ unsigned long allocationTreeLength;
 /// @param order The order to go in.
 /// @param index The index in the order free list. Note that it is 1-indexed.
 /// @return The pointer to the AllocationNode.
-inline AllocationNode *get_allocation_node(int order, unsigned long index)
+static inline AllocationNode *get_allocation_node(int order, unsigned long index)
 {
     return allocation_tree[order] + index - 1;
 }
@@ -39,7 +39,7 @@ inline AllocationNode *get_allocation_node(int order, unsigned long index)
 /// @brief Gets the starting AllocationNode index at the given order.
 /// @param order The order to go in.
 /// @return The index of the starting AllocationNode.
-inline AllocationNode *get_start(int order)
+static inline AllocationNode *get_start(int order)
 {
     return get_allocation_node(order, 1)->Next;
 }
@@ -47,7 +47,7 @@ inline AllocationNode *get_start(int order)
 /// @brief Gets the ending AllocationNode index at the given order.
 /// @param order The order to go in.
 /// @return The index of the last AllocationNode.
-inline AllocationNode *get_end(int order)
+static inline AllocationNode *get_end(int order)
 {
     return get_allocation_node(order, 1)->Previous;
 }
