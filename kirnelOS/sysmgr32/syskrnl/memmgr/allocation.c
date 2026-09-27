@@ -78,12 +78,12 @@ void append(int order, unsigned long index)
     AllocationNode *central = get_allocation_node(order, 1);
     AllocationNode *end = central->Previous;
 
-    // Turn central <-> end to central <-> node <-> end.
-    central->Next = node;
-    node->Previous = end;
-
-    end->Previous = node;
+    // Turn end <-> central to end <-> node <-> central.
+    central->Previous = node;
     node->Next = central;
+
+    end->Next = node;
+    node->Previous = end;
 }
 
 /// @brief Computes the length of the allocation tree in bytes and the number of AllocationNodes for each existing order.
@@ -138,7 +138,11 @@ void init_allocator()
     for (int i = 0; i <= highestOrder; i++)
     {
         // Add the offset to each order.
-        allocation_tree[i] += (unsigned long)start;
+        AllocationNode *startingNode = (allocation_tree[i] += (unsigned long)start);
+
+        // Link to itself to mark it as an empty list.
+        startingNode->Next = startingNode;
+        startingNode->Previous = startingNode;
     }
 
     // TODO: Functions that allow allocation at specific locations.
