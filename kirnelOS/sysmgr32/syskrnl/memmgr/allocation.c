@@ -107,6 +107,29 @@ AllocationNode *append(int order, unsigned long index)
     return node;
 }
 
+/// @brief Appends an AllocationNode and performs a cascading merge with its buddies if possible.
+/// @param order The order to insert the AllocationNode in.
+/// @param index The 0-indexed page that the AllocationNode points to.
+void cascade_add(int order, unsigned long index)
+{
+    while (order < highestOrder)
+    {
+        // We cascade first before adding the merged block.
+        AllocationNode *buddy = get_allocation_node(order, (index ^ 1) + 2);
+        if (buddy->Next == 0 && buddy->Previous == 0)
+        {
+            // There is no buddy at this point so add the new block.
+            break;
+        }
+
+        dissolve(buddy);
+        order++;
+        index /= 2;
+    }
+
+    append(order, index);
+}
+
 /// @brief Bisects the AllocationNode and puts its split parts into the lower order.
 /// @param order The order the AllocationNode is in.
 /// @param node The AllocationNode to split.
@@ -250,6 +273,18 @@ void *allocate_strict(unsigned long numPages)
 
     dissolve(candidate);
     return location;
+}
+
+void deallocate(int order, void *address)
+{
+    if ((unsigned long)address & ((1 << PAGE_SIZE_EXP << order) - 1))
+    {
+        // The address is not aligned to pages.
+        return;
+    }
+
+    unsigned long page = (unsigned long)address >> PAGE_SIZE_EXP;
+    cascade_add(order, page >> order);
 }
 
 void init_allocator()
