@@ -21,7 +21,7 @@ typedef struct __attribute__((packed)) AllocNode
 /// @brief The starting pointers of the allocation tree in terms of order.
 AllocationNode *allocation_tree[MAXIMUM_ORDERS];
 
-/// @brief The highest order of the allocation tree.
+/// @brief The highest order of the allocation tree. This means that there are orders between 0..highestOrder, and the number of total orders is highestOrder + 1.
 unsigned long highestOrder;
 
 /// @brief The number of bytes of the allocation tree.
@@ -52,14 +52,22 @@ static inline AllocationNode *get_end(int order)
     return get_allocation_node(order, 1)->Previous;
 }
 
+/// @brief Gets the 0-based index of the given AllocationNode in the givne order.
+/// @param order The order the AllocationNode is in.
+/// @param node The AllocationNode.
+/// @return The index of the AllocationNode.
+static inline unsigned long get_index_of_node(int order, AllocationNode *node)
+{
+    return node - allocation_tree[order] - 1;
+}
+
 /// @brief Returns the starting address of the page that the given AllocationNode points to.
 /// @param order The order the AllocationNode is in.
 /// @param node The AllocationNode.
 /// @return The starting address of the page.
-void *get_page_location(int order, AllocationNode *node)
+static inline void *get_page_location(int order, AllocationNode *node)
 {
-    unsigned long index = node - allocation_tree[order] - 1;
-    return (void *)(index << order << PAGE_SIZE_EXP);
+    return (void *)(get_index_of_node(order, node) << order << PAGE_SIZE_EXP);
 }
 
 /// @brief Clears and connects the adjacent nodes of the AllocationNode together.
@@ -81,7 +89,8 @@ void dissolve(AllocationNode *node)
 /// @brief Inserts an AllocationNode at the given index, without performing any cascading merge operations, to the end of the linked list of its order.
 /// @param order The order to insert the AllocationNode in.
 /// @param index The page that the AllocationNode points to.
-void append(int order, unsigned long index)
+/// @return The new AllocationNode.
+AllocationNode *append(int order, unsigned long index)
 {
     AllocationNode *node = get_allocation_node(order, index);
 
@@ -94,6 +103,8 @@ void append(int order, unsigned long index)
 
     end->Next = node;
     node->Previous = end;
+
+    return node;
 }
 
 /// @brief Adds the usable range to the memory allocation tree.
