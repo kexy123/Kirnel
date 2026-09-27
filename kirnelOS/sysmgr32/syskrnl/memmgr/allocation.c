@@ -52,6 +52,16 @@ static inline AllocationNode *get_end(int order)
     return get_allocation_node(order, 1)->Previous;
 }
 
+/// @brief Returns the starting address of the page that the given AllocationNode points to.
+/// @param order The order the AllocationNode is in.
+/// @param node The AllocationNode.
+/// @return The starting address of the page.
+void *get_page_location(int order, AllocationNode *node)
+{
+    unsigned long index = node - allocation_tree[order] - 1;
+    return (void *)(index << order << PAGE_SIZE_EXP);
+}
+
 /// @brief Clears and connects the adjacent nodes of the AllocationNode together.
 /// @param node The AllocationNode to dissolve.
 void dissolve(AllocationNode *node)
