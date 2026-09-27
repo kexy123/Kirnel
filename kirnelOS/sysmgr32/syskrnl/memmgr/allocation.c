@@ -96,6 +96,42 @@ void append(int order, unsigned long index)
     node->Previous = end;
 }
 
+/// @brief Adds the usable range to the memory allocation tree.
+/// @param baseAddress The starting address of the usable range.
+/// @param endAddress The ending address of the usable range.
+void add_range(unsigned long baseAddress, unsigned long endAddress)
+{
+    // Align to pages.
+    unsigned long pageStart = baseAddress >> PAGE_SIZE_EXP;
+    unsigned long pageEnd = endAddress >> PAGE_SIZE_EXP;
+
+    if ((baseAddress & 0x00000FFF) != 0)
+    {
+        // The pageStart extends out of the baseAddress, so keep it inside.
+        // pageEnd does not need any checks because its right-shift is essentially integer division. Note that pageEnd - 1 is the last page in this range.
+        pageStart++;
+    }
+
+    // Decumulate the range and add the optimal blocks.
+    unsigned long range = pageEnd - pageStart;
+    unsigned long current = pageStart;
+    while (range > 0)
+    {
+        unsigned long maxOrder = __builtin_ctz(current);
+        unsigned long rangeMaxOrder = 31 - __builtin_clz(range);
+
+        if (maxOrder > rangeMaxOrder)
+        {
+            maxOrder = rangeMaxOrder;
+        }
+
+        append(maxOrder, (current >> maxOrder));
+
+        range -= 1 << maxOrder;
+        current += 1 << maxOrder;
+    }
+}
+
 /// @brief Computes the length of the allocation tree in bytes and the number of AllocationNodes for each existing order.
 void compute_allocation_tree_length()
 {
@@ -156,4 +192,5 @@ void init_allocator()
     }
 
     // TODO: Functions that allow allocation at specific locations.
+    add_range(segment->BaseAddress + allocationTreeLength, segment->BaseAddress + segment->SegmentLength);
 }
