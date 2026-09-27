@@ -38,7 +38,7 @@ typedef struct __attribute__((packed))
     unsigned LFNReserved : 2;
 } EntryAttributes;
 
-/// @brief Data format for a file/folder entry in the FAT12 file system.
+/// @brief [Data format for a file/folder entry](https://wiki.osdev.org/FAT#Standard_8.3_format) in the FAT12 file system.
 typedef struct __attribute__((packed))
 {
     /// @brief The name of the entry.
