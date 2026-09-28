@@ -6,7 +6,7 @@ ELF_GCC := i386-elf-gcc
 NASM := nasm
 MAKE_DIR = @mkdir -p $(dir $@)
 
-C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/kernel_utils -std=c11
+C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/kernel_utils -std=c23
 
 # OBJECTS
 C_SOURCES := $(shell find kirnelOS/kernel_utils -name '*.c')

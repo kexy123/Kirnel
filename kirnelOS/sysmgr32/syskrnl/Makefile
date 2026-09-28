@@ -8,7 +8,7 @@ ELF_OBJCPY := i386-elf-objcopy
 NASM := nasm
 MAKE_DIR = @mkdir -p $(dir $@)
 
-C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syskrnl -IkirnelOS/kernel_utils -std=c11 -fdata-sections -ffunction-sections
+C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syskrnl -IkirnelOS/kernel_utils -std=c23 -fdata-sections -ffunction-sections
 
 # OBJECTS
 C_SOURCES := $(shell find kirnelOS/sysmgr32/syskrnl -name '*.c')
