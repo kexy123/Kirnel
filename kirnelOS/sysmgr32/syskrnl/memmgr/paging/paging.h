@@ -90,17 +90,20 @@ typedef unsigned char Page[PAGE_SIZE];
 /// @param canWrite The entry can be written to; otherwise it is read-only.
 /// @param userAccessible The entry can be accessed by the user; otherwise it is only accessible to the supervisor.
 /// @param global The page entry is global regardless of when switching between page directories.
-void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global);
+/// @param selfReferential The page directory is self-referential and its integrity should be maintained.
+void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool selfReferential);
 
 /// @brief Unmaps and frees the given number at pages by a starting virtual page address.
 /// @param root The PageDirectory to modify.
 /// @param virtualPage The the starting virtual page-aligned address.
 /// @param pages The number of pages to unmap.
-void unmap(PageDirectory *root, void *virtualPage, unsigned long pages);
+/// @param selfReferential The page directory is self-referential and its integrity should be maintained.
+void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool selfReferential);
 
 /// @brief Creates an empty PageDirectory.
+/// @param selfReferential The page directory should be self-referential.
 /// @return The created PageDirectory.
-PageDirectory *create_directory();
+PageDirectory *create_directory(_Bool selfReferential);
 
 /// @brief Enables paging to the given PageDirectory.
 /// @param pageDirectory The PageDirectory to use.

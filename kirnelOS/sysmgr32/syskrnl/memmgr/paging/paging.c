@@ -38,7 +38,7 @@ void create_page_entry(PageTable *table, unsigned short index, Page *pageAddress
 /// @param canWrite The entry can be written to; otherwise it is read-only.
 /// @param userAccessible The entry can be accessed by the user; otherwise it is only accessible to the supervisor.
 /// @return The created/already existing page table.
-PageTable *try_create_directory_entry(PageDirectory *directory, unsigned short index, _Bool canWrite, _Bool userAccessible)
+PageTable *try_create_directory_entry(PageDirectory *directory, unsigned short index, _Bool canWrite, _Bool userAccessible, _Bool selfReferential)
 {
     PageDirectoryEntry *entry = &(*directory)[index];
     if (entry->Present)
@@ -58,12 +58,17 @@ PageTable *try_create_directory_entry(PageDirectory *directory, unsigned short i
         .Page = ((unsigned long)address) >> PAGE_SIZE_EXP,
     };
 
+    if (selfReferential)
+    {
+        create_page_entry((PageTable *)((*directory)[1023].Page << PAGE_SIZE_EXP), index, (Page *)address, 1, 0, 0);
+    }
+
     return (PageTable *)address;
 }
 
 /// @brief Attempts to get the page table at the given directory and index; 0 if not mapped.
 /// @param directory The PageDirectory to look in.
-/// @param index The index of the page directory.
+/// @param index The index of the` page directory.
 /// @return The pointer to the PageTable; 0 if not found.
 PageTable *get_page_table(PageDirectory *directory, unsigned short index)
 {
@@ -95,7 +100,8 @@ void unmap_page(PageTable *table, unsigned short index)
 /// @brief Attempts to unmap and free the given page table; does nothing if already unmapped.
 /// @param directory The PageDirectory to look in.
 /// @param index The index of the page directory to unmap.
-void unmap_page_table(PageDirectory *directory, unsigned short index)
+/// @param selfReferential The page directory is self-referential and its integrity should be maintained.
+void unmap_page_table(PageDirectory *directory, unsigned short index, _Bool selfReferential)
 {
     PageDirectoryEntry *entry = &(*directory)[index];
     if (!entry->Present)
@@ -113,10 +119,15 @@ void unmap_page_table(PageDirectory *directory, unsigned short index)
 
     entry->Present = 0;
 
+    if (selfReferential)
+    {
+        directory[1023]->Present = 0;
+    }
+
     deallocate(1, page);
 }
 
-void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global)
+void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool selfReferential)
 {
     unsigned long virtualAddress = (unsigned long)virtualPage;
 
@@ -124,7 +135,7 @@ void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned lo
     unsigned short tableEntry = (virtualAddress >> 12) & 0x000003FF; // Extract next 10 bits.
 
     // Map the physical page onto the virtual page.
-    PageTable *table = try_create_directory_entry(root, directoryEntry, canWrite, userAccessible);
+    PageTable *table = try_create_directory_entry(root, directoryEntry, canWrite, userAccessible, selfReferential);
     for (unsigned long current = 0; current < contiguous; current++)
     {
         create_page_entry(table, tableEntry, physicalPage, canWrite, userAccessible, global);
@@ -137,12 +148,12 @@ void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned lo
             tableEntry = 0;
 
             directoryEntry++;
-            table = try_create_directory_entry(root, directoryEntry, canWrite, userAccessible);
+            table = try_create_directory_entry(root, directoryEntry, canWrite, userAccessible, selfReferential);
         }
     }
 }
 
-void unmap(PageDirectory *root, void *virtualPage, unsigned long pages)
+void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool selfReferential)
 {
     unsigned long virtualAddress = (unsigned long)virtualPage;
 
@@ -172,7 +183,7 @@ void unmap(PageDirectory *root, void *virtualPage, unsigned long pages)
     while (pages >= MAX_ENTRIES)
     {
         directoryEntry++;
-        unmap_page_table(root, directoryEntry);
+        unmap_page_table(root, directoryEntry, selfReferential);
 
         pages -= MAX_ENTRIES;
     }
@@ -189,7 +200,14 @@ void unmap(PageDirectory *root, void *virtualPage, unsigned long pages)
     }
 }
 
-PageDirectory *create_directory()
+PageDirectory *create_directory(_Bool selfReferential)
 {
-    return (PageDirectory *)allocate_strict(1);
+    PageDirectory *directory = (PageDirectory *)allocate_strict(1);
+
+    if (selfReferential)
+    {
+        try_create_directory_entry(directory, 1023, 1, 0, 1);
+    }
+
+    return directory;
 }
