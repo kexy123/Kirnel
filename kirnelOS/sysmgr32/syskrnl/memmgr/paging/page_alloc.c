@@ -4,15 +4,17 @@
 #include "utils/flow.h"
 #include "utils/memcopy.h"
 
-#define MAXIMUM_ORDERS (21)                          // The maximum number of orders in the buddy allocation tree for 32-bit memory.
+#define MAXIMUM_ORDERS (21) // The maximum number of orders in the buddy allocation tree for 32-bit memory.
 
 /// @brief The starting pointers of the allocation tree in terms of order.
-AllocationNode *allocation_tree[MAXIMUM_ORDERS];
+AllocationNode *allocationTree[MAXIMUM_ORDERS];
 
 /// @brief The highest order of the allocation tree. This means that there are orders between 0..highestOrder, and the number of total orders is highestOrder + 1.
 unsigned long highestOrder;
 
 unsigned long allocationTreeLength;
+
+const char *treeLocation;
 
 /// @brief Gets an AllocationNode by pointer at the given order and index.
 /// @param order The order to go in.
@@ -20,7 +22,7 @@ unsigned long allocationTreeLength;
 /// @return The pointer to the AllocationNode.
 static inline AllocationNode *get_allocation_node(int order, unsigned long index)
 {
-    return allocation_tree[order] + index - 1;
+    return allocationTree[order] + index - 1;
 }
 
 /// @brief Gets the starting AllocationNode index at the given order.
@@ -45,7 +47,7 @@ static inline AllocationNode *get_end(int order)
 /// @return The index of the AllocationNode.
 static inline unsigned long get_index_of_node(int order, AllocationNode *node)
 {
-    return node - allocation_tree[order] - 1;
+    return node - allocationTree[order] - 1;
 }
 
 /// @brief Returns the starting address of the page that the given AllocationNode points to.
@@ -216,7 +218,7 @@ void compute_allocation_tree_length()
     for (int i = 0; i <= highestOrder; i++)
     {
         // Each order has one extra element on a power of two. Note that order 0 is the deepest in the tree.
-        allocation_tree[highestOrder - i] = (AllocationNode *)allocationTreeLength;
+        allocationTree[highestOrder - i] = (AllocationNode *)allocationTreeLength;
         allocationTreeLength += ((1 << i) + 1) * sizeof(AllocationNode);
     }
 }
@@ -286,7 +288,7 @@ void init_allocator()
     for (int i = 0; i <= highestOrder; i++)
     {
         // Add the offset to each order.
-        AllocationNode *startingNode = (allocation_tree[i] += (unsigned long)start);
+        AllocationNode *startingNode = (allocationTree[i] += (unsigned long)start);
 
         // Link to itself to mark it as an empty list.
         startingNode->Next = startingNode;
@@ -295,4 +297,6 @@ void init_allocator()
 
     // TODO: Functions that allow allocation at specific locations.
     add_range(segment->BaseAddress + allocationTreeLength, segment->BaseAddress + segment->SegmentLength);
+
+    treeLocation = (char *)segment;
 }
