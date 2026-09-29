@@ -1,7 +1,7 @@
 #include "master.h"
 #include "gdt/master.h"
 #include "kernel_virtual_layout.h"
-#include "krnl_jump.h"
+#include "kernel_jump.h"
 #include "paging/mem_segments.h"
 #include "paging/page_alloc.h"
 #include "paging/paging.h"
