@@ -5,7 +5,7 @@
 /// @brief The IDT entry flags.
 typedef union
 {
-    /// @brief The IDT flags as a raw byte.
+    /// @brief The raw bits of the IDT flags.
     unsigned char Raw;
 
     struct __attribute__((packed))
@@ -59,7 +59,7 @@ typedef void (*InterruptFunction)(void);
 extern IDTEntry idtTable[256];
 
 /// @brief The assigned interrupt descriptor table descriptor.
-extern IDTDescriptor *descriptor;
+extern IDTDescriptor interruptDescriptor;
 
 /// @brief Initiates the interrupt descriptor table.
 void init_idt();

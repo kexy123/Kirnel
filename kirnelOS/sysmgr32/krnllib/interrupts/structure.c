@@ -6,7 +6,7 @@
 
 IDTEntry idtTable[256];
 
-IDTDescriptor *descriptor;
+IDTDescriptor interruptDescriptor;
 
 /// @brief Loads the given interrupt descriptor table with the given address to the descriptor.
 /// @param descriptor The address of the IDTDescriptor.
@@ -39,8 +39,8 @@ void create_idt_gate(unsigned char interruptCode, unsigned long offset, Interrup
 
 void init_idt()
 {
-    descriptor->Limit = sizeof(IDTEntry) * 256 - 1;
-    descriptor->Base = (unsigned long)&idtTable;
+    interruptDescriptor.Limit = sizeof(IDTEntry) * 256 - 1;
+    interruptDescriptor.Base = (unsigned long)&idtTable;
 
     // Initialise the Programmable Interrupt Controller for hardware interrupts.
     // Specification: https://wiki.osdev.org/8259_PIC#Initialisation
@@ -63,5 +63,5 @@ void init_idt()
     create_idt_gate(0x08, (unsigned long)service8, double_fault_handle, 0x08, (IDTEntryFlags){.Raw = 0b10001110}); // Interrupt 8 (#DF): double fault.
     create_idt_gate(0x26, (unsigned long)irq6, fdc_interrupt_handle, 0x08, (IDTEntryFlags){.Raw = 0b10001110});    // IRQ6: floppy disk controller.
 
-    load_idt(descriptor);
+    load_idt(&interruptDescriptor);
 }
