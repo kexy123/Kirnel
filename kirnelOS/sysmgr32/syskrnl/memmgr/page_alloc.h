@@ -18,7 +18,7 @@ typedef struct __attribute__((packed)) AllocNode
 /// @brief The number of bytes of the allocation tree.
 extern unsigned long allocationTreeLength;
 
-/// @brief Allocates and returns the starting address to a free memory of the given number of pages.
+/// @brief Allocates and returns the starting address to a free zeroed-out memory chunk of the given number of pages.
 /// @param numPages The number of pages to allocate.
 /// @return The starting memory address of the free pages.
 void *allocate_strict(unsigned long numPages);

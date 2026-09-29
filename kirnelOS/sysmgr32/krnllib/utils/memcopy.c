@@ -10,3 +10,13 @@ void copy_to(void *source, void *destination, short byteCount)
         sourcePtr[i] = destinationPtr[i];
     }
 }
+
+void zero_out(void *source, unsigned long bytes)
+{
+    char *sourcePtr = (char *)source;
+
+    for (unsigned long i = 0; i < bytes; i++)
+    {
+        sourcePtr[i] = 0x00;
+    }
+}

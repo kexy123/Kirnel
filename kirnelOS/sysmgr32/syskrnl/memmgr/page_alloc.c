@@ -2,6 +2,7 @@
 #include "mem_segments.h"
 #include "utils/bit.h"
 #include "utils/flow.h"
+#include "utils/memcopy.h"
 
 #define MAXIMUM_ORDERS (21)                          // The maximum number of orders in the buddy allocation tree for 32-bit memory.
 
@@ -258,12 +259,14 @@ void *allocate_strict(unsigned long numPages)
     void *location = get_page_location(order, candidate);
 
     dissolve(candidate);
+    zero_out(location, PAGE_SIZE << order);
+
     return location;
 }
 
 void deallocate(int order, void *address)
 {
-    if ((unsigned long)address & ((1 << PAGE_SIZE_EXP << order) - 1))
+    if ((unsigned long)address & ((PAGE_SIZE << order) - 1))
     {
         // The address is not aligned to pages.
         return;
