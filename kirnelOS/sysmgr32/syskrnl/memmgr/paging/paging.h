@@ -92,6 +92,12 @@ typedef unsigned char Page[PAGE_SIZE];
 /// @param global The page entry is global regardless of when switching between page directories.
 void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global);
 
+/// @brief Unmaps and frees the given number at pages by a starting virtual page address.
+/// @param root The PageDirectory to modify.
+/// @param virtualPage The the starting virtual page-aligned address.
+/// @param pages The number of pages to unmap.
+void unmap(PageDirectory *root, void *virtualPage, unsigned long pages);
+
 /// @brief Creates an empty PageDirectory.
 /// @return The created PageDirectory.
 PageDirectory *create_directory();
