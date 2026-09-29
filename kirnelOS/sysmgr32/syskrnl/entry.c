@@ -1,4 +1,5 @@
 #include "vga/out.h"
+#include "memmgr/gdt/master.h"
 #include "memmgr/mem_segments.h"
 #include "memmgr/page_alloc.h"
 #include "memmgr/paging.h"
@@ -10,6 +11,7 @@ __attribute__((section(".text.krnl_start"))) void krnl_start()
 
     print_ln("Hello from the SYSKRNL!");
 
+    create_os_gdt();
     analyse_mem_segments();
     init_allocator();
 
