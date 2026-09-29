@@ -1,5 +1,5 @@
 #include "gdt.h"
-#include "memmgr/page_alloc.h"
+#include "memmgr/paging/page_alloc.h"
 
 /// @brief The starting entry of the global descriptor table.
 SegmentEntry *table;

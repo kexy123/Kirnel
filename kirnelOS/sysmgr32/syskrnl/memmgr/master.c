@@ -1,10 +1,10 @@
 #include "master.h"
-#include "memmgr/gdt/master.h"
-#include "memmgr/kernel_virtual_layout.h"
-#include "memmgr/krnl_jump.h"
-#include "memmgr/mem_segments.h"
-#include "memmgr/page_alloc.h"
-#include "memmgr/paging.h"
+#include "gdt/master.h"
+#include "kernel_virtual_layout.h"
+#include "krnl_jump.h"
+#include "paging/mem_segments.h"
+#include "paging/page_alloc.h"
+#include "paging/paging.h"
 
 void init_mem()
 {
