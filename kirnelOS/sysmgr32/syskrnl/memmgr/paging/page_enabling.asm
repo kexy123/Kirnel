@@ -2,6 +2,8 @@
 
 section .text
 
+extern pagingEnabled
+
 global enable_paging
 
 enable_paging:
@@ -14,5 +16,7 @@ enable_paging:
     mov eax, cr0
     or eax, 0x80000001
     mov cr0, eax
+
+    mov [pagingEnabled], byte 0x01
 
     ret

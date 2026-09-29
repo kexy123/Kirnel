@@ -2,6 +2,8 @@
 #include "paging.h"
 #include "utils/flow.h"
 
+_Bool pagingEnabled = 0;
+
 /// @brief Creates a page entry at the given index that points to a physical page-aligned address.
 /// @param table The PageTable to modify.
 /// @param index The index of the page table. It must be empty.
@@ -207,7 +209,7 @@ PageDirectory *create_directory(_Bool selfReferential)
     if (selfReferential)
     {
         try_create_directory_entry(directory, 1023, 1, 0, 1);
-        map(directory, (void *)0xFFBFFFFF, (Page *)directory, 1, 1, 0, 0, 1);
+        // map(directory, (void *)0xFFBFFFFF, (Page *)directory, 1, 1, 0, 0, 1);
     }
 
     return directory;

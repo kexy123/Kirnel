@@ -84,6 +84,9 @@ typedef PageDirectoryEntry PageDirectory[MAX_ENTRIES];
 /// @brief A physical page.
 typedef unsigned char Page[PAGE_SIZE];
 
+/// @brief Is set if paging is enabled.
+extern _Bool pagingEnabled;
+
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
 /// @param root The PageDirectory to modify.
 /// @param virtualPage The starting virtual page-aligned address.
