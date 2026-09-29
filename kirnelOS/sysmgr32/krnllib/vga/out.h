@@ -18,7 +18,8 @@ typedef struct __attribute__((packed))
         unsigned char: print_uint, \
         unsigned short: print_uint, \
         unsigned long: print_uint, \
-        unsigned int: print_uint \
+        unsigned int: print_uint, \
+        _Bool: print_bool \
     )(message)
 
 #define print_ln(message) \
@@ -40,6 +41,10 @@ void print_uint(unsigned long num);
 /// @brief Prints an unsigned integer to the VGA in base-16 and moves the cursor.
 /// @param num The number to print in base-16.
 void print_uintx(unsigned long num);
+
+/// @brief Prints the truth value of a boolean as text. "True" if true; otherwise "False".
+/// @param boolean The boolean whose truth value to print.
+void print_bool(_Bool boolean);
 
 /// @brief Fills the text after the cursor in the current line with spaces and moves the cursor to the next line in the VGA.
 void print_newl();

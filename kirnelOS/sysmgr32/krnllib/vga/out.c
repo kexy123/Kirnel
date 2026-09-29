@@ -66,6 +66,18 @@ void print_uintx(unsigned long num)
     print_s(result);
 }
 
+void print_bool(_Bool boolean)
+{
+    if (boolean == 0)
+    {
+        print_s("False");
+    }
+    else
+    {
+        print_s("True");
+    }
+}
+
 void print_newl()
 {
     print_c('\n');
