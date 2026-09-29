@@ -2,7 +2,12 @@
 #include "paging.h"
 #include "utils/flow.h"
 
+#define SELF_REFERENCING_POINTER ((PageDirectory *)(0xFFBFF000)) // The pointer where a self-referencing page directory references itself.
+#define PAGE_REFERENCING_POINTER ((PageTable *)(0xFFFFF000))     // The starting pointer of the page tables.
+
 _Bool pagingEnabled = 0;
+
+PageDirectory *self = SELF_REFERENCING_POINTER;
 
 /// @brief Creates a page entry at the given index that points to a physical page-aligned address.
 /// @param table The PageTable to modify.
@@ -62,7 +67,7 @@ PageTable *try_create_directory_entry(PageDirectory *directory, unsigned short i
 
     if (selfReferential)
     {
-        create_page_entry((PageTable *)((*directory)[1023].Page << PAGE_SIZE_EXP), index, (Page *)address, 1, 0, 0);
+        create_page_entry((PageTable *)((*directory)[NUM_ENTRIES - 1].Page << PAGE_SIZE_EXP), index, (Page *)address, 1, 0, 0);
     }
 
     return (PageTable *)address;
@@ -83,7 +88,7 @@ PageTable *get_page_table(PageDirectory *directory, unsigned short index)
     return (PageTable *)0;
 }
 
-/// @brief Attempts to unmap and freethe given page; does nothing if already unmapped.
+/// @brief Attempts to unmap the given page; does nothing if already unmapped.
 /// @param table The PageTable to look in.
 /// @param index The index of the page table to unmap.
 void unmap_page(PageTable *table, unsigned short index)
@@ -95,11 +100,9 @@ void unmap_page(PageTable *table, unsigned short index)
     }
 
     entry->Present = 0;
-
-    deallocate(1, (Page *)(entry->Page << PAGE_SIZE_EXP));
 }
 
-/// @brief Attempts to unmap and free the given page table; does nothing if already unmapped.
+/// @brief Attempts to unmap the given page table; does nothing if already unmapped.
 /// @param directory The PageDirectory to look in.
 /// @param index The index of the page directory to unmap.
 /// @param selfReferential The page directory is self-referential and its integrity should be maintained.
@@ -114,7 +117,7 @@ void unmap_page_table(PageDirectory *directory, unsigned short index, _Bool self
     PageTable *page = (PageTable *)(entry->Page << PAGE_SIZE_EXP);
 
     // Unmap all of the pages.
-    for (int i = 0; i < MAX_ENTRIES; i++)
+    for (int i = 0; i < NUM_ENTRIES; i++)
     {
         unmap_page(page, i);
     }
@@ -123,10 +126,9 @@ void unmap_page_table(PageDirectory *directory, unsigned short index, _Bool self
 
     if (selfReferential)
     {
-        directory[1023]->Present = 0;
+        PageTable *table = (PageTable *)((*directory)[1023].Page << PAGE_SIZE_EXP);
+        (*table)[index].Present = 0;
     }
-
-    deallocate(1, page);
 }
 
 void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool selfReferential)
@@ -144,7 +146,7 @@ void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned lo
 
         physicalPage++;
         tableEntry++;
-        if (tableEntry >= MAX_ENTRIES)
+        if (tableEntry >= NUM_ENTRIES)
         {
             // Go to the next page table.
             tableEntry = 0;
@@ -168,7 +170,7 @@ void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool se
     table = get_page_table(root, directoryEntry);
     if (pages != 0 && table)
     {
-        for (unsigned long i = tableEntry; i < MAX_ENTRIES; i++)
+        for (unsigned long i = tableEntry; i < NUM_ENTRIES; i++)
         {
             unmap_page(table, i);
 
@@ -182,12 +184,12 @@ void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool se
     }
 
     // Unmap entire page tables if applicable.
-    while (pages >= MAX_ENTRIES)
+    while (pages >= NUM_ENTRIES)
     {
         directoryEntry++;
         unmap_page_table(root, directoryEntry, selfReferential);
 
-        pages -= MAX_ENTRIES;
+        pages -= NUM_ENTRIES;
     }
 
     // Unmap the left hand side of the last page table.
@@ -208,8 +210,8 @@ PageDirectory *create_directory(_Bool selfReferential)
 
     if (selfReferential)
     {
-        try_create_directory_entry(directory, 1023, 1, 0, 1);
-        // map(directory, (void *)0xFFBFFFFF, (Page *)directory, 1, 1, 0, 0, 1);
+        try_create_directory_entry(directory, NUM_ENTRIES - 1, 1, 0, 1);
+        map(directory, (void *)SELF_REFERENCING_POINTER, (Page *)directory, 1, 1, 0, 0, 1);
     }
 
     return directory;

@@ -2,7 +2,7 @@
 
 #include "page_alloc.h"
 
-#define MAX_ENTRIES (1024) // The maximum number of entries in both the PageTable and PageDirectory.
+#define NUM_ENTRIES (1024) // The number of entries in both the PageTable and PageDirectory.
 
 /// @brief Specification of the [page table entry](https://wiki.osdev.org/index.php?title=X86_Paging#Page_Table).
 typedef struct __attribute__((packed))
@@ -76,16 +76,19 @@ typedef struct __attribute__((packed))
 } PageDirectoryEntry;
 
 /// @brief A fixed array of page table entries that point to physical pages in memory.
-typedef PageTableEntry PageTable[MAX_ENTRIES];
+typedef PageTableEntry PageTable[NUM_ENTRIES];
 
 /// @brief A fixed array of physical addresses to PageTables.
-typedef PageDirectoryEntry PageDirectory[MAX_ENTRIES];
+typedef PageDirectoryEntry PageDirectory[NUM_ENTRIES];
 
 /// @brief A physical page.
 typedef unsigned char Page[PAGE_SIZE];
 
 /// @brief Is set if paging is enabled.
 extern _Bool pagingEnabled;
+
+/// @brief The location of the self-referencing page directory in virtual memory if this page directory is being used.
+extern PageDirectory *self;
 
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
 /// @param root The PageDirectory to modify.
