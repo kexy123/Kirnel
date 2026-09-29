@@ -5,18 +5,18 @@
 /// @brief Creates a page entry at the given index that points to a physical page-aligned address.
 /// @param table The PageTable to modify.
 /// @param index The index of the page table. It must be empty.
-/// @param pageAddress The page-aligned address to point to.
+/// @param physicalPageAddress The physical page-aligned address to point to.
 /// @param canWrite The entry can be written to; otherwise it is read-only.
 /// @param userAccessible The entry can be accessed by the user; otherwise it is only accessible to the supervisor.
 /// @param global The page entry is global regardless of when switching between page directories.
-void create_page_entry(PageTable *table, unsigned short index, Page *pageAddress, _Bool canWrite, _Bool userAccessible, _Bool global)
+void create_page_entry(PageTable *table, unsigned short index, Page *physicalPageAddress, _Bool canWrite, _Bool userAccessible, _Bool global)
 {
-    unsigned long address = ((unsigned long)pageAddress) >> PAGE_SIZE_EXP;
+    unsigned long address = ((unsigned long)physicalPageAddress) >> PAGE_SIZE_EXP;
 
     PageTableEntry *entry = &(*table)[index];
     if (entry->Present && entry->Page != address)
     {
-        // The page entry must be empty or it must be pointing to the same pageAddress.
+        // The page entry must be empty or it must be pointing to the same physicalPageAddress.
         panic();
         return;
     }
@@ -207,6 +207,7 @@ PageDirectory *create_directory(_Bool selfReferential)
     if (selfReferential)
     {
         try_create_directory_entry(directory, 1023, 1, 0, 1);
+        map(directory, (void *)0xFFBFFFFF, (Page *)directory, 1, 1, 0, 0, 1);
     }
 
     return directory;

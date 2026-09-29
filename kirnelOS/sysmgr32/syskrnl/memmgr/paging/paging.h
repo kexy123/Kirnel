@@ -1,5 +1,7 @@
 #pragma once
 
+#include "page_alloc.h"
+
 #define MAX_ENTRIES (1024) // The maximum number of entries in both the PageTable and PageDirectory.
 
 /// @brief Specification of the [page table entry](https://wiki.osdev.org/index.php?title=X86_Paging#Page_Table).
