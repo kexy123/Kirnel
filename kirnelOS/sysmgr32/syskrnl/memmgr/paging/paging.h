@@ -84,11 +84,24 @@ typedef PageDirectoryEntry PageDirectory[NUM_ENTRIES];
 /// @brief A physical page.
 typedef unsigned char Page[PAGE_SIZE];
 
+/// @brief A special page that is used to translate a physical address to the most-recently mapped virtual address.
+typedef void* PhysicalToVirtualTranslationPage[NUM_ENTRIES];
+
 /// @brief Is set if paging is enabled.
 extern _Bool pagingEnabled;
 
 /// @brief The location of the self-referencing page directory in virtual memory if this page directory is being used.
 extern PageDirectory *self;
+
+/// @brief Converts a virtual address into its physical address; 0 if not found.
+/// @param virtual The virtual address to convert.
+/// @return The physical address.
+void *virtual_to_physical(void *virtual);
+
+/// @brief Converts a physical address into its virtual address. Note that physical to virtual addresses are a one-to-many relationship, so only the most-recently mapped virtual address to this physical address is returned.
+/// @param physical The physical address to convert.
+/// @return The physical address.
+void *physical_to_virtual(void *physical);
 
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
 /// @param root The PageDirectory to modify.
