@@ -41,6 +41,11 @@ void *virtual_to_physical(void *virtual)
 
 void *physical_to_virtual(void *physical)
 {
+    if (!pagingEnabled)
+    {
+        return physical;
+    }
+
     unsigned short dirEntry, pageEntry, offset;
     split_address(physical, &dirEntry, &pageEntry, &offset);
 

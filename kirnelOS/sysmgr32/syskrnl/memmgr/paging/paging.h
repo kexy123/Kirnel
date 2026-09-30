@@ -98,9 +98,9 @@ extern PageDirectory *self;
 /// @return The physical address.
 void *virtual_to_physical(void *virtual);
 
-/// @brief Converts a physical address into its virtual address. Note that physical to virtual addresses are a one-to-many relationship, so only the most-recently mapped virtual address to this physical address is returned.
+/// @brief Converts a physical address into its virtual address; 0 if not found. Note that physical to virtual addresses are a one-to-many relationship, so only the most-recently mapped virtual address to this physical address is returned. If paging is not enabled, simply returns the physical address.
 /// @param physical The physical address to convert.
-/// @return The physical address.
+/// @return The virtual address.
 void *physical_to_virtual(void *physical);
 
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
