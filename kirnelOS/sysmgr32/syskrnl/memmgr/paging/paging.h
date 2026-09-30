@@ -75,7 +75,7 @@ typedef struct __attribute__((packed))
     unsigned Page : 20;
 } PageDirectoryEntry;
 
-/// @brief Creation types for when retrieving pages or page tables.
+/// @brief Creation behavior types for when retrieving pages or page tables.
 typedef enum
 {
     /// @brief The page/page table should be created and override the previously existing one.
@@ -87,6 +87,19 @@ typedef enum
     /// @brief A page/page table should not be created even if it doesn't exist.
     NoCreate
 } CreationType;
+
+/// @brief Page freeing behavior types for when unmapping pages and/or page tables in a page directory.
+typedef enum
+{
+    /// @brief No pages are freed.
+    NoFree = 0x00,
+
+    /// @brief Frees the pages when unmapping them.
+    FreePages = 0x01,
+
+    /// @brief Frees the page tables if possible.
+    FreePageTables = 0x02
+} PageFreeType;
 
 /// @brief A fixed array of page table entries that point to physical pages in memory.
 typedef PageTableEntry PageTable[NUM_ENTRIES];
@@ -129,7 +142,7 @@ PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationTyp
 /// @brief Gets/creates the page from the given directory and virtual address.
 /// @param root The PageDirectory to look in.
 /// @param virtualAddress The virtual address in the page directory.
-/// @param create The creation type. Note that if the page should be created, a page table may be created if the corresponding page table doesn't exist.
+/// @param create The creation type. Note that if the page can be created, a page table may be created if the corresponding page table doesn't exist.
 /// @param physicalAddress The physical page-aligned address to map to if the page wasn't found. If 0, allocates a page instead.
 /// @param canWrite The page table can be written to; otherwise it is read-only.
 /// @param userAccessible The page table can be read user code.
@@ -151,10 +164,11 @@ void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned lo
 
 /// @brief Unmaps and frees the given number at pages by a starting virtual page address.
 /// @param root The PageDirectory to modify.
-/// @param virtualPage The the starting virtual page-aligned address.
+/// @param virtualPage The starting virtual page-aligned address.
 /// @param pages The number of pages to unmap.
-/// @param selfReferential The page directory is self-referential and its integrity should be maintained.
-void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool selfReferential);
+/// @param free The page freeing behavior.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+void unmap(PageDirectory *root, Page *virtualPage, unsigned long pages, PageFreeType free, _Bool translating);
 
 /// @brief Creates an empty PageDirectory.
 /// @param selfReferential The page directory should be self-referential.

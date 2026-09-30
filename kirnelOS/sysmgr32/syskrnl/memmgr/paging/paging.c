@@ -5,7 +5,7 @@
 
 #define SELF_REFERENCING_POINTER ((PageDirectory *)(0xFF7FF000))                    // The pointer where a self-referencing page directory references itself.
 #define VIRT_REFERENCING_POINTER ((PhysicalToVirtualTranslationPage *)(0xFF800000)) // The starting page table of translating physical addresses to virtual addresses.
-#define PAGE_REFERENCING_POINTER ((PageTable *)(0xFFC00000))                        // The starting pointer of the page table metadata.
+#define PAGE_REFERENCING_POINTER (0xFFC00000)                                       // The starting pointer of the page table metadata.
 
 _Bool pagingEnabled = 0;
 
@@ -30,7 +30,7 @@ void *virtual_to_physical(void *virtual)
     unsigned short dirEntry, pageEntry, offset;
     split_address(virtual, &dirEntry, &pageEntry, &offset);
 
-    PageTableEntry entry = (*(PAGE_REFERENCING_POINTER + dirEntry))[pageEntry];
+    PageTableEntry entry = (*(PageTable *)(PAGE_REFERENCING_POINTER + (dirEntry << PAGE_SIZE_EXP)))[pageEntry];
     if (!entry.Present)
     {
         return (void *)0;
@@ -59,7 +59,7 @@ void *physical_to_virtual(void *physical)
     return (void *)(virtualAddress + offset);
 }
 
-/// @brief Adds the translation mapping from the physical address to the virtual address to the given page directory.
+/// @brief Adds the translation mapping from the physical address to the virtual address in the given page directory.
 /// @param root The PageDirectory to modify.
 /// @param physicalAddress The physical address to map. Must be page-aligned.
 /// @param virtualAddress The virtual address to map to. Must be page-aligned.
@@ -97,7 +97,7 @@ PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationTyp
 
         if (translating)
         {
-            get_page(root, PAGE_REFERENCING_POINTER + dirEntry, Create, newPage, 1, 0, 0, 1);
+            get_page(root, (PageTable *)(PAGE_REFERENCING_POINTER + (dirEntry << PAGE_SIZE_EXP)), Create, newPage, 1, 0, 0, 1);
         }
     }
 
@@ -108,7 +108,7 @@ PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationTyp
 
     if (pagingEnabled && root == self)
     {
-        return PAGE_REFERENCING_POINTER + dirEntry;
+        return (PageTable *)(PAGE_REFERENCING_POINTER + (dirEntry << PAGE_SIZE_EXP));
     }
 
     // Note that we are using a different page directory, so we refer to the physical address of the entry and translate it to the current directory being used for virtual translation.
@@ -177,7 +177,7 @@ void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned lo
     }
 }
 
-void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool translating);
+void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, PageFreeType free, _Bool translating);
 
 PageDirectory *create_directory(_Bool translating)
 {
