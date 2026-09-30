@@ -75,6 +75,19 @@ typedef struct __attribute__((packed))
     unsigned Page : 20;
 } PageDirectoryEntry;
 
+/// @brief Creation types for when retrieving pages or page tables.
+typedef enum
+{
+    /// @brief The page/page table should be created and override the previously existing one.
+    Create,
+
+    /// @brief The page/page table should only be created if it doesn't exist.
+    NullCoalesce,
+
+    /// @brief A page/page table should not be created even if it doesn't exist.
+    NoCreate
+} CreationType;
+
 /// @brief A fixed array of page table entries that point to physical pages in memory.
 typedef PageTableEntry PageTable[NUM_ENTRIES];
 
@@ -85,7 +98,7 @@ typedef PageDirectoryEntry PageDirectory[NUM_ENTRIES];
 typedef unsigned char Page[PAGE_SIZE];
 
 /// @brief A special page that is used to translate a physical address to the most-recently mapped virtual address.
-typedef void* PhysicalToVirtualTranslationPage[NUM_ENTRIES];
+typedef Page* PhysicalToVirtualTranslationPage[NUM_ENTRIES];
 
 /// @brief Is set if paging is enabled.
 extern _Bool pagingEnabled;
@@ -103,16 +116,38 @@ void *virtual_to_physical(void *virtual);
 /// @return The virtual address.
 void *physical_to_virtual(void *physical);
 
+/// @brief Gets/creates the page table from the given directory and virtual address in that directory.
+/// @param root The PageDirectory to look in/modify.
+/// @param virtualAddress The virtual address in the page directory.
+/// @param create The creation type.
+/// @param canWrite The page table can be written to; otherwise it is read-only.
+/// @param userAccessible The page table can be read user code.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+/// @return The PageTable; 0 if not found and not created.
+PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationType create, _Bool canWrite, _Bool userAccessible, _Bool translating);
+
+/// @brief Gets/creates the page from the given directory and virtual address.
+/// @param root The PageDirectory to look in.
+/// @param virtualAddress The virtual address in the page directory.
+/// @param create The creation type. Note that if the page should be created, a page table may be created if the corresponding page table doesn't exist.
+/// @param physicalAddress The physical page-aligned address to map to if the page wasn't found. If 0, allocates a page instead.
+/// @param canWrite The page table can be written to; otherwise it is read-only.
+/// @param userAccessible The page table can be read user code.
+/// @param global The page table should not be discarded when switching page tables.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+/// @return The Page; 0 if not found and not created.
+Page *get_page(PageDirectory *root, void *virtualAddress, CreationType create, void *physicalAddress, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
+
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
 /// @param root The PageDirectory to modify.
 /// @param virtualPage The starting virtual page-aligned address.
 /// @param physicalPage The starting physical page-aligned address.
 /// @param contiguous The number of physical contiguous pages to map.
-/// @param canWrite The entry can be written to; otherwise it is read-only.
-/// @param userAccessible The entry can be accessed by the user; otherwise it is only accessible to the supervisor.
-/// @param global The page entry is global regardless of when switching between page directories.
-/// @param selfReferential The page directory is self-referential and its integrity should be maintained.
-void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool selfReferential);
+/// @param canWrite The pages can be written to; otherwise it is read-only.
+/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
+/// @param global The pages are global regardless of when switching between page directories.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
 
 /// @brief Unmaps and frees the given number at pages by a starting virtual page address.
 /// @param root The PageDirectory to modify.

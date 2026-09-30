@@ -1,23 +1,11 @@
 #include "page_alloc.h"
 #include "paging.h"
 #include "utils/flow.h"
+#include "vga/out.h"
 
-#define SELF_REFERENCING_POINTER ((PageDirectory *)(0xFF7FF000)) // The pointer where a self-referencing page directory references itself.
-#define VIRT_REFERENCING_POINTER ((PageTable *)(0xFF800000))     // The starting page table of translating physical addresses to virtual addresses.
-#define PAGE_REFERENCING_POINTER ((PageTable *)(0xFFC00000))     // The starting pointer of the page table metadata.
-
-/// @brief Creation types for when retrieving pages or page tables.
-typedef enum
-{
-    /// @brief The page/page table should be created and override the previously existing one.
-    Create,
-
-    /// @brief The page/page table should only be created if it doesn't exist.
-    NullCoalesce,
-
-    /// @brief A page/page table should not be created even if it doesn't exist.
-    NoCreate
-} CreationType;
+#define SELF_REFERENCING_POINTER ((PageDirectory *)(0xFF7FF000))                    // The pointer where a self-referencing page directory references itself.
+#define VIRT_REFERENCING_POINTER ((PhysicalToVirtualTranslationPage *)(0xFF800000)) // The starting page table of translating physical addresses to virtual addresses.
+#define PAGE_REFERENCING_POINTER ((PageTable *)(0xFFC00000))                        // The starting pointer of the page table metadata.
 
 _Bool pagingEnabled = 0;
 
@@ -62,7 +50,7 @@ void *physical_to_virtual(void *physical)
     unsigned short dirEntry, pageEntry, offset;
     split_address(physical, &dirEntry, &pageEntry, &offset);
 
-    unsigned long virtualAddress = (*(PhysicalToVirtualTranslationPage *)(VIRT_REFERENCING_POINTER + dirEntry))[pageEntry];
+    unsigned long virtualAddress = (unsigned long)(*(VIRT_REFERENCING_POINTER + dirEntry))[pageEntry];
     if (virtualAddress == 0)
     {
         return (void *)0;
@@ -71,25 +59,24 @@ void *physical_to_virtual(void *physical)
     return (void *)(virtualAddress + offset);
 }
 
-/// @brief Adds the translation mapping from the physical address to the virtual address.
+/// @brief Adds the translation mapping from the physical address to the virtual address to the given page directory.
+/// @param root The PageDirectory to modify.
 /// @param physicalAddress The physical address to map. Must be page-aligned.
 /// @param virtualAddress The virtual address to map to. Must be page-aligned.
-void add_translation(void *physicalAddress, void *virtualAddress)
+void add_translation(PageDirectory *root, void *physicalAddress, void *virtualAddress)
 {
     unsigned short dirEntry, pageEntry, _;
     split_address(physicalAddress, &dirEntry, &pageEntry, &_);
 
-    (*(PhysicalToVirtualTranslationPage *)(VIRT_REFERENCING_POINTER + dirEntry))[pageEntry] = virtualAddress;
+    if (pagingEnabled && root == self)
+    {
+        (*(VIRT_REFERENCING_POINTER + dirEntry))[pageEntry] = virtualAddress;
+    }
+
+    PhysicalToVirtualTranslationPage *virtualReferencingPage = (PhysicalToVirtualTranslationPage *)get_page(root, VIRT_REFERENCING_POINTER + dirEntry, NullCoalesce, 0, 1, 0, 0, 1);
+    (*virtualReferencingPage)[pageEntry] = virtualAddress;
 }
 
-/// @brief Gets/creates the page table from the given directory and virtual address in that directory.
-/// @param root The PageDirectory to look in/modify.
-/// @param virtualAddress The virtual address in the page directory.
-/// @param create The creation type.
-/// @param canWrite The page table can be written to; otherwise it is read-only.
-/// @param userAccessible The page table can be read user code.
-/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
-/// @return The PageTable; 0 if not found and not created.
 PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationType create, _Bool canWrite, _Bool userAccessible, _Bool translating)
 {
     unsigned short dirEntry, _, __;
@@ -110,7 +97,7 @@ PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationTyp
 
         if (translating)
         {
-            get_page(root, newPage, PAGE_REFERENCING_POINTER + dirEntry, Create, 1, 0, 0, 1);
+            get_page(root, PAGE_REFERENCING_POINTER + dirEntry, Create, newPage, 1, 0, 0, 1);
         }
     }
 
@@ -126,19 +113,9 @@ PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationTyp
 
     // Note that we are using a different page directory, so we refer to the physical address of the entry and translate it to the current directory being used for virtual translation.
     // With paging disabled, this is just a regular physical address.
-    return physical_to_virtual(entry->Page << PAGE_SIZE_EXP);
+    return physical_to_virtual((void *)(entry->Page << PAGE_SIZE_EXP));
 }
 
-/// @brief Gets/creates the page from the given directory and virtual address.
-/// @param root The PageDirectory to look in.
-/// @param virtualAddress The virtual address in the page directory.
-/// @param create The creation type. Note that if the page should be created, a page table may be created if the corresponding page table doesn't exist.
-/// @param physicalAddress The physical page-aligned address to map to if the page wasn't found.
-/// @param canWrite The page table can be written to; otherwise it is read-only.
-/// @param userAccessible The page table can be read user code.
-/// @param global The page table should not be discarded when switching page tables.
-/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
-/// @return The Page; 0 if not found and not created.
 Page *get_page(PageDirectory *root, void *virtualAddress, CreationType create, void *physicalAddress, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
 {
     PageTable *table = get_page_table(root, virtualAddress, create != NoCreate ? NullCoalesce : NoCreate, canWrite, userAccessible, translating);
@@ -153,6 +130,11 @@ Page *get_page(PageDirectory *root, void *virtualAddress, CreationType create, v
     PageTableEntry *entry = &(*table)[pageEntry];
     if (create == Create || !entry->Present && create == NullCoalesce)
     {
+        if (physicalAddress == 0)
+        {
+            physicalAddress = allocate_strict(1);
+        }
+
         *entry = (PageTableEntry){
             .Accessed = 0,
             .Dirty = 0,
@@ -165,7 +147,7 @@ Page *get_page(PageDirectory *root, void *virtualAddress, CreationType create, v
 
         if (translating)
         {
-            add_translation(physicalAddress, virtualAddress);
+            add_translation(root, physicalAddress, virtualAddress);
         }
     }
 
@@ -183,7 +165,17 @@ Page *get_page(PageDirectory *root, void *virtualAddress, CreationType create, v
     return physical_to_virtual(physicalAddress);
 }
 
-void map(PageDirectory *root, void *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
+void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
+{
+    while (contiguous > 0)
+    {
+        get_page(root, virtualPage, Create, physicalPage, canWrite, userAccessible, global, translating);
+
+        virtualPage++;
+        physicalPage++;
+        contiguous--;
+    }
+}
 
 void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool translating);
 
@@ -198,9 +190,9 @@ PageDirectory *create_directory(_Bool translating)
 
     if (translating)
     {
-        get_page_table(directory, 1022, Create, 1, 0, 1); // Reserve page table 1022 for physical to virtual addressing.
+        get_page_table(directory, VIRT_REFERENCING_POINTER, Create, 1, 0, 1); // Reserve page table 1022 for physical to virtual addressing.
         // TOOD: Comment this one out to test if 1022 implicitly creates 1023.
-        get_page_table(directory, 1023, NullCoalesce, 1, 0, 1); // Reserve page table 1023 for virtual to physical addressing.
+        get_page_table(directory, PAGE_REFERENCING_POINTER, NullCoalesce, 1, 0, 1); // Reserve page table 1023 for virtual to physical addressing.
 
         get_page(directory, SELF_REFERENCING_POINTER, Create, directory, 1, 0, 0, 1); // Reserve page 1023 of page table 1021.
     }
