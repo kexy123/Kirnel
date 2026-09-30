@@ -2,9 +2,22 @@
 #include "paging.h"
 #include "utils/flow.h"
 
-#define SELF_REFERENCING_POINTER ((PageDirectory *)(0xFF7FF000))                    // The pointer where a self-referencing page directory references itself.
-#define VIRT_REFERENCING_POINTER ((PhysicalToVirtualTranslationPage *)(0xFF800000)) // The starting page table of translating physical addresses to virtual addresses.
-#define PAGE_REFERENCING_POINTER ((PageTable *)(0xFFC00000))                        // The starting pointer of the page table metadata.
+#define SELF_REFERENCING_POINTER ((PageDirectory *)(0xFF7FF000)) // The pointer where a self-referencing page directory references itself.
+#define VIRT_REFERENCING_POINTER ((PageTable *)(0xFF800000))     // The starting page table of translating physical addresses to virtual addresses.
+#define PAGE_REFERENCING_POINTER ((PageTable *)(0xFFC00000))     // The starting pointer of the page table metadata.
+
+/// @brief Creation types for when retrieving pages or page tables.
+typedef enum
+{
+    /// @brief The page/page table should be created and override the previously existing one.
+    Create,
+
+    /// @brief The page/page table should only be created if it doesn't exist.
+    NullCoalesce,
+
+    /// @brief A page/page table should not be created even if it doesn't exist.
+    NoCreate
+} CreationType;
 
 _Bool pagingEnabled = 0;
 
@@ -15,7 +28,7 @@ PageDirectory *self = SELF_REFERENCING_POINTER;
 /// @param directoryEntry The directory entry of the address.
 /// @param pageEntry The page entry of the address.
 /// @param offset The byte offset of the address.
-void split_address(void *address, unsigned short *directoryEntry, unsigned short *pageEntry, unsigned short *offset)
+static inline void split_address(void *address, unsigned short *directoryEntry, unsigned short *pageEntry, unsigned short *offset)
 {
     unsigned long number = (unsigned long)address;
 
@@ -49,7 +62,7 @@ void *physical_to_virtual(void *physical)
     unsigned short dirEntry, pageEntry, offset;
     split_address(physical, &dirEntry, &pageEntry, &offset);
 
-    unsigned long virtualAddress = (*(VIRT_REFERENCING_POINTER + dirEntry))[pageEntry];
+    unsigned long virtualAddress = (*(PhysicalToVirtualTranslationPage *)(VIRT_REFERENCING_POINTER + dirEntry))[pageEntry];
     if (virtualAddress == 0)
     {
         return (void *)0;
