@@ -19,14 +19,14 @@ extern unsigned long allocationTreeLength;
 /// @brief The address of the alloocation tree.
 extern const char *treeLocation;
 
-/// @brief Allocates and returns the starting address to a free zeroed-out memory chunk of the given number of pages.
+/// @brief Allocates and returns the starting physical address to a free zeroed-out memory chunk of the given number of pages.
 /// @param numPages The number of pages to allocate.
-/// @return The starting memory address of the free pages.
+/// @return The starting physical memory address of the free pages.
 void *allocate_strict(unsigned long numPages);
 
-/// @brief Frees the given address with the given order.
+/// @brief Frees the given physical address with the given order.
 /// @param order The order of the address.
-/// @param address The starting address.
+/// @param address The starting address. Must be physical.
 void deallocate(int order, void *address);
 
 /// @brief Initialises the memory allocation table.
