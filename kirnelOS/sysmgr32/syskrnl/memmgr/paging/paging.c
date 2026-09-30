@@ -182,19 +182,13 @@ void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, _Bool tr
 PageDirectory *create_directory(_Bool translating)
 {
     PageDirectory *directory = allocate_strict(1);
-
-    if (pagingEnabled)
-    {
-        // TODO: Convert physical directory address to virtual directory address.
-    }
+    PageDirectory *directoryVirtual = physical_to_virtual(directory);
 
     if (translating)
     {
-        get_page_table(directory, VIRT_REFERENCING_POINTER, Create, 1, 0, 1); // Reserve page table 1022 for physical to virtual addressing.
-        // TOOD: Comment this one out to test if 1022 implicitly creates 1023.
-        get_page_table(directory, PAGE_REFERENCING_POINTER, NullCoalesce, 1, 0, 1); // Reserve page table 1023 for virtual to physical addressing.
-
-        get_page(directory, SELF_REFERENCING_POINTER, Create, directory, 1, 0, 0, 1); // Reserve page 1023 of page table 1021.
+        // Reserve page 1023 of page table 1021.
+        // Consequently this also generates page tables 1022 (physical to virtual) and 1023 (virtual to physical) for translation.
+        get_page(directoryVirtual, SELF_REFERENCING_POINTER, Create, directory, 1, 0, 0, 1);
     }
 
     return directory;
