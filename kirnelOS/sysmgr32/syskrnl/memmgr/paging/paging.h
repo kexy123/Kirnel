@@ -95,7 +95,7 @@ typedef union
     {
         /// @brief The directory index.
         unsigned Directory : 10;
-        
+
         /// @brief The page index.
         unsigned Page : 10;
 
@@ -127,6 +127,23 @@ extern _Bool pagingEnabled;
 
 /// @brief The location of the self-referencing page directory in virtual memory if this page directory is being used.
 extern PageDirectory *self;
+
+/// @brief Geets a page table from the given page directory and index.
+/// @param directory The PageDirectory to look in.
+/// @param virtualAddress The virtual address corresponding to this traversal.
+/// @param entryResult The location to load the directory entry onto.
+/// @param result The location to load the page table location onto. This acknowledges paging.
+/// @return True if the page table exists; otherwise false. In contradictory cases a kernel panic may occur.
+_Bool get_page_table(PageDirectory *directory, Address virtualAddress, PageDirectoryEntry **entryResult, PageTable **result);
+
+/// @brief Gets a page from the given page table and index.
+/// @param directory The PageDirectory this page table is in.
+/// @param table The PageTable to look in.
+/// @param virtualAddress The virtual address corresponding to this traversal.
+/// @param entryResult The location to load the table entry onto.
+/// @param result The location to load the page location onto. This acknowledges paging.
+/// @return True if the page exists; otherwise false. In contradictory cases a kernel panic may occur.
+_Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddress, PageTableEntry **entryResult, Page **result);
 
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
 /// @param root The PageDirectory to modify.

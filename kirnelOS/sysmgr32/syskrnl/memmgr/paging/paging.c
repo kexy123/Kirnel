@@ -11,6 +11,31 @@ _Bool pagingEnabled = 0;
 
 PageDirectory *self = SELF_REFERENCING_POINTER;
 
+/// @brief Traverses through the given directory using the given virtual address and returns the page associated with it.
+/// @param directory The PageDirectory to traverse in.
+/// @param virtualAddress The virtual address to use.
+/// @param result The location to load the page location onto.
+/// @return True if the mapping exists; otherwise false.
+_Bool traverse(PageDirectory *directory, Address virtualAddress, Page **result)
+{
+    // Page directory.
+    PageTable *table;
+    PageDirectoryEntry *_;
+    if (!get_page_table(directory, virtualAddress, &_, &table))
+    {
+        return 0;
+    }
+
+    // Page table.
+    PageTableEntry *__;
+    if (!get_page(directory, table, virtualAddress, &__, result))
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
 /// @brief Translates a physical address to the current paging's virtual address if paging is enabled; simply translates the physical address as the virtual address if disabled.
 /// @param physical The physical address.
 /// @param result The location to translate the virtual address onto.
@@ -28,18 +53,8 @@ _Bool phys_to_virt(Address physical, void **result)
     physical.Page = physical.Directory; // Shift the page as the address index.
     physical.Directory = 1022;          // Physical to virtual translation page table.
 
-    // Page directory.
-    PageTable *table;
-    PageDirectoryEntry *_;
-    if (!get_page_table(self, physical, &_, &table))
-    {
-        return 0;
-    }
-
-    // Page table.
     PhysicalToVirtualTranslationPage *page;
-    PageTableEntry *__;
-    if (!get_page(self, table, physical, &__, &page))
+    if (!traverse(self, physical, &page))
     {
         return 0;
     }
@@ -70,18 +85,8 @@ _Bool virt_to_phys(PageDirectory *directory, Address virtual, void **result)
     virtual.Page = virtual.Directory; // Shift the page as the address index.
     virtual.Directory = 1023;         // Self-referencing page tables.
 
-    // Page directory.
-    PageTable *table;
-    PageDirectoryEntry *_;
-    if (!get_page_table(directory, virtual, &_, &table))
-    {
-        return 0;
-    }
-
-    // Page table.
     PageTable *page;
-    PageTableEntry *__;
-    if (!get_page(directory, table, virtual, &page, &__))
+    if (!traverse(directory, virtual, &page))
     {
         return 0;
     }
@@ -90,13 +95,6 @@ _Bool virt_to_phys(PageDirectory *directory, Address virtual, void **result)
     return 1;
 }
 
-/// @brief Gets a page from the given page table and index.
-/// @param directory The PageDirectory this page table is in.
-/// @param table The PageTable to look in.
-/// @param virtualAddress The virtual address corresponding to this traversal.
-/// @param entryResult The location to load the table entry onto.
-/// @param result The location to load the page location onto. This acknowledges paging.
-/// @return True if the page exists; otherwise false. In contradictory cases a kernel panic may occur.
 _Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddress, PageTableEntry **entryResult, Page **result)
 {
     PageTableEntry *entry = table[virtualAddress.Page];
@@ -125,12 +123,6 @@ _Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddres
     return 1;
 }
 
-/// @brief Geets a page table from the given page directory and index.
-/// @param directory The PageDirectory to look in.
-/// @param virtualAddress The virtual address corresponding to this traversal.
-/// @param entryResult The location to load the directory entry onto.
-/// @param result The location to load the page table location onto. This acknowledges paging.
-/// @return True if the page table exists; otherwise false. In contradictory cases a kernel panic may occur.
 _Bool get_page_table(PageDirectory *directory, Address virtualAddress, PageDirectoryEntry **entryResult, PageTable **result)
 {
     PageDirectoryEntry *entry = directory[virtualAddress.Directory];
