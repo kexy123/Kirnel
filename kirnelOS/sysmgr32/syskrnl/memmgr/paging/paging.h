@@ -75,19 +75,6 @@ typedef struct __attribute__((packed))
     unsigned Page : 20;
 } PageDirectoryEntry;
 
-/// @brief Creation behavior types for when retrieving pages or page tables.
-typedef enum
-{
-    /// @brief The page/page table should be created and override the previously existing one.
-    Create,
-
-    /// @brief The page/page table should only be created if it doesn't exist.
-    NullCoalesce,
-
-    /// @brief A page/page table should not be created even if it doesn't exist.
-    NoCreate
-} CreationType;
-
 /// @brief Page freeing behavior types for when unmapping pages and/or page tables in a page directory.
 typedef enum
 {
@@ -118,38 +105,6 @@ extern _Bool pagingEnabled;
 
 /// @brief The location of the self-referencing page directory in virtual memory if this page directory is being used.
 extern PageDirectory *self;
-
-/// @brief Converts a virtual address into its physical address; 0 if not found.
-/// @param virtual The virtual address to convert.
-/// @return The physical address.
-void *virtual_to_physical(void *virtual);
-
-/// @brief Converts a physical address into its virtual address; 0 if not found. Note that physical to virtual addresses are a one-to-many relationship, so only the most-recently mapped virtual address to this physical address is returned. If paging is not enabled, simply returns the physical address.
-/// @param physical The physical address to convert.
-/// @return The virtual address.
-void *physical_to_virtual(void *physical);
-
-/// @brief Gets/creates the page table from the given directory and virtual address in that directory.
-/// @param root The PageDirectory to look in/modify.
-/// @param virtualAddress The virtual address in the page directory.
-/// @param create The creation type.
-/// @param canWrite The page table can be written to; otherwise it is read-only.
-/// @param userAccessible The page table can be read user code.
-/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
-/// @return The PageTable; 0 if not found and not created.
-PageTable *get_page_table(PageDirectory *root, void *virtualAddress, CreationType create, _Bool canWrite, _Bool userAccessible, _Bool translating);
-
-/// @brief Gets/creates the page from the given directory and virtual address.
-/// @param root The PageDirectory to look in.
-/// @param virtualAddress The virtual address in the page directory.
-/// @param create The creation type. Note that if the page can be created, a page table may be created if the corresponding page table doesn't exist.
-/// @param physicalAddress The physical page-aligned address to map to if the page wasn't found. If 0, allocates a page instead.
-/// @param canWrite The page table can be written to; otherwise it is read-only.
-/// @param userAccessible The page table can be read user code.
-/// @param global The page table should not be discarded when switching page tables.
-/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
-/// @return The Page; 0 if not found and not created.
-Page *get_page(PageDirectory *root, void *virtualAddress, CreationType create, void *physicalAddress, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
 
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
 /// @param root The PageDirectory to modify.
