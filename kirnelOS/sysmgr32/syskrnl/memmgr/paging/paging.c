@@ -166,7 +166,7 @@ _Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddres
     // Handle case for self-querying.
     if (directory == self && pagingEnabled)
     {
-        *result = virtualAddress.Address;
+        *result = (Page *)(virtualAddress.Raw & 0xFFFFF000);
         return 1;
     }
 
@@ -284,7 +284,46 @@ PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, Page
     return physicalPageTable;
 }
 
-void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
+void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
+{
+    Page *page;
+    PageTable *table;
+    _Bool newPageTable = 1;
+
+    Page *physicalPage = (Page *)physicalAddress;
+    while (contiguous > 0)
+    {
+        if (newPageTable)
+        {
+            newPageTable = 0;
+
+            PageDirectoryEntry *_;
+            if (!get_page_table(root, virtualAddress, &_, &table))
+            {
+                void *location;
+                phys_to_virt((Address){.Address = (void *)map_page_table(root, virtualAddress, (PageTable *)0xFFFFFFFF, canWrite, userAccessible, translating)}, &location);
+                
+                table = (PageTable *)location;
+            }
+            else
+            {
+                table = (PageTable *)page;
+            }
+        }
+
+        map_page(root, table, virtualAddress, (void *)physicalPage, canWrite, userAccessible, global, translating);
+
+        virtualAddress.Page++;
+        if (virtualAddress.Page == 0)
+        {
+            virtualAddress.Directory++;
+            newPageTable = 1;
+        }
+
+        physicalPage++;
+        contiguous--;
+    }
+}
 
 void unmap(PageDirectory *root, Page *virtualPage, unsigned long pages, PageFreeType free, _Bool translating);
 
