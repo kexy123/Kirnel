@@ -7,6 +7,16 @@
 #define VIRT_REFERENCING_POINTER ((PhysicalToVirtualTranslationPage *)(0xFF800000)) // The starting page table of translating physical addresses to virtual addresses.
 #define PAGE_REFERENCING_POINTER (0xFFC00000)                                       // The starting pointer of the page table metadata.
 
+/// @brief The behavior for when traversing through a page directory.
+typedef enum
+{
+    /// @brief Gets the page table.
+    ForPageTable,
+
+    /// @brief Gets the page.
+    ForPage
+} TraversalType;
+
 _Bool pagingEnabled = 0;
 
 PageDirectory *self = SELF_REFERENCING_POINTER;
@@ -14,26 +24,36 @@ PageDirectory *self = SELF_REFERENCING_POINTER;
 /// @brief Traverses through the given directory using the given virtual address and returns the page associated with it.
 /// @param directory The PageDirectory to traverse in.
 /// @param virtualAddress The virtual address to use.
+/// @param type The type of object to traverse for.
 /// @param result The location to load the page location onto.
 /// @return True if the mapping exists; otherwise false.
-_Bool traverse(PageDirectory *directory, Address virtualAddress, Page **result)
+_Bool traverse(PageDirectory *directory, Address virtualAddress, TraversalType type, Page **result)
 {
     // Page directory.
-    PageTable *table;
     PageDirectoryEntry *_;
-    if (!get_page_table(directory, virtualAddress, &_, &table))
+    if (!get_page_table(directory, virtualAddress, &_, &result))
     {
         return 0;
+    }
+
+    if (type == ForPageTable)
+    {
+        return 1;
     }
 
     // Page table.
     PageTableEntry *__;
-    if (!get_page(directory, table, virtualAddress, &__, result))
+    if (!get_page(directory, result, virtualAddress, &__, result))
     {
         return 0;
     }
 
-    return 1;
+    if (type == ForPage)
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 /// @brief Translates a physical address to the current paging's virtual address if paging is enabled; simply translates the physical address as the virtual address if disabled.
@@ -53,14 +73,14 @@ _Bool phys_to_virt(Address physical, void **result)
     physical.Page = physical.Directory; // Shift the page as the address index.
     physical.Directory = 1022;          // Physical to virtual translation page table.
 
-    PhysicalToVirtualTranslationPage *page;
-    if (!traverse(self, physical, &page))
+    Page *page;
+    if (!traverse(self, physical, ForPage, &page))
     {
         return 0;
     }
 
     // Virtual page location.
-    Address virtualAddress = (*page)[physical.Offset];
+    Address virtualAddress = (*(PhysicalToVirtualTranslationPage *)page)[physical.Offset];
     if (virtualAddress.Offset != 0)
     {
         // Invalid address as it is not page-aligned.
@@ -85,13 +105,13 @@ _Bool virt_to_phys(PageDirectory *directory, Address virtual, void **result)
     virtual.Page = virtual.Directory; // Shift the page as the address index.
     virtual.Directory = 1023;         // Self-referencing page tables.
 
-    PageTable *page;
-    if (!traverse(directory, virtual, &page))
+    Page *page;
+    if (!traverse(directory, virtual, ForPage, &page))
     {
         return 0;
     }
 
-    *result = (void *)(((*page)[offset].Page << PAGE_SIZE_EXP) + offset);
+    *result = (void *)(((*(PageTable *)page)[offset].Page << PAGE_SIZE_EXP) + offset);
     return 1;
 }
 
