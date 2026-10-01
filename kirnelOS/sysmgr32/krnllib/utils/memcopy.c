@@ -20,3 +20,13 @@ void zero_out(void *source, unsigned long bytes)
         sourcePtr[i] = 0x00;
     }
 }
+
+void one_out(void *source, unsigned long bytes)
+{
+    char *sourcePtr = (char *)source;
+
+    for (unsigned long i = 0; i < bytes; i++)
+    {
+        sourcePtr[i]= 0xFF;
+    }
+}
