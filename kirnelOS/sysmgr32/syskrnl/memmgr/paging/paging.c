@@ -1,9 +1,10 @@
 #include "page_alloc.h"
 #include "paging.h"
 #include "utils/flow.h"
+#include "utils/memcopy.h"
 #include "vga/out.h"
 
-#define SELF_REFERENCING_POINTER ((PageDirectory *)(0xFF7FF000))                    // The pointer where a self-referencing page directory references itself.
+#define SELF_REFERENCING_POINTER (0xFF7FF000)                                       // The pointer where a self-referencing page directory references itself.
 #define VIRT_REFERENCING_POINTER ((PhysicalToVirtualTranslationPage *)(0xFF800000)) // The starting page table of translating physical addresses to virtual addresses.
 #define PAGE_REFERENCING_POINTER (0xFFC00000)                                       // The starting pointer of the page table metadata.
 
@@ -19,7 +20,7 @@ typedef enum
 
 _Bool pagingEnabled = 0;
 
-PageDirectory *self = SELF_REFERENCING_POINTER;
+PageDirectory *self = (PageDirectory *)SELF_REFERENCING_POINTER;
 
 /// @brief Traverses through the given directory using the given virtual address and returns the page associated with it.
 /// @param directory The PageDirectory to traverse in.
@@ -31,19 +32,21 @@ _Bool traverse(PageDirectory *directory, Address virtualAddress, TraversalType t
 {
     // Page directory.
     PageDirectoryEntry *_;
-    if (!get_page_table(directory, virtualAddress, &_, &result))
+    PageTable *table;
+    if (!get_page_table(directory, virtualAddress, &_, &table))
     {
         return 0;
     }
 
     if (type == ForPageTable)
     {
+        *result = (Page *)table;
         return 1;
     }
 
     // Page table.
     PageTableEntry *__;
-    if (!get_page(directory, result, virtualAddress, &__, result))
+    if (!get_page(directory, table, virtualAddress, &__, result))
     {
         return 0;
     }
@@ -111,13 +114,48 @@ _Bool virt_to_phys(PageDirectory *directory, Address virtual, void **result)
         return 0;
     }
 
-    *result = (void *)(((*(PageTable *)page)[offset].Page << PAGE_SIZE_EXP) + offset);
+    PageTable *table = (PageTable *)page;
+    *result = (void *)(((*table)[virtual.Offset].Page << PAGE_SIZE_EXP) + offset);
     return 1;
+}
+
+/// @brief Adds a physical-to-virtual translation map to the given page directory.
+/// @param directory The PageDirectory to modify.
+/// @param physical The page-aligned physical address.
+/// @param virtual The page-aligned virtual address.
+void add_translation(PageDirectory *directory, Address virtual, Address physical)
+{
+    physical.Offset = physical.Page;
+    physical.Page = physical.Directory;
+    physical.Directory = 1022;
+
+    PageDirectoryEntry *_;
+    PageTable *table;
+    if (!get_page_table(directory, physical, &_, &table))
+    {
+        void *location;
+        phys_to_virt((Address){.Address = map_page_table(directory, physical, (void *)0xFFFFFFFF, 1, 0, 1)}, &location);
+
+        table = (PageTable *)location;
+    }
+
+    Page *page;
+    if (!traverse(directory, physical, ForPage, &page))
+    {
+        void *location;
+        phys_to_virt((Address){.Address = map_page(directory, table, physical, (void *)0xFFFFFFFF, 1, 0, 0, 1)}, &location);
+
+        page = (Page *)location;
+        one_out(page, sizeof(Page));
+    }
+
+    PhysicalToVirtualTranslationPage *translationPage = (PhysicalToVirtualTranslationPage *)page;
+    (*translationPage)[physical.Offset] = virtual;
 }
 
 _Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddress, PageTableEntry **entryResult, Page **result)
 {
-    PageTableEntry *entry = table[virtualAddress.Page];
+    PageTableEntry *entry = &((*table)[virtualAddress.Page]);
     if (!entry->Present)
     {
         return 0;
@@ -133,7 +171,7 @@ _Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddres
     }
 
     Address physicalLocation = {.Raw = entry->Page << PAGE_SIZE_EXP};
-    if (!phys_to_virt(physicalLocation, result))
+    if (!phys_to_virt(physicalLocation, (void **)result))
     {
         // The page is present but there's no virtual location mapped to it.
         panic();
@@ -145,7 +183,7 @@ _Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddres
 
 _Bool get_page_table(PageDirectory *directory, Address virtualAddress, PageDirectoryEntry **entryResult, PageTable **result)
 {
-    PageDirectoryEntry *entry = directory[virtualAddress.Directory];
+    PageDirectoryEntry *entry = &((*directory)[virtualAddress.Directory]);
     if (!entry->Present)
     {
         return 0;
@@ -156,23 +194,115 @@ _Bool get_page_table(PageDirectory *directory, Address virtualAddress, PageDirec
     // Handle case for self-querying.
     if (directory == self && pagingEnabled)
     {
-        *result = PAGE_REFERENCING_POINTER + (virtualAddress.Directory << PAGE_SIZE_EXP);
+        *result = (PageTable *)(PAGE_REFERENCING_POINTER + (virtualAddress.Directory << PAGE_SIZE_EXP));
         return 1;
     }
 
     Address physicalLocation = {.Raw = entry->Page << PAGE_SIZE_EXP};
-    if (!phys_to_virt(physicalLocation, result))
+    void *virtualLocation;
+    if (!phys_to_virt(physicalLocation, &virtualLocation))
     {
         // The page table is present but there's no virtual location mapped to it.
         panic();
         return 0;
     }
 
+    *result = virtualLocation;
     return 1;
 }
 
-void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
+void *map_page(PageDirectory *directory, PageTable *table, Address virtualAddress, void *physicalAddress, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
+{
+    if (physicalAddress == (void *)0xFFFFFFFF)
+    {
+        physicalAddress = allocate_strict(1);
+    }
+
+    Address physical = {.Address = physicalAddress};
+
+    (*table)[virtualAddress.Page] = (PageTableEntry){
+        .Accessed = 0,
+        .Dirty = 0,
+        .ReadOrWrite = canWrite,
+        .UserOrSuper = userAccessible,
+        .Global = global,
+        .Page = (unsigned long)physicalAddress >> PAGE_SIZE_EXP,
+        .Present = 1,
+    };
+
+    if (translating)
+    {
+        // We added a page translation from a virtual to a physical address via map_page_table. Add the other way around.
+        physical.Offset = 0x000;
+        add_translation(directory, virtualAddress, physical);
+    }
+
+    return physicalAddress;
+}
+
+PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, PageTable *physicalPageTable, _Bool canWrite, _Bool userAccessible, _Bool translating)
+{
+    if (physicalPageTable == (void *)0xFFFFFFFF)
+    {
+        physicalPageTable = allocate_strict(1);
+    }
+
+    (*directory)[virtualAddress.Directory] = (PageDirectoryEntry){
+        .Accessed = 0,
+        .Dirty = 0,
+        .ReadOrWrite = canWrite,
+        .UserOrSuper = userAccessible,
+        .Page = (unsigned long)physicalPageTable >> PAGE_SIZE_EXP,
+        .Present = 1,
+    };
+
+    if (translating)
+    {
+        // We need to add this page table as part of the virtual to physical translation.
+        virtualAddress.Offset = 0x000;
+        virtualAddress.Page = virtualAddress.Directory;
+        virtualAddress.Directory = 1023; // Self-referencing page tables.
+
+        PageTable *table;
+        Page *page;
+        if (!traverse(directory, virtualAddress, ForPageTable, &page))
+        {
+            // Create the page table if it doesn't exist.
+            void *virtualLocation;
+            phys_to_virt((Address){.Address = map_page_table(directory, virtualAddress, (PageTable *)0xFFFFFFFF, 1, 0, 1)}, &virtualLocation);
+
+            table = virtualLocation;
+        }
+        else
+        {
+            table = (PageTable *)page;
+        }
+
+        map_page(directory, table, virtualAddress, physicalPageTable, 1, 0, 0, 1);
+    }
+
+    return physicalPageTable;
+}
+
+void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
 
 void unmap(PageDirectory *root, Page *virtualPage, unsigned long pages, PageFreeType free, _Bool translating);
 
-PageDirectory *create_directory(_Bool translating);
+PageDirectory *create_directory(_Bool translating)
+{
+    PageDirectory *directory = allocate_strict(1);
+
+    void *virtualLocation;
+    phys_to_virt((Address){.Address = directory}, &virtualLocation);
+    PageDirectory *virtualDirectory = (PageDirectory *)virtualLocation;
+
+    if (translating)
+    {
+        phys_to_virt((Address){.Address = map_page_table(virtualDirectory, (Address){.Raw = SELF_REFERENCING_POINTER}, (PageTable *)0xFFFFFFFF, 1, 0, 1)}, &virtualLocation);
+
+        PageTable *page = (PageTable *)virtualLocation;
+        map_page(virtualDirectory, page, (Address){.Raw = SELF_REFERENCING_POINTER}, directory, 1, 0, 0, 1);
+    }
+
+    return directory;
+}

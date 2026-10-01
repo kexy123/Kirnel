@@ -93,14 +93,14 @@ typedef union
 {
     struct __attribute__((packed))
     {
-        /// @brief The directory index.
-        unsigned Directory : 10;
+        /// @brief The byte offset in the page.
+        unsigned Offset : 12;
 
         /// @brief The page index.
         unsigned Page : 10;
 
-        /// @brief The byte offset in the page.
-        unsigned Offset : 12;
+        /// @brief The directory index.
+        unsigned Directory : 10;
     };
 
     /// @brief The location pointer.
@@ -145,16 +145,38 @@ _Bool get_page_table(PageDirectory *directory, Address virtualAddress, PageDirec
 /// @return True if the page exists; otherwise false. In contradictory cases a kernel panic may occur.
 _Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddress, PageTableEntry **entryResult, Page **result);
 
+/// @brief Maps a page from the page directory at the given page table and address to the given physical address or a free page.
+/// @param directory The PageDirectory the page table is in.
+/// @param table The PageTable to modify.
+/// @param virtualAddress The virtual address to map from.
+/// @param physicalAddress The physical address to map to. 0xFFFFFFFF to map to a free page.
+/// @param canWrite The pages can be written to; otherwise it is read-only.
+/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
+/// @param global The pages are global regardless of when switching between page directories.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+/// @return The physical address that was mapped to.
+void *map_page(PageDirectory *directory, PageTable *table, Address virtualAddress, void *physicalAddress, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
+
+/// @brief Maps a page table from a page directory to the given page table address or a free page.
+/// @param directory The PageDirectory to modify.
+/// @param virtualAddress The virtual address to map from.
+/// @param physicalPageTable The physical PageTable address to map to. 0xFFFFFFFF to map to a free page.
+/// @param canWrite The pages can be written to; otherwise it is read-only.
+/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+/// @return The physical address that was mapped to.
+PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, PageTable *physicalPageTable, _Bool canWrite, _Bool userAccessible, _Bool translating);
+
 /// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
 /// @param root The PageDirectory to modify.
-/// @param virtualPage The starting virtual page-aligned address.
-/// @param physicalPage The starting physical page-aligned address.
+/// @param virtualAddress The starting virtual page-aligned address.
+/// @param physicalAddress The starting physical page-aligned address.
 /// @param contiguous The number of physical contiguous pages to map.
 /// @param canWrite The pages can be written to; otherwise it is read-only.
 /// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
 /// @param global The pages are global regardless of when switching between page directories.
 /// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
-void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
+void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
 
 /// @brief Unmaps and frees the given number at pages by a starting virtual page address.
 /// @param root The PageDirectory to modify.
