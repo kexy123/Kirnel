@@ -37,7 +37,7 @@ typedef struct __attribute__((packed))
     /// @brief Usable bits for the kernel.
     unsigned Available : 3;
 
-    /// @brief The page number.
+    /// @brief The physical page number.
     unsigned Page : 20;
 } PageTableEntry;
 
@@ -71,7 +71,7 @@ typedef struct __attribute__((packed))
     /// @brief Usable bits for the kernel.
     unsigned Available : 4;
 
-    /// @brief The page number of the page table.
+    /// @brief The physical page number of the page table.
     unsigned Page : 20;
 } PageDirectoryEntry;
 
@@ -88,6 +88,28 @@ typedef enum
     FreePageTables = 0x02
 } PageFreeType;
 
+/// @brief The structure of a virtual address.
+typedef union
+{
+    struct __attribute__((packed))
+    {
+        /// @brief The directory index.
+        unsigned Directory : 10;
+        
+        /// @brief The page index.
+        unsigned Page : 10;
+
+        /// @brief The byte offset in the page.
+        unsigned Offset : 12;
+    };
+
+    /// @brief The location pointer.
+    void *Address;
+
+    /// @brief The address as a number.
+    unsigned long Raw;
+} Address;
+
 /// @brief A fixed array of page table entries that point to physical pages in memory.
 typedef PageTableEntry PageTable[NUM_ENTRIES];
 
@@ -98,7 +120,7 @@ typedef PageDirectoryEntry PageDirectory[NUM_ENTRIES];
 typedef unsigned char Page[PAGE_SIZE];
 
 /// @brief A special page that is used to translate a physical address to the most-recently mapped virtual address.
-typedef Page* PhysicalToVirtualTranslationPage[NUM_ENTRIES];
+typedef Page *PhysicalToVirtualTranslationPage[NUM_ENTRIES];
 
 /// @brief Is set if paging is enabled.
 extern _Bool pagingEnabled;
