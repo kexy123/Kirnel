@@ -165,6 +165,53 @@ Page *get_page(PageDirectory *root, void *virtualAddress, CreationType create, v
     return physical_to_virtual(physicalAddress);
 }
 
+/// @brief Unmaps the page at the given virtual address in the given page directory.
+/// @param root The PageDirectory to modify.
+/// @param virtualAddress The page-aligned virtual address whose page to unmap.
+/// @param free The page unmapping behavior.
+void unmap_page(PageDirectory *root, void *virtualAddress, PageFreeType free)
+{
+    PageTable *table = get_page_table(root, virtualAddress, NoCreate, 0, 0, 0);
+    if (table == 0)
+    {
+        return;
+    }
+
+    unsigned short _, pageEntry, __;
+    split_address(virtualAddress, &_, &pageEntry, &__);
+
+    PageTableEntry *entry = &(*table)[pageEntry];
+    if ((free | FreePages) && entry->Present)
+    {
+        deallocate(1, (void *)(entry->Page << PAGE_SIZE_EXP));
+    }
+
+    entry->Present = 0;
+}
+
+/// @brief Unmaps and frees the page table at the given virutal address in the given page directory.
+/// @param root The PageDiectory to modify.
+/// @param virtualAddress The page-table-aligned virtual address whose page table to unmap.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+void unmap_page_table(PageDirectory *root, void *virtualAddress, _Bool translating)
+{
+    unsigned short dirEntry, _, __;
+    split_address(virtualAddress, &dirEntry, &_, &__);
+
+    PageDirectoryEntry *entry = &(*root)[dirEntry];
+    if (entry->Present)
+    {
+        PageTable *table = (PageTable *)(entry->Page << PAGE_SIZE_EXP);
+        if (translating)
+        {
+            unmap_page(root, physical_to_virtual(table), FreePages);
+        }
+        entry->Present = 0;
+
+        deallocate(1, table);
+    }
+}
+
 void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
 {
     while (contiguous > 0)
@@ -177,7 +224,18 @@ void map(PageDirectory *root, Page *virtualPage, Page *physicalPage, unsigned lo
     }
 }
 
-void unmap(PageDirectory *root, void *virtualPage, unsigned long pages, PageFreeType free, _Bool translating);
+void unmap(PageDirectory *root, Page *virtualPage, unsigned long pages, PageFreeType free, _Bool translating)
+{
+    while (pages > 0)
+    {
+        unmap_page(root, virtualPage, free);
+
+        // TODO: Unmap page tables.
+        
+        virtualPage++;
+        pages--;
+    }
+}
 
 PageDirectory *create_directory(_Bool translating)
 {
