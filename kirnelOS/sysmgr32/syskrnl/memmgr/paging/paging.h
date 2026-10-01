@@ -120,7 +120,7 @@ typedef PageDirectoryEntry PageDirectory[NUM_ENTRIES];
 typedef unsigned char Page[PAGE_SIZE];
 
 /// @brief A special page that is used to translate a physical address to the most-recently mapped virtual address.
-typedef Page *PhysicalToVirtualTranslationPage[NUM_ENTRIES];
+typedef Address PhysicalToVirtualTranslationPage[NUM_ENTRIES];
 
 /// @brief Is set if paging is enabled.
 extern _Bool pagingEnabled;
