@@ -9,9 +9,9 @@ void copy_to(void *source, void *destination, short byteCount);
 /// @brief Zeroes out the given number of bytes starting from the source address.
 /// @param source The source address.
 /// @param bytes The number of bytes to zero out.
-void zero_out(void *source, unsigned long bytes);
+void zero_fill(void *source, unsigned long bytes);
 
 /// @brief Fills the given number of bytes starting from the source address with all set bits.
 /// @param source The source address.
 /// @param bytes The number of bytes whose bits to be all set.
-void one_out(void *source, unsigned long bytes);
+void one_fill(void *source, unsigned long bytes);

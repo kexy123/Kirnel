@@ -20,7 +20,7 @@ void generate_descriptor()
     memDescriptor.SegmentStart = table = (DescriptorTable *)allocate_strict(1);
 
     // Zero-fill the first entry.
-    zero_out(table, sizeof(SegmentEntry));
+    zero_fill(table, sizeof(SegmentEntry));
 
     maxEntries = 1;
     memDescriptor.Length = sizeof(SegmentEntry) - 1;

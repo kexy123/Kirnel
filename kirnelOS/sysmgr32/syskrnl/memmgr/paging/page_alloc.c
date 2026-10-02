@@ -261,7 +261,7 @@ void *allocate_strict(unsigned long numPages)
     void *location = get_page_location(order, candidate);
 
     dissolve(candidate);
-    zero_out(location, PAGE_SIZE << order);
+    zero_fill(location, PAGE_SIZE << order);
 
     return location;
 }

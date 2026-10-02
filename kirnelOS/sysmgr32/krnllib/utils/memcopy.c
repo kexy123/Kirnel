@@ -11,7 +11,7 @@ void copy_to(void *source, void *destination, short byteCount)
     }
 }
 
-void zero_out(void *source, unsigned long bytes)
+void zero_fill(void *source, unsigned long bytes)
 {
     char *sourcePtr = (char *)source;
 
@@ -21,7 +21,7 @@ void zero_out(void *source, unsigned long bytes)
     }
 }
 
-void one_out(void *source, unsigned long bytes)
+void one_fill(void *source, unsigned long bytes)
 {
     char *sourcePtr = (char *)source;
 

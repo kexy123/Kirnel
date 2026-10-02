@@ -146,7 +146,7 @@ void add_translation(PageDirectory *directory, Address virtual, Address physical
         phys_to_virt((Address){.Address = map_page(directory, table, physical, (void *)0xFFFFFFFF, 1, 0, 0, 1)}, &location);
 
         page = (Page *)location;
-        one_out(page, sizeof(Page));
+        one_fill(page, sizeof(Page));
     }
 
     PhysicalToVirtualTranslationPage *translationPage = (PhysicalToVirtualTranslationPage *)page;
@@ -302,7 +302,7 @@ void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, uns
             {
                 void *location;
                 phys_to_virt((Address){.Address = (void *)map_page_table(root, virtualAddress, (PageTable *)0xFFFFFFFF, canWrite, userAccessible, translating)}, &location);
-                
+
                 table = (PageTable *)location;
             }
             else
