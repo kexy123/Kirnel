@@ -18,9 +18,10 @@ const char *uint_to_str(unsigned long num)
     return (const char *)(result) + i;
 }
 
-const char *uint_to_strx(unsigned long num)
+const char *uint_to_strx(unsigned long num, unsigned char leadingZeros)
 {
     static char result[9];
+    unsigned char leadingZeroSentinel = 9 - leadingZeros;
 
     int i = 9;
     result[i] = '\0';
@@ -47,7 +48,7 @@ const char *uint_to_strx(unsigned long num)
         }
 
         num /= 16;
-    } while (num > 0);
+    } while (num > 0 || i > leadingZeroSentinel);
 
     return (const char *)(result) + i;
 }

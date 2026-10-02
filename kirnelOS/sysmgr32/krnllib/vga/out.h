@@ -46,6 +46,11 @@ void print_uintx(unsigned long num);
 /// @param boolean The boolean whose truth value to print.
 void print_bool(_Bool boolean);
 
+/// @brief Prints the bytes from a given source in big-endian hexadecimal and moves the cursor.
+/// @param source The source whose bytes to print.
+/// @param numBytes The number of bytes to print in hexadecimal.
+void print_hex(void *source, unsigned long numBytes);
+
 /// @brief Fills the text after the cursor in the current line with spaces and moves the cursor to the next line in the VGA.
 void print_newl();
 

@@ -61,7 +61,7 @@ void print_uint(unsigned long num)
 
 void print_uintx(unsigned long num)
 {
-    const char *result = uint_to_strx(num);
+    const char *result = uint_to_strx(num, 0);
     print_s("0x");
     print_s(result);
 }
@@ -75,6 +75,20 @@ void print_bool(_Bool boolean)
     else
     {
         print_s("True");
+    }
+}
+
+void print_hex(void *source, unsigned long numBytes)
+{
+    unsigned char *sourcePtr = (char *)source;
+
+    for (unsigned long i = 0; i < numBytes; i++)
+    {
+        const char *result = uint_to_strx(*sourcePtr, 2);
+        print_s(result);
+        print_c(' ');
+
+        sourcePtr++;
     }
 }
 
