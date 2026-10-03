@@ -184,7 +184,7 @@ void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, uns
 /// @param pages The number of pages to unmap.
 /// @param free The page freeing behavior.
 /// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
-void unmap(PageDirectory *root, Page *virtualPage, unsigned long pages, PageFreeType free, _Bool translating);
+void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, PageFreeType free, _Bool translating);
 
 /// @brief Creates an empty PageDirectory.
 /// @param selfReferential The page directory should be self-referential.

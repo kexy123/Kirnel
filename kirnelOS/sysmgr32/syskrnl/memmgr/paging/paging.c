@@ -284,6 +284,52 @@ PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, Page
     return physicalPageTable;
 }
 
+/// @brief Unmaps a page in the given page table at the given address.
+/// @param table The PageTable to modify.
+/// @param virtualAddress The address whose page to unmap.
+/// @param free Determines if the page should be freed.
+void unmap_page(PageTable *table, Address virtualAddress, PageFreeType free)
+{
+    PageTableEntry *entry = &(*table)[virtualAddress.Page];
+    entry->Present = 0;
+
+    if (free & FreePages)
+    {
+        deallocate(1, (void *)(entry->Page << PAGE_SIZE_EXP));
+    }
+}
+
+/// @brief Unmaps a page table in the given page directory at the given address.
+/// @param directory The PageDirectory to modify.
+/// @param virtualAddress The address whose page table to unmap.
+/// @param free Determines if the page table should be freed.
+/// @param translating This PageDirectory translates its own page tables in itself.
+void unmap_page_table(PageDirectory *directory, Address virtualAddress, PageFreeType free, _Bool translating)
+{
+    PageDirectoryEntry *entry = &(*directory)[virtualAddress.Directory];
+    entry->Present = 0;
+
+    if (translating)
+    {
+        // Ditto to map_page_table.
+        virtualAddress.Offset = 0x000;
+        virtualAddress.Page = virtualAddress.Directory;
+        virtualAddress.Directory = 1023;
+
+        PageTable *selfTable;
+        PageDirectoryEntry *_;
+        if (get_page_table(directory, virtualAddress, &_, &selfTable))
+        {
+            unmap_page(selfTable, virtualAddress, free);
+        }
+    }
+
+    if (free & FreePageTables)
+    {
+        deallocate(1, (void *)(entry->Page << PAGE_SIZE_EXP));
+    }
+}
+
 void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
 {
     Page *page;
@@ -325,7 +371,51 @@ void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, uns
     }
 }
 
-void unmap(PageDirectory *root, Page *virtualPage, unsigned long pages, PageFreeType free, _Bool translating);
+void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, PageFreeType free, _Bool translating)
+{
+    PageTable *table;
+    _Bool removePageTable = virtualAddress.Page == 0;
+    _Bool newPageTable = 1;
+
+    while (pages > 0)
+    {
+        if (newPageTable)
+        {
+            newPageTable = 0;
+            PageDirectoryEntry *_;
+            if (!get_page_table(root, virtualAddress, &_, &table))
+            {
+                // Skip this page table.
+                if (pages <= NUM_ENTRIES)
+                {
+                    // Avoid integer overflow issues.
+                    return;
+                }
+                else
+                {
+                    pages -= NUM_ENTRIES;
+                }
+            }
+        }
+
+        unmap_page(table, virtualAddress, free);
+
+        virtualAddress.Page++;
+        if (virtualAddress.Page == 0)
+        {
+            if (removePageTable)
+            {
+                unmap_page_table(root, virtualAddress, free, translating);
+            }
+
+            virtualAddress.Directory++;
+            removePageTable = 1;
+            newPageTable = 1;
+        }
+
+        pages--;
+    }
+}
 
 PageDirectory *create_directory(_Bool translating)
 {
