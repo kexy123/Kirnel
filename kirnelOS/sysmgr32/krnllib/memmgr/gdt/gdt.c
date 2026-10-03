@@ -1,5 +1,7 @@
 #include "gdt.h"
+#include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/paging/page_alloc.h"
+#include "memmgr/paging/paging.h"
 #include "utils/memcopy.h"
 
 /// @brief The location of the global descriptor table.
@@ -17,7 +19,8 @@ extern void load_gdt(TableDescriptorRegister *descriptor);
 
 void generate_descriptor()
 {
-    memDescriptor.SegmentStart = table = (DescriptorTable *)allocate_strict(1);
+    map(self, kernel_gdt, allocate_strict(1), 1, 1, 0, 1, 1);
+    memDescriptor.SegmentStart = table = (DescriptorTable *)kernel_gdt.Address;
 
     // Zero-fill the first entry.
     zero_fill(table, sizeof(SegmentEntry));

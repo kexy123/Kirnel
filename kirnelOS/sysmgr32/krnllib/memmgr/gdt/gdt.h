@@ -99,7 +99,7 @@ typedef struct __attribute__((packed))
     DescriptorTable *SegmentStart;
 } TableDescriptorRegister;
 
-/// @brief Generates a descriptor.
+/// @brief Generates a descriptor. Should only be initiated once.
 void generate_descriptor();
 
 /// @brief Adds a descriptor segment to the table.

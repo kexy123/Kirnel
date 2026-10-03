@@ -8,6 +8,9 @@ extern const Address old_kernel_space;
 /// @brief The dedicated space of the kernel.
 extern const Address kernel_space;
 
+/// @brief The dedicated location of the global descriptor table. Only has one page.
+extern const Address kernel_gdt;
+
 /// @brief The dedicated space of the allocation tree.
 extern const Address kernel_page_alloc_tree;
 
