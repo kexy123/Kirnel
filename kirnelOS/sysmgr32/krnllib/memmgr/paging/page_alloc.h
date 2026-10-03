@@ -31,3 +31,6 @@ void deallocate(int order, void *address);
 
 /// @brief Initialises the memory allocation table.
 void init_allocator();
+
+/// @brief Locates the memory allocation table.
+void locate_allocator();

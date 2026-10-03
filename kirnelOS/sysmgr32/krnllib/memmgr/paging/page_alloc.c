@@ -1,5 +1,6 @@
 #include "page_alloc.h"
 #include "mem_segments.h"
+#include "memmgr/kernel_virtual_layout.h"
 #include "utils/bit.h"
 #include "utils/flow.h"
 #include "utils/memcopy.h"
@@ -284,4 +285,19 @@ void init_allocator()
     add_range(segment->BaseAddress + allocationTreeLength, segment->BaseAddress + segment->SegmentLength);
 
     treeLocation = (char *)segment;
+}
+
+void locate_allocator()
+{
+    // Essentially reinstantiates the necessary variables to preserve page allocation.
+    highestOrder = lowest_exp2(memoryEnd) - PAGE_SIZE_EXP;
+
+    compute_allocation_tree_length();
+    for (int i = 0; i <= highestOrder; i++)
+    {
+        // Add the dedicated address of the allocation tree offset.
+        allocationTree[i] = (unsigned long)allocationTree[i] + kernel_page_alloc_tree.Address;
+    }
+
+    treeLocation = (char *)kernel_page_alloc_tree.Address;
 }
