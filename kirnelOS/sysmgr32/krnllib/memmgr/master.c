@@ -9,13 +9,12 @@
 
 void init_mem()
 {
-    // create_os_gdt();
     analyse_mem_segments();
     init_allocator();
 
     PageDirectory *root = create_directory(1);
 
-    map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0, 1); // Kernel lower half. This is to ensure the integrity of the code pointer.
+    map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0, 1);
 
     // The page allocation system.
     map(root, kernel_page_alloc_tree, (void *)treeLocation, 1 << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0, 1);
@@ -23,5 +22,14 @@ void init_mem()
 
     enable_paging(root);
 
-    // unmap(self, (Address){.Raw = 0x00000000}, 0x1000, NoFree, 1);
+    create_os_gdt();
+}
+
+void finalize_mem()
+{
+    analyse_mem_segments();
+    check_paging();
+    locate_allocator();
+
+    unmap(self, old_kernel_space, 0x1000, FreePageTables, 1);
 }
