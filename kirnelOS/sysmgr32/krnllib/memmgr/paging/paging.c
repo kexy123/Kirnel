@@ -316,9 +316,10 @@ void unmap_page_table(PageDirectory *directory, Address virtualAddress, PageFree
         virtualAddress.Directory = 1023;
 
         PageTable *selfTable;
-        PageDirectoryEntry *_;
-        if (get_page_table(directory, virtualAddress, &_, &selfTable))
+        Page *page;
+        if (traverse(directory, virtualAddress, ForPageTable, &page))
         {
+            selfTable = (PageTable *)page;
             unmap_page(selfTable, virtualAddress, free);
         }
     }
@@ -378,25 +379,23 @@ void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, Pag
 
     while (pages > 0)
     {
-        if (newPageTable)
+        PageDirectoryEntry *_;
+        if (newPageTable && !get_page_table(root, virtualAddress, &_, &table))
         {
-            newPageTable = 0;
-            PageDirectoryEntry *_;
-            if (!get_page_table(root, virtualAddress, &_, &table))
+            // Skip this page table.
+            if (pages <= NUM_ENTRIES)
             {
-                // Skip this page table.
-                if (pages <= NUM_ENTRIES)
-                {
-                    // Avoid integer overflow issues.
-                    return;
-                }
-                else
-                {
-                    pages -= NUM_ENTRIES;
-                }
+                // Avoid integer overflow issues.
+                return;
+            }
+            else
+            {
+                pages -= NUM_ENTRIES;
+                continue;
             }
         }
 
+        newPageTable = 0;
         unmap_page(table, virtualAddress, free);
 
         virtualAddress.Page++;
