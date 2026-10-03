@@ -8,6 +8,8 @@ global enable_paging
 
 global check_paging
 
+global invalidate_page
+
 enable_paging:
     ; https://wiki.osdev.org/X86_Paging#32-bit_Paging
     ; Move the address to CR3.
@@ -35,4 +37,11 @@ check_paging:
     mov [pagingEnabled], byte 0x01
 
 skip_set:
+    ret
+
+invalidate_page:
+    mov eax, [esp + 4] ; The virtual address.
+
+    invlpg [eax] ; https://wiki.osdev.org/index.php?title=X86_Paging#INVLPG
+
     ret

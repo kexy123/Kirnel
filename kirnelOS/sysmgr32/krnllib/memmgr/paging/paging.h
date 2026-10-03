@@ -197,3 +197,7 @@ extern void enable_paging(PageDirectory *pageDirectory);
 
 /// @brief Checks if paging is enabled and sets pagingEnabled.
 extern void check_paging();
+
+/// @brief Invalidates a page by a given virtual address. Is used for setting or clearing the presence of pages from within the self page directory.
+/// @param virtualAddress The page-aligned virtual address whose page to invalidate.
+extern void invalidate_page(void *virtualAddress);

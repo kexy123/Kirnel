@@ -229,6 +229,11 @@ void *map_page(PageDirectory *directory, PageTable *table, Address virtualAddres
         .Present = 1,
     };
 
+    if (pagingEnabled && directory == self)
+    {
+        invalidate_page(virtualAddress.Address);
+    }
+
     if (translating)
     {
         // We added a page translation from a virtual to a physical address via map_page_table. Add the other way around.
@@ -284,13 +289,19 @@ PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, Page
 }
 
 /// @brief Unmaps a page in the given page table at the given address.
+/// @param directory The PageDirectory this table is in.
 /// @param table The PageTable to modify.
 /// @param virtualAddress The address whose page to unmap.
 /// @param free Determines if the page should be freed.
-void unmap_page(PageTable *table, Address virtualAddress, PageFreeType free)
+void unmap_page(PageDirectory *directory, PageTable *table, Address virtualAddress, PageFreeType free)
 {
     PageTableEntry *entry = &(*table)[virtualAddress.Page];
     entry->Present = 0;
+
+    if (pagingEnabled && directory == self)
+    {
+        invalidate_page(virtualAddress.Address);
+    }
 
     if (free & FreePages)
     {
@@ -320,7 +331,7 @@ void unmap_page_table(PageDirectory *directory, Address virtualAddress, PageFree
         if (traverse(directory, virtualAddress, ForPageTable, &page))
         {
             selfTable = (PageTable *)page;
-            unmap_page(selfTable, virtualAddress, free);
+            unmap_page(directory, selfTable, virtualAddress, free);
         }
     }
 
@@ -396,7 +407,7 @@ void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, Pag
         }
 
         newPageTable = 0;
-        unmap_page(table, virtualAddress, free);
+        unmap_page(root, table, virtualAddress, free);
 
         virtualAddress.Page++;
         if (virtualAddress.Page == 0)
