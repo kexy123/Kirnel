@@ -8,6 +8,12 @@ extern const Address old_kernel_space;
 /// @brief The dedicated space of the kernel.
 extern const Address kernel_space;
 
+/// @brief The start (bottom) of the kernel stack space.
+extern const Address kernel_stack_start;
+
+/// @brief The end (top) of the kernel stack space.
+extern const Address kernel_stack_end;
+
 /// @brief The dedicated location of the global descriptor table. Only has one page.
 extern const Address kernel_gdt;
 
