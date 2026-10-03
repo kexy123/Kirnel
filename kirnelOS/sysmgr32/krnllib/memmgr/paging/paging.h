@@ -178,6 +178,16 @@ PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, Page
 /// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
 void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
 
+/// @brief Maps a virtual page location by the given number of wanted free pages.
+/// @param root The PageDirectory to modify.
+/// @param virtualAddress The starting virtual page-aligned address.
+/// @param pages The number of pages to allocate and map to. Note that they do not need to be contiguous.
+/// @param canWrite The pages can be written to; otherwise it is read-only.
+/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
+/// @param global The pages are global regardless of when switching between page directories.
+/// @param translating This PageDirectory translates its own virtual addresses to physical address and vice versa.
+void map_to_free(PageDirectory *root, Address virtualAddress, unsigned long pages, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating);
+
 /// @brief Unmaps and frees the given number at pages by a starting virtual page address.
 /// @param root The PageDirectory to modify.
 /// @param virtualPage The starting virtual page-aligned address.

@@ -377,6 +377,19 @@ void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, uns
     }
 }
 
+void map_to_free(PageDirectory *root, Address virtualAddress, unsigned long pages, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
+{
+    while (pages > 0)
+    {
+        unsigned long oldPages = pages;
+        void *location = try_allocate(pages, &pages);
+
+        map(root, virtualAddress, location, oldPages - pages, canWrite, userAccessible, global, translating);
+
+        virtualAddress.Address += (oldPages - pages) << PAGE_SIZE_EXP;
+    }
+}
+
 void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, PageFreeType free, _Bool translating)
 {
     PageTable *table;

@@ -23,7 +23,7 @@ void init_mem()
 
     // The kernel stack.
     unsigned long stack_length = (kernel_stack_end.Raw - kernel_stack_start.Raw) >> PAGE_SIZE_EXP; // The number of pages in the kernel stack.
-    map(root, kernel_stack_start, allocate_strict(stack_length), stack_length, 1, 0, 0, 1);
+    map_to_free(root, kernel_stack_start, stack_length, 1, 0, 0, 1);
 
     enable_paging(root);
 

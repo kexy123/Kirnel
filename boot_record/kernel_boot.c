@@ -27,7 +27,7 @@ void load_kernel()
         print_ln("Kernel found.");
 
         void *location = allocate_strict((kernel.FileSize >> PAGE_SIZE_EXP) + 1);
-        map(self, kernel_space, location, 0x10, 1, 0, 1, 1); // Dedicated kernel space.
+        map(self, kernel_space, location, 0x10, 1, 0, 1, 1); // Dedicated kernel space. Note that map_to_free will not work here.
 
         load_entire_entry(&kernel, (char *)location);
     }

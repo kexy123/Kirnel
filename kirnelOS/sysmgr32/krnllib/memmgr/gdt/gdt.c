@@ -19,7 +19,7 @@ extern void load_gdt(TableDescriptorRegister *descriptor);
 
 void generate_descriptor()
 {
-    map(self, kernel_gdt, allocate_strict(1), 1, 1, 0, 1, 1);
+    map_to_free(self, kernel_gdt, 1, 1, 0, 1, 1);
     memDescriptor.SegmentStart = table = (DescriptorTable *)kernel_gdt.Address;
 
     // Zero-fill the first entry.
