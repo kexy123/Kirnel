@@ -1,7 +1,7 @@
 #include "disksys/floppy/fdc.h"
 #include "filesys/fat12/cluster.h"
 #include "filesys/fat12/dir.h"
-#include "interrupts/structure.h"
+#include "interrupts/master.h"
 #include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/master.h"
 #include "memmgr/paging/paging.h"

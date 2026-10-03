@@ -61,5 +61,5 @@ extern IDTEntry idtTable[256];
 /// @brief The assigned interrupt descriptor table descriptor.
 extern IDTDescriptor interruptDescriptor;
 
-/// @brief Initiates the interrupt descriptor table.
-void init_idt();
+/// @brief Creates the interrupts.
+void make_gates();

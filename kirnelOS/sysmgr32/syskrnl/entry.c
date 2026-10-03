@@ -1,4 +1,4 @@
-#include "interrupts/structure.h"
+#include "interrupts/master.h"
 #include "memmgr/master.h"
 #include "vga/out.h"
 
