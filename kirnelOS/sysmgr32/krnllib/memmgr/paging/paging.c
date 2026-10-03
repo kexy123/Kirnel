@@ -343,7 +343,6 @@ void unmap_page_table(PageDirectory *directory, Address virtualAddress, PageFree
 
 void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global, _Bool translating)
 {
-    Page *page;
     PageTable *table;
     _Bool newPageTable = 1;
 
@@ -361,10 +360,6 @@ void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, uns
                 phys_to_virt((Address){.Address = (void *)map_page_table(root, virtualAddress, (PageTable *)0xFFFFFFFF, canWrite, userAccessible, translating)}, &location);
 
                 table = (PageTable *)location;
-            }
-            else
-            {
-                table = (PageTable *)page;
             }
         }
 
