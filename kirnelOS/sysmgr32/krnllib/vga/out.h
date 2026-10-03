@@ -56,3 +56,7 @@ void print_newl();
 
 /// @brief Clears the VGA buffer and moves the cursor to the beginning.
 void clear_screen();
+
+/// @brief Changes the location of the VGA buffer.
+/// @param location The new location to go to.
+void change_vga_output(VGACharacter *location);

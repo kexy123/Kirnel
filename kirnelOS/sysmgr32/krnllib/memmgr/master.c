@@ -6,6 +6,7 @@
 #include "paging/page_alloc.h"
 #include "paging/paging.h"
 #include "utils/bit.h"
+#include "vga/out.h"
 
 void init_mem()
 {
@@ -34,6 +35,9 @@ void finalize_mem()
     analyse_mem_segments();
     check_paging();
     locate_allocator();
+
+    map(self, (Address){.Raw = 0xC00B8000}, (void *)0x000B8000, 1, 1, 0, 0, 1);
+    change_vga_output((VGACharacter *)0xC00B8000);
 
     unmap(self, old_kernel_space, 0x1000, FreePageTables, 1);
 }

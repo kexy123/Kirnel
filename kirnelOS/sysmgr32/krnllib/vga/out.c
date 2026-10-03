@@ -1,17 +1,19 @@
 #include "convert/int.h"
 #include "out.h"
 
-#define VGA_START ((volatile VGACharacter *)(0x000B8000)) // The pointer of the starting character of the VGA.
-#define VGA_WIDTH (80)                                    // The VGA width.
-#define VGA_HEIGHT (25)                                   // The VGA height.
+#define VGA_WIDTH (80)  // The VGA width.
+#define VGA_HEIGHT (25) // The VGA height.
+
+/// @brief The starting character of the VGA buffer.
+volatile VGACharacter *vgaStart = (volatile VGACharacter *)(0x000B8000);
 
 /// @brief The current position of where to output text in the VGA.
-volatile VGACharacter *vgaBuffer = VGA_START;
+volatile VGACharacter *vgaBuffer = (volatile VGACharacter *)(0x000B8000);
 
 /// @brief Executes a carraige return.
 void char_cr()
 {
-    vgaBuffer -= (vgaBuffer - VGA_START) % VGA_WIDTH;
+    vgaBuffer -= (vgaBuffer - vgaStart) % VGA_WIDTH;
 }
 
 /// @brief Executes a line feed.
@@ -100,9 +102,15 @@ void print_newl()
 
 void clear_screen()
 {
-    vgaBuffer = VGA_START;
+    vgaBuffer = vgaStart;
     for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++)
     {
         vgaBuffer[i].Character = ' ';
     }
+}
+
+void change_vga_output(VGACharacter *location)
+{
+    vgaStart = location;
+    clear_screen();
 }
