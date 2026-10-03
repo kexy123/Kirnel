@@ -7,7 +7,7 @@
 #define MAXIMUM_ORDERS (21) // The maximum number of orders in the buddy allocation tree for 32-bit memory.
 
 /// @brief The starting pointers of the allocation tree in terms of order.
-AllocationNode *allocationTree[MAXIMUM_ORDERS];
+static AllocationNode *allocationTree[MAXIMUM_ORDERS];
 
 /// @brief The highest order of the allocation tree. This means that there are orders between 0..highestOrder, and the number of total orders is highestOrder + 1.
 unsigned long highestOrder;
@@ -23,22 +23,6 @@ const char *treeLocation;
 static inline AllocationNode *get_allocation_node(int order, unsigned long index)
 {
     return allocationTree[order] + index - 1;
-}
-
-/// @brief Gets the starting AllocationNode index at the given order.
-/// @param order The order to go in.
-/// @return The index of the starting AllocationNode.
-static inline AllocationNode *get_start(int order)
-{
-    return get_allocation_node(order, 1)->Next;
-}
-
-/// @brief Gets the ending AllocationNode index at the given order.
-/// @param order The order to go in.
-/// @return The index of the last AllocationNode.
-static inline AllocationNode *get_end(int order)
-{
-    return get_allocation_node(order, 1)->Previous;
 }
 
 /// @brief Gets the 0-based index of the given AllocationNode in the given order.
@@ -60,19 +44,20 @@ static inline void *get_page_location(int order, AllocationNode *node)
 }
 
 /// @brief Clears and connects the adjacent nodes of the AllocationNode together.
+/// @param order The order the AllocationNode is in.
 /// @param node The AllocationNode to dissolve.
-void dissolve(AllocationNode *node)
+void dissolve(int order, AllocationNode *node)
 {
-    AllocationNode *previous = node->Previous;
-    AllocationNode *next = node->Next;
+    AllocationNode *previous = get_allocation_node(order, node->Previous);
+    AllocationNode *next = get_allocation_node(order, node->Next);
 
     // Turn previous <-> node <-> next to previous <-> next.
     previous->Next = node->Next;
     next->Previous = node->Previous;
 
-    // Zero-out the AllocationNode.
-    node->Previous = (AllocationNode *)0UL;
-    node->Next = (AllocationNode *)0UL;
+    // Invalidate the AllocationNode.
+    node->Previous = 0;
+    node->Next = 0;
 }
 
 /// @brief Inserts an AllocationNode at the given index, without performing any cascading merge operations, to the end of the linked list of its order.
@@ -84,14 +69,14 @@ AllocationNode *append(int order, unsigned long index)
     AllocationNode *node = get_allocation_node(order, index + 2);
 
     AllocationNode *central = get_allocation_node(order, 1);
-    AllocationNode *end = central->Previous;
+    AllocationNode *end = get_allocation_node(order, central->Previous);
 
     // Turn end <-> central to end <-> node <-> central.
-    central->Previous = node;
-    node->Next = central;
+    end->Next = index + 2;
+    node->Previous = central->Previous;
 
-    end->Next = node;
-    node->Previous = end;
+    central->Previous = index + 2;
+    node->Next = 1;
 
     return node;
 }
@@ -111,7 +96,7 @@ void cascade_add(int order, unsigned long index)
             break;
         }
 
-        dissolve(buddy);
+        dissolve(order, buddy);
         order++;
         index /= 2;
     }
@@ -130,7 +115,7 @@ AllocationNode *split(int order, AllocationNode *node)
     AllocationNode *left = append(order - 1, index * 2); // Left child.
     append(order - 1, index * 2 + 1);                    // Right child.
 
-    dissolve(node);
+    dissolve(order, node);
 
     return left;
 }
@@ -151,7 +136,7 @@ AllocationNode *cascade_split(int orderTarget)
         }
 
         start = get_allocation_node(order, 1);
-        candidate = start->Next;
+        candidate = get_allocation_node(order, start->Next);
         if (start != candidate)
         {
             break;
@@ -260,7 +245,7 @@ void *allocate_strict(unsigned long numPages)
     AllocationNode *candidate = cascade_split(order);
     void *location = get_page_location(order, candidate);
 
-    dissolve(candidate);
+    dissolve(order, candidate);
     zero_fill(location, PAGE_SIZE << order);
 
     return location;
@@ -291,8 +276,8 @@ void init_allocator()
         AllocationNode *startingNode = (allocationTree[i] += (unsigned long)start);
 
         // Link to itself to mark it as an empty list.
-        startingNode->Next = startingNode;
-        startingNode->Previous = startingNode;
+        startingNode->Next = 1;
+        startingNode->Previous = 1;
     }
 
     // TODO: Functions that allow allocation at specific locations.

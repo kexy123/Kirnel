@@ -4,13 +4,13 @@
 #define PAGE_SIZE (1 << PAGE_SIZE_EXP) // The number of bytes in a page in memory.
 
 /// @brief An allocation node. The position of the allocation node and in its order determines the size of the starting page it's pointing to.
-typedef struct __attribute__((packed)) AllocNode
+typedef struct __attribute__((packed))
 {
-    /// @brief The previous allocation node in its order list.
-    struct AllocNode *Previous;
+    /// @brief The previous allocation node in its order list. Note that it is relative to the starting node of its order and one-indexed.
+    unsigned long Previous;
 
-    /// @brief The next allocation node in its order list.
-    struct AllocNode *Next;
+    /// @brief The next allocation node in its order list. Note that it is relative to the starting node of its order and one-indexed.
+    unsigned long Next;
 } AllocationNode;
 
 /// @brief The number of bytes of the allocation tree.
