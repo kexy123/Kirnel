@@ -2,7 +2,7 @@
 #include "memmgr/paging/page_alloc.h"
 #include "utils/memcopy.h"
 
-/// @brief The next empty entry of the global descriptor table.
+/// @brief The location of the global descriptor table.
 DescriptorTable *table;
 
 /// @brief The descriptor defining metadata of the global descriptor table.
