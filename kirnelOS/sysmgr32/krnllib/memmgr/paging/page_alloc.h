@@ -1,7 +1,7 @@
 #pragma once
 
 #define PAGE_SIZE_EXP (12)             // The exponent of the size of a page in bytes in memory.
-#define PAGE_SIZE (1 << PAGE_SIZE_EXP) // The number of bytes in a page in memory.
+#define PAGE_SIZE (1UL << PAGE_SIZE_EXP) // The number of bytes in a page in memory.
 
 /// @brief An allocation node. The position of the allocation node and in its order determines the size of the starting page it's pointing to.
 typedef struct __attribute__((packed))

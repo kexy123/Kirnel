@@ -192,8 +192,8 @@ void add_range(unsigned long baseAddress, unsigned long endAddress)
 
         append(maxOrder, (current >> maxOrder));
 
-        range -= 1 << maxOrder;
-        current += 1 << maxOrder;
+        range -= 1UL << maxOrder;
+        current += 1UL << maxOrder;
     }
 }
 
@@ -205,7 +205,7 @@ void compute_allocation_tree_length()
     {
         // Each order has one extra element on a power of two. Note that order 0 is the deepest in the tree.
         allocationTree[highestOrder - i] = (AllocationNode *)allocationTreeLength;
-        allocationTreeLength += ((1 << i) + 1) * sizeof(AllocationNode);
+        allocationTreeLength += ((1UL << i) + 1) * sizeof(AllocationNode);
     }
 }
 

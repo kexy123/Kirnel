@@ -18,7 +18,7 @@ void init_mem()
     map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0, 1); // Old kernel space.
 
     // The page allocation system.
-    map(root, kernel_page_alloc_tree, (void *)treeLocation, 1 << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0, 1);
+    map(root, kernel_page_alloc_tree, (void *)treeLocation, 1UL << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0, 1);
     treeLocation = (const char *)kernel_page_alloc_tree.Address;
 
     // The kernel stack.
