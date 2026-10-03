@@ -10,7 +10,7 @@ oem_name:               db "KIRNELOS"       ; 8 bytes.
 
 bytes_per_sector:       dw 512
 sectors_per_cluster:    db 1                ; 1-to-1 scale.
-reserved_sectors:       dw 16               ; The first 16 sectors are for the boot_record.
+reserved_sectors:       dw 32               ; The first 32 sectors are for the boot_record.
 fat_count:              db 2                ; FAT usually contains two tables historically for redundancy and recovery.
 root_entry_count:       dw 224              ; 224 32-bytes directory entries can exist in the root.
 total_sectors:          dw 2880             ; 2880 sectors corresponds to about 1.5 MB.

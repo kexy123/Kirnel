@@ -74,7 +74,7 @@ typedef struct __attribute__((packed))
     /// @brief The low bits of the starting entry cluster of this file/folder.
     unsigned short FirstClusterLow;
 
-    /// @brief The size of the file.
+    /// @brief The size of the file in bytes.
     unsigned long FileSize;
 } Entry;
 

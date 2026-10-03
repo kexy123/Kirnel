@@ -36,14 +36,14 @@ build/os.img: build/boot.bin build/bootrec.bin
 	$(MAKE_DIR)
 	cat $^ > $@
 # 16 sectors
-	truncate -s 8192 $@
+	truncate -s 16384 $@
 
 # Compile to the floppy image.
 floppy.img: build_all build/os.img
 	truncate -s 1440K floppy.img
-	mkfs.fat -F 12 -R 16 -S 512 floppy.img
+	mkfs.fat -F 12 -R 32 -S 512 floppy.img
 
-	dd if=build/os.img of=floppy.img bs=512 count=16 conv=notrunc
+	dd if=build/os.img of=floppy.img bs=512 count=32 conv=notrunc
 
 	mmd -i floppy.img ::/kirnelOS
 	mcopy -i floppy.img -s build/kirnelOS/* ::/kirnelOS

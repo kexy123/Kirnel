@@ -15,5 +15,5 @@ jump_next_stage:
     mov ss, ax
     mov esp, 0xFFFF
 
-    jmp 0x08:0xD000
+    jmp 0x08:0xC0000000
     ret

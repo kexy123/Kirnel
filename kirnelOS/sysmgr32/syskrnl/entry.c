@@ -8,9 +8,6 @@ __attribute__((section(".text.krnl_start"))) void krnl_start()
 
     print_ln("Hello from the SYSKRNL!");
 
-    init_mem();
-    print_ln("Memory system initiated.");
-
     while (1)
         ;
 }

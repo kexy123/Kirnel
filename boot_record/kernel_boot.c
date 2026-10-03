@@ -2,6 +2,9 @@
 #include "filesys/fat12/cluster.h"
 #include "filesys/fat12/dir.h"
 #include "interrupts/structure.h"
+#include "memmgr/kernel_virtual_layout.h"
+#include "memmgr/master.h"
+#include "memmgr/paging/paging.h"
 #include "next_stage.h"
 #include "vga/out.h"
 
@@ -22,8 +25,11 @@ void load_kernel()
     else
     {
         print_ln("Kernel found.");
-        char *kernel_location = (char *)0xD000;
-        load_entire_entry(&kernel, kernel_location);
+
+        void *location = allocate_strict((kernel.FileSize >> PAGE_SIZE_EXP) + 1);
+        map(self, kernel_space, location, 0x10, 1, 0, 1, 1); // Dedicated kernel space.
+
+        load_entire_entry(&kernel, (char *)location);
     }
 }
 
@@ -31,11 +37,16 @@ void load_kernel()
 __attribute__((section(".text.krnl_boot")))
 void krnl_boot(void)
 {
+    clear_screen();
+
     print_ln("Setting interrupts. . .");
     init_idt();
 
     print_ln("Setting disk. . .");
     init_fdc();
+
+    print_ln("Initialising memory. . .");
+    init_mem();
 
     print_ln("Locating kernel. . .");
     load_kernel();

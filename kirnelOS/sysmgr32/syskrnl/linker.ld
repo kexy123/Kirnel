@@ -3,7 +3,7 @@ ENTRY(krnl_start)
 
 SECTIONS
 {
-    . = 0xD000;
+    . = 0xC0000000;
 
     .text :
     {

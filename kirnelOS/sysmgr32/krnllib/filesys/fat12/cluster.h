@@ -36,6 +36,6 @@ ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster);
 
 /// @brief Loads the entire contents of the entry into memory at the given location.
 /// @param entry The entry whose contents to load.
-/// @param location The location of where to load the contents onto.
+/// @param location The location of where to load the contents onto. Must be a physical address.
 /// @return The status of the cluster's reading.
 ReadClusterStatus load_entire_entry(Entry *entry, char *location);
