@@ -20,3 +20,8 @@ unsigned long lowest_exp2(unsigned long num)
     // The number is slightly greater than 2 << power, so increment it once more.
     return power + 1;
 }
+
+unsigned long highest_exp2(unsigned long num)
+{
+    return 31 - __builtin_clz(num);
+}
