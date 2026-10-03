@@ -8,6 +8,9 @@ extern const Address old_kernel_space;
 /// @brief The dedicated space of the kernel.
 extern const Address kernel_space;
 
+/// @brief The dedicated location of the VGA.
+extern const Address kernel_vga;
+
 /// @brief The start (bottom) of the kernel stack space.
 extern const Address kernel_stack_start;
 

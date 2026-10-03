@@ -36,8 +36,8 @@ void finalize_mem()
     check_paging();
     locate_allocator();
 
-    map(self, (Address){.Raw = 0xC00B8000}, (void *)0x000B8000, 1, 1, 0, 0, 1);
-    change_vga_output((VGACharacter *)0xC00B8000);
+    map(self, kernel_vga, (void *)0x000B8000, 1, 1, 0, 0, 1); // Remapping the VGA buffer.
+    change_vga_output((VGACharacter *)kernel_vga.Address);
 
     unmap(self, old_kernel_space, 0x1000, FreePageTables, 1);
 }
