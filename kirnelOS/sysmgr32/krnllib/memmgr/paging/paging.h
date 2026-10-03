@@ -193,4 +193,7 @@ PageDirectory *create_directory(_Bool selfReferential);
 
 /// @brief Enables paging to the given PageDirectory.
 /// @param pageDirectory The PageDirectory to use.
-void enable_paging(PageDirectory *pageDirectory);
+extern void enable_paging(PageDirectory *pageDirectory);
+
+/// @brief Checks if paging is enabled and sets pagingEnabled.
+extern void check_paging();

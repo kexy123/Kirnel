@@ -6,6 +6,8 @@ extern pagingEnabled
 
 global enable_paging
 
+global check_paging
+
 enable_paging:
     ; https://wiki.osdev.org/X86_Paging#32-bit_Paging
     ; Move the address to CR3.
@@ -19,4 +21,18 @@ enable_paging:
 
     mov [pagingEnabled], byte 0x01
 
+    ret
+
+check_paging:
+    mov eax, cr0
+
+    test eax, 0x00000001
+    jz skip_set
+
+    test eax, 0x80000000
+    jz skip_set
+
+    mov [pagingEnabled], byte 0x01
+
+skip_set:
     ret
