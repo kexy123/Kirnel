@@ -252,6 +252,21 @@ void *allocate_strict(unsigned long numPages)
     return location;
 }
 
+void *try_allocate(unsigned long numPages, unsigned long *remainder)
+{
+    unsigned long order = highest_exp2(numPages);
+
+    *remainder = numPages - (1UL << order);
+
+    AllocationNode *candidate = cascade_split(order);
+    void *location = get_page_location(order, candidate);
+
+    dissolve(order, candidate);
+    zero_fill(location, PAGE_SIZE << order);
+
+    return location;
+}
+
 void deallocate(int order, void *address)
 {
     if ((unsigned long)address & ((PAGE_SIZE << order) - 1))

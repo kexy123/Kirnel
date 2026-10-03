@@ -24,6 +24,12 @@ extern const char *treeLocation;
 /// @return The starting physical memory address of the free pages.
 void *allocate_strict(unsigned long numPages);
 
+/// @brief Tries to allocate a given number of pages exactly, returns the first chunk, and yields the remainder. This function should repeatedly be called with the remainder as the new number of pages.
+/// @param numPages The number of pages to allocate.
+/// @param remainder The location of where to return the remainder onto.
+/// @return The starting physical memory address of the free pages.
+void *try_allocate(unsigned long numPages, unsigned long *remainder);
+
 /// @brief Frees the given physical address with the given order.
 /// @param order The order of the address.
 /// @param address The starting address. Must be physical.
