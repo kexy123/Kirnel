@@ -14,11 +14,15 @@ void init_mem()
 
     PageDirectory *root = create_directory(1);
 
-    map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0, 1);
+    map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0, 1); // Old kernel space.
 
     // The page allocation system.
     map(root, kernel_page_alloc_tree, (void *)treeLocation, 1 << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0, 1);
     treeLocation = (const char *)kernel_page_alloc_tree.Address;
+
+    // The kernel stack.
+    unsigned long stack_length = (kernel_stack_end.Raw - kernel_stack_start.Raw) >> PAGE_SIZE_EXP; // The number of pages in the kernel stack.
+    map(root, kernel_stack_start, allocate_strict(stack_length), stack_length, 1, 0, 0, 1);
 
     enable_paging(root);
 
