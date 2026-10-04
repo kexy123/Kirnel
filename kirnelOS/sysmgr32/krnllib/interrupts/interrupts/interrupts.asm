@@ -45,6 +45,8 @@ section .text
 ;;;;; INTERRUPTS ;;;;;
 service_error 8 ; Double fault.
 
+service_error 14 ; Page fault.
+
 int_req_service 6, 0x26 ; IRQ6; floppy disk controller hardware interrupt.
 
 
@@ -58,7 +60,7 @@ isr_cpu_preserve:
     mov eax, ds
     push eax
 
-    ; Store the page fault: https://en.wikipedia.org/wiki/Control_register#CR2
+    ; Store the register used for the page fault: https://en.wikipedia.org/wiki/Control_register#CR2
     mov eax, cr2
     push eax
 
