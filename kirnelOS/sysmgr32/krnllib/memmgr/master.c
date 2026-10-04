@@ -17,6 +17,8 @@ void init_mem()
 
     map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0, 1); // Old kernel space.
 
+    map(root, kernel_paging_directory, (void *)root, 1, 1, 0, 1, 1); // Global location of the kernel page directory.
+
     // The page allocation system.
     map(root, kernel_page_alloc_tree, (void *)treeLocation, 1UL << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0, 1);
     treeLocation = (const char *)kernel_page_alloc_tree.Address;
