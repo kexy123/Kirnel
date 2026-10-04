@@ -13,19 +13,19 @@ void init_mem()
     analyse_mem_segments();
     init_allocator();
 
-    PageDirectory *root = create_directory(1);
+    PageDirectory *root = create_directory();
 
-    map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0, 1); // Old kernel space.
+    map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0); // Old kernel space.
 
-    map(root, kernel_paging_directory, (void *)root, 1, 1, 0, 1, 1); // Global location of the kernel page directory.
+    map(root, kernel_paging_directory, (void *)root, 1, 1, 0, 1); // Global location of the kernel page directory.
 
     // The page allocation system.
-    map(root, kernel_page_alloc_tree, (void *)treeLocation, 1UL << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0, 1);
+    map(root, kernel_page_alloc_tree, (void *)treeLocation, 1UL << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0);
     treeLocation = (const char *)kernel_page_alloc_tree.Address;
 
     // The kernel stack.
     unsigned long stack_length = (kernel_stack_end.Raw - kernel_stack_start.Raw) >> PAGE_SIZE_EXP; // The number of pages in the kernel stack.
-    map_to_free(root, kernel_stack_start, stack_length, 1, 0, 0, 1);
+    map_to_free(root, kernel_stack_start, stack_length, 1, 0, 0);
 
     enable_paging(root);
 
@@ -38,8 +38,8 @@ void finalize_mem()
     check_paging();
     locate_allocator();
 
-    map(self, kernel_vga, (void *)0x000B8000, 1, 1, 0, 0, 1); // Remapping the VGA buffer.
+    map(self, kernel_vga, (void *)0x000B8000, 1, 1, 0, 0); // Remapping the VGA buffer.
     change_vga_output((VGACharacter *)kernel_vga.Address);
 
-    unmap(self, old_kernel_space, 0x1000, FreePageTables, 1);
+    unmap(self, old_kernel_space, 0x1000, FreePageTables);
 }
