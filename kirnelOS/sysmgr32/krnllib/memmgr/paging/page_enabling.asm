@@ -6,6 +6,8 @@ extern pagingEnabled
 
 global enable_paging
 
+global switch_page
+
 global check_paging
 
 global invalidate_page
@@ -22,6 +24,12 @@ enable_paging:
     mov cr0, eax
 
     mov [pagingEnabled], byte 0x01
+
+    ret
+
+switch_page:
+    mov eax, [esp + 4] ; The PageDirectory address.
+    mov cr3, eax
 
     ret
 
