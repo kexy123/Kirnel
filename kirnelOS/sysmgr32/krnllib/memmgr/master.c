@@ -17,7 +17,7 @@ void init_mem()
 
     map(root, old_kernel_space, (void *)0x00000000, 0x1000, 1, 0, 0); // Old kernel space.
 
-    map(root, kernel_paging_directory, (void *)root, 1, 1, 0, 1); // Global location of the kernel page directory.
+    map_to_free(root, kernel_paging_directory, 1, 1, 0, 1); // Global location of the kernel page directory.
 
     // The page allocation system.
     map(root, kernel_page_alloc_tree, (void *)treeLocation, 1UL << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0);
@@ -28,6 +28,8 @@ void init_mem()
     map_to_free(root, kernel_stack_start, stack_length, 1, 0, 0);
 
     enable_paging(root);
+
+    *(PageDirectory **)kernel_paging_directory.Address = root; // Add the kernel page directory.
 
     create_os_gdt();
 }

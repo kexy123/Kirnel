@@ -17,7 +17,7 @@ const Address kernel_page_alloc_tree = {.Raw = 0xE0000000};
 
 const Address kernel_page_start = {.Raw = 0xD0000000};
 
-const Address kernel_paging_directory = {.Raw = 0xFF7FE000};
+const Address kernel_paging_directory = {.Raw = 0xFF7FEFFC};
 
 /// @brief The dedicated location of where to assign pages at.
 static Address kernel_pages = (Address)(kernel_page_start);

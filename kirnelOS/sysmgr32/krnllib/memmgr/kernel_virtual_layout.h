@@ -23,7 +23,7 @@ extern const Address kernel_gdt;
 /// @brief The dedicated space of the allocation tree.
 extern const Address kernel_page_alloc_tree;
 
-/// @brief The dedicated global location of the page directory for the kernel.
+/// @brief The dedicated global location of the physical address to the page directory for the kernel.
 extern const Address kernel_paging_directory;
 
 /// @brief The dedicated space of page allocation for the kernel.
