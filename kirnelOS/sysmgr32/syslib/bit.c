@@ -1,11 +1,10 @@
 #include "bit.h"
-#include "flow.h"
 
 unsigned long lowest_exp2(unsigned long num)
 {
     if (num == 0)
     {
-        panic();
+        return 0;
     }
 
     // Counts leading zeroes then determines the power of two from there.
@@ -23,5 +22,10 @@ unsigned long lowest_exp2(unsigned long num)
 
 unsigned long highest_exp2(unsigned long num)
 {
+    if (num == 0)
+    {
+        return 0;
+    }
+
     return 31 - __builtin_clz(num);
 }

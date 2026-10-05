@@ -8,7 +8,7 @@ ELF_OBJCPY := i386-elf-objcopy
 NASM := nasm
 MAKE_DIR = @mkdir -p $(dir $@)
 
-C_FLAGS := -ffreestanding -nostdlib -m32 -Iboot_record -IkirnelOS/sysmgr32/krnllib -std=c23 -fdata-sections -ffunction-sections
+C_FLAGS := -ffreestanding -nostdlib -m32 -Iboot_record -IkirnelOS/sysmgr32/krnllib -IkirnelOS/sysmgr32/syslib -std=c23 -fdata-sections -ffunction-sections
 
 # OBJECTS
 C_SOURCES := $(shell find boot_record -name '*.c')
@@ -19,7 +19,7 @@ ASM_SOURCES := $(shell find boot_record -name '*.asm')
 ASM_OBJECTS := $(ASM_SOURCES:.asm=.o)
 ASM_OBJECTS := $(ASM_OBJECTS:boot_record/%=build_sub/boot_record/%)
 
-EXT_OBJECTS := $(shell find build_sub/kirnelOS/sysmgr32/krnllib -name '*.o')
+EXT_OBJECTS := $(shell find build_sub/kirnelOS/sysmgr32/krnllib -name '*.o') $(shell find build_sub/kirnelOS/sysmgr32/syslib -name '*.o')
 
 # DEPENDENCIES
 first: $(ASM_OBJECTS) $(C_OBJECTS)

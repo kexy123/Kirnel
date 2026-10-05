@@ -5,7 +5,7 @@
 #include "paging/mem_segments.h"
 #include "paging/page_alloc.h"
 #include "paging/paging.h"
-#include "utils/bit.h"
+#include "bit.h"
 #include "vga/out.h"
 
 void init_mem()

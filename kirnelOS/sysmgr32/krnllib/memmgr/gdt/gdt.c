@@ -2,7 +2,7 @@
 #include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/paging/page_alloc.h"
 #include "memmgr/paging/paging.h"
-#include "utils/memcopy.h"
+#include "memory/memcopy.h"
 
 /// @brief The location of the global descriptor table.
 DescriptorTable *table;

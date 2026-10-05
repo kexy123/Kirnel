@@ -1,7 +1,7 @@
 #include "page_alloc.h"
 #include "paging.h"
 #include "utils/flow.h"
-#include "utils/memcopy.h"
+#include "memory/memcopy.h"
 
 #define SELF_REFERENCING_POINTER (0xFF7FF000)                                       // The pointer where a self-referencing page directory references itself.
 #define VIRT_REFERENCING_POINTER ((PhysicalToVirtualTranslationPage *)(0xFF800000)) // The starting page table of translating physical addresses to virtual addresses.
