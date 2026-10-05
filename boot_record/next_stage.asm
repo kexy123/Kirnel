@@ -2,7 +2,7 @@
 
 section .text
 
-extern kernel_stack_end
+extern kernelStackEnd
 
 global jump_next_stage
 
@@ -15,7 +15,7 @@ jump_next_stage:
     mov gs, ax
 
     mov ss, ax
-    mov esp, [kernel_stack_end]
+    mov esp, [kernelStackEnd]
 
     jmp 0x08:0xC0000000
     ret

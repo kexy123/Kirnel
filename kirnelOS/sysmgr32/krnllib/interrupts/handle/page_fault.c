@@ -6,9 +6,9 @@
 
 void page_fault_handle(InterruptCPUState *state)
 {
-    if (state->CS == kernel_code_segmemt)
+    if (state->CS == kernelCodeSegment)
     {
-        switch_page(*(PageDirectory **)kernel_paging_directory.Address);
+        switch_page(*(PageDirectory **)kernelPagingDirectory.Address);
         map_to_free(self, (Address){.Raw = state->CR2}, 1, 1, 0, 1);
     }
     else

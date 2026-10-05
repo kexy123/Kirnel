@@ -1,11 +1,11 @@
 #include "master.h"
 #include "gdt.h"
 
-const unsigned short kernel_code_segmemt = 0x0008;
-const unsigned short kernel_data_segmemt = 0x0010;
+const unsigned short kernelCodeSegment = 0x0008;
+const unsigned short kernelDataSegment = 0x0010;
 
-const unsigned short user_code_segmemt = 0x0018;
-const unsigned short user_data_segmemt = 0x0020;
+const unsigned short userCodeSegment = 0x0018;
+const unsigned short userDataSegment = 0x0020;
 
 void create_os_gdt()
 {

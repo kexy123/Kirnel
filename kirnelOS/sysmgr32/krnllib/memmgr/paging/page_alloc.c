@@ -313,8 +313,8 @@ void locate_allocator()
     for (int i = 0; i <= highestOrder; i++)
     {
         // Add the dedicated address of the allocation tree offset.
-        allocationTree[i] = (unsigned long)allocationTree[i] + kernel_page_alloc_tree.Address;
+        allocationTree[i] = (unsigned long)allocationTree[i] + kernelPageAllocTree.Address;
     }
 
-    treeLocation = (char *)kernel_page_alloc_tree.Address;
+    treeLocation = (char *)kernelPageAllocTree.Address;
 }
