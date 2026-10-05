@@ -10,6 +10,8 @@ wsl make
 if "%1" == "-d" (
     @REM Debugger; run gdb; target remote :1234
     qemu-system-i386 -drive format=raw,file=floppy.img,if=floppy -S -s -m 128M
+) else if "%1" == "-int" (
+    qemu-system-i386 -drive format=raw,file=floppy.img,if=floppy -m 128M -no-reboot -d int
 ) else (
     qemu-system-i386 -drive format=raw,file=floppy.img,if=floppy -m 128M
 )
