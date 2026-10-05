@@ -239,9 +239,11 @@ const MemorySegmentEntry *find_sufficient_tree()
     return (MemorySegmentEntry *)0;
 }
 
-void *allocate_strict(unsigned long numPages)
+void *allocate_strict(unsigned long numPages, unsigned long *remainder)
 {
     unsigned long order = lowest_exp2(numPages);
+
+    *remainder = (1UL << order) - numPages;
 
     AllocationNode *candidate = cascade_split(order);
     void *location = get_page_location(order, candidate);

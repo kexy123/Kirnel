@@ -26,9 +26,11 @@ void load_kernel()
     {
         print_ln("Kernel found.");
 
-        unsigned long numPages = (kernel.FileSize >> PAGE_SIZE_EXP) + 1;
-        void *location = allocate_strict(numPages);
-        map(self, kernel_space, location, numPages, 1, 0, 1); // Dedicated kernel space. Note that map_to_free will not work here.
+        unsigned long numPages = (kernel.FileSize >> PAGE_SIZE_EXP) + 1, _;
+        void *location = allocate_strict(numPages, &_);
+
+        map(self, kernel_space, location, 0x1000, 1, 0, 1); // Dedicated kernel space. Note that map_to_free will not work here.
+        // TODO: do not use 0x1000 pages later.
 
         load_entire_entry(&kernel, (char *)location);
     }
