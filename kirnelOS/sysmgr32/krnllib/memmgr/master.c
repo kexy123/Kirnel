@@ -20,7 +20,7 @@ void init_mem()
     map_to_free(root, kernelPagingDirectory, 1, 1, 0, 1); // Global location of the kernel page directory.
 
     // The page allocation system.
-    map(root, kernelPageAllocTree, (void *)treeLocation, 1UL << (lowest_exp2(allocationTreeLength) - PAGE_SIZE_EXP), 1, 0, 0);
+    map(root, kernelPageAllocTree, (void *)treeLocation, (allocationTreeLength >> PAGE_SIZE_EXP) + 1, 1, 0, 1);
     treeLocation = (const char *)kernelPageAllocTree.Address;
 
     // The kernel stack.
@@ -38,10 +38,15 @@ void finalize_mem()
 {
     analyse_mem_segments();
     check_paging();
-    locate_allocator();
 
     map(self, kernelVGA, (void *)0x000B8000, 1, 1, 0, 0); // Remapping the VGA buffer.
     change_vga_output((VGACharacter *)kernelVGA.Address);
+    locate_allocator();
+
+    void *result;
+    phys_to_virt(kernelPageAllocTree, &result);
+    print_uintx((unsigned long)result);
+    print_newl();
 
     unmap(self, oldKernelSpace, 0x1000, FreePageTables);
 }
