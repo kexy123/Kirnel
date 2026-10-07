@@ -52,7 +52,7 @@ static char *heapEnd = (char *)__HEAP_START;
 void push(void *location)
 {
     FreeHeap *freeBlock = (FreeHeap *)location;
-    unsigned long index = lowest_exp2(freeBlock->Length) - __HEAP_ATOMIC;
+    unsigned long index = highest_exp2(freeBlock->Length) - __HEAP_ATOMIC;
 
     // Connect from heapTop <-> nextBlock to heapTop <-> freeBlock <-> nextBlock.
     FreeHeap *nextBlock = heapTop[index];
@@ -77,7 +77,7 @@ void dissolve(void *location)
     if (previous == 0)
     {
         // This heap block is connected to the heapTop pointer, so refer to that pointer.
-        unsigned long index = lowest_exp2(main->Length) - __HEAP_ATOMIC;
+        unsigned long index = highest_exp2(main->Length) - __HEAP_ATOMIC;
         heapTop[index] = next;
     }
     else
@@ -157,14 +157,14 @@ void *malloc(unsigned long size)
 {
     for (unsigned long orderIndex = lowest_exp2(size) - __HEAP_ATOMIC; orderIndex < __HEAP_NUM_ORDERS; orderIndex++)
     {
-        void *location = heapTop[orderIndex];
+        char *location = (char *)heapTop[orderIndex];
         if (location == 0)
         {
             continue;
         }
 
-        try_partition(location, size);
-        return location;
+        try_partition((void *)location, size);
+        return (void *)(location + sizeof(HeapLength));
     }
 
     return expand(size);
@@ -202,6 +202,12 @@ void free(void *object)
             dissolve((void *)nextLength);
             totalLength += *nextLength;
         }
+    }
+    else
+    {
+        // Merge with the large heap space at the end of the heapEnd.
+        heapEnd = (char *)freeLocation;
+        return;
     }
 
     // Reinstantiate the new merged block.
