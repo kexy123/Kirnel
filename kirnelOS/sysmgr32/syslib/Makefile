@@ -16,7 +16,7 @@ C_OBJECTS := $(C_SOURCES:.c=.o)
 C_OBJECTS := $(C_OBJECTS:kirnelOS/sysmgr32/syslib/%=build_sub/kirnelOS/sysmgr32/syslib/%)
 
 CPP_SOURCES := $(shell find kirnelOS/sysmgr32/syslib -name '*.cpp')
-CPP_OBJECTS := $(CPP_SOURCES:.c=.o)
+CPP_OBJECTS := $(CPP_SOURCES:.cpp=.o)
 CPP_OBJECTS := $(CPP_OBJECTS:kirnelOS/sysmgr32/syslib/%=build_sub/kirnelOS/sysmgr32/syslib/%)
 
 ASM_SOURCES := $(shell find kirnelOS/sysmgr32/syslib -name '*.asm')
