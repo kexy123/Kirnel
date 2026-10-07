@@ -145,7 +145,7 @@ void *expand(unsigned long size)
     unsigned long blockSize = __HEAP_HEADER_SIZE + size;
 
     heapEnd += blockSize;
-    if (heapEnd > __HEAP_END)
+    if (heapEnd > (char *)__HEAP_END)
     {
         // TODO: Abort process.
     }
@@ -182,7 +182,7 @@ void free(void *object)
 
     // Try and merge the left neighbour.
     EndHeap *previousEnd = (EndHeap *)(meta - sizeof(EndHeap));
-    if (previousEnd >= __HEAP_START && previousEnd->Flags.Free)
+    if (previousEnd >= (EndHeap *)__HEAP_START && previousEnd->Flags.Free)
     {
         // Merge this block and move the ending location of where to free the entire merged block.
         freeLocation = (void *)(meta - previousEnd->Length);
@@ -193,7 +193,7 @@ void free(void *object)
 
     // Try and merge the right neighbour.
     HeapLength *nextLength = (HeapLength *)(meta + *length);
-    if (nextLength < heapEnd)
+    if (nextLength < (HeapLength *)heapEnd)
     {
         EndHeap *nextEnd = (EndHeap *)((char *)nextLength + *nextLength - sizeof(EndHeap));
         if (nextEnd->Flags.Free)
