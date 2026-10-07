@@ -35,10 +35,10 @@ static inline unsigned long get_index_of_node(int order, AllocationNode *node)
     return node - allocationTree[order] - 1;
 }
 
-/// @brief Returns the starting address of the page that the given AllocationNode points to.
+/// @brief Returns the starting physical address of the page that the given AllocationNode points to.
 /// @param order The order the AllocationNode is in.
 /// @param node The AllocationNode.
-/// @return The starting address of the page.
+/// @return The starting physical address of the page.
 static inline void *get_page_location(int order, AllocationNode *node)
 {
     return (void *)(get_index_of_node(order, node) << order << PAGE_SIZE_EXP);
@@ -47,7 +47,7 @@ static inline void *get_page_location(int order, AllocationNode *node)
 /// @brief Clears and connects the adjacent nodes of the AllocationNode together.
 /// @param order The order the AllocationNode is in.
 /// @param node The AllocationNode to dissolve.
-void dissolve(int order, AllocationNode *node)
+void dissolve_page(int order, AllocationNode *node)
 {
     AllocationNode *previous = get_allocation_node(order, node->Previous);
     AllocationNode *next = get_allocation_node(order, node->Next);
@@ -57,8 +57,8 @@ void dissolve(int order, AllocationNode *node)
     next->Previous = node->Previous;
 
     // Invalidate the AllocationNode.
-    node->Previous = 0;
-    node->Next = 0;
+    node->Previous = 1;
+    node->Next = 1;
 }
 
 /// @brief Inserts an AllocationNode at the given index, without performing any cascading merge operations, to the end of the linked list of its order.
@@ -91,13 +91,13 @@ void cascade_add(int order, unsigned long index)
     {
         // We cascade first before adding the merged block.
         AllocationNode *buddy = get_allocation_node(order, (index ^ 1) + 2);
-        if (buddy->Next == 0 && buddy->Previous == 0)
+        if (buddy->Next <= 1 && buddy->Previous <= 1)
         {
             // There is no buddy at this point so add the new block.
             break;
         }
 
-        dissolve(order, buddy);
+        dissolve_page(order, buddy);
         order++;
         index /= 2;
     }
@@ -116,7 +116,7 @@ AllocationNode *split(int order, AllocationNode *node)
     AllocationNode *left = append(order - 1, index * 2); // Left child.
     append(order - 1, index * 2 + 1);                    // Right child.
 
-    dissolve(order, node);
+    dissolve_page(order, node);
 
     return left;
 }
@@ -138,7 +138,7 @@ AllocationNode *cascade_split(int orderTarget)
 
         start = get_allocation_node(order, 1);
         candidate = get_allocation_node(order, start->Next);
-        if (start != candidate)
+        if (start->Next > 1)
         {
             break;
         }
@@ -248,8 +248,7 @@ void *allocate_strict(unsigned long numPages, unsigned long *remainder)
     AllocationNode *candidate = cascade_split(order);
     void *location = get_page_location(order, candidate);
 
-    dissolve(order, candidate);
-    zero_fill(location, PAGE_SIZE << order);
+    dissolve_page(order, candidate);
 
     return location;
 }
@@ -263,8 +262,7 @@ void *try_allocate(unsigned long numPages, unsigned long *remainder)
     AllocationNode *candidate = cascade_split(order);
     void *location = get_page_location(order, candidate);
 
-    dissolve(order, candidate);
-    zero_fill(location, PAGE_SIZE << order);
+    dissolve_page(order, candidate);
 
     return location;
 }
@@ -287,11 +285,11 @@ void init_allocator()
     compute_allocation_tree_length();
 
     const MemorySegmentEntry *segment = find_sufficient_tree();
-    AllocationNode *start = (AllocationNode *)(unsigned long)segment->BaseAddress;
+    unsigned long start = (unsigned long)segment->BaseAddress;
     for (int i = 0; i <= highestOrder; i++)
     {
         // Add the offset to each order.
-        AllocationNode *startingNode = (allocationTree[i] += (unsigned long)start);
+        AllocationNode *startingNode = (allocationTree[i] = (AllocationNode *)((unsigned long)allocationTree[i] + start));
 
         // Link to itself to mark it as an empty list.
         startingNode->Next = 1;
@@ -301,7 +299,7 @@ void init_allocator()
     // TODO: Functions that allow allocation at specific locations.
     add_range(segment->BaseAddress + allocationTreeLength, segment->BaseAddress + segment->SegmentLength);
 
-    treeLocation = (char *)segment;
+    treeLocation = (char *)segment->BaseAddress;
 }
 
 void locate_allocator()
@@ -313,7 +311,7 @@ void locate_allocator()
     for (int i = 0; i <= highestOrder; i++)
     {
         // Add the dedicated address of the allocation tree offset.
-        allocationTree[i] = (unsigned long)allocationTree[i] + kernelPageAllocTree.Address;
+        allocationTree[i] = (AllocationNode *)((unsigned long)allocationTree[i] + kernelPageAllocTree.Address);
     }
 
     treeLocation = (char *)kernelPageAllocTree.Address;
