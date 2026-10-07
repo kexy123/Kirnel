@@ -2,7 +2,8 @@
 #include "interrupt_state.h"
 #include "utils/portcall.h"
 
-InterruptHandle handles[256] = {0};
+/// @brief The interrupt handles.
+InterruptHandle handles[256];
 
 void service_handle(InterruptCPUState *state)
 {
