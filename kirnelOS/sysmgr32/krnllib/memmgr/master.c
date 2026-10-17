@@ -1,11 +1,9 @@
 #include "master.h"
 #include "gdt/master.h"
 #include "kernel_virtual_layout.h"
-#include "kernel_jump.h"
 #include "paging/mem_segments.h"
 #include "paging/page_alloc.h"
 #include "paging/paging.h"
-#include "bit.h"
 #include "vga/out.h"
 
 void init_mem()

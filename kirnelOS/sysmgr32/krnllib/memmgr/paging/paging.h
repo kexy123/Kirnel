@@ -192,7 +192,7 @@ void map_to_free(PageDirectory *root, Address virtualAddress, unsigned long page
 void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, PageFreeType free);
 
 /// @brief Creates an empty PageDirectory.
-/// @return The created PageDirectory.
+/// @return The virtual address of where the PageDirectory was created.
 PageDirectory *create_directory();
 
 /// @brief Enables paging to the given PageDirectory.

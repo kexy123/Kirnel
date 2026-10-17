@@ -36,8 +36,8 @@ typedef struct __attribute__((packed))
     /// @brief The entry is archived.
     unsigned Archived : 1;
 
-    /// @brief Reserved.
-    unsigned LFNReserved : 2;
+    /// @brief Reserved; always zero.
+    unsigned : 2;
 } EntryAttributes;
 
 /// @brief [Data format for a file/folder entry](https://wiki.osdev.org/FAT#Standard_8.3_format) in the FAT12 file system.

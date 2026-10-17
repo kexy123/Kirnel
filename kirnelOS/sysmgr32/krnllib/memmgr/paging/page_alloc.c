@@ -3,7 +3,6 @@
 #include "memmgr/kernel_virtual_layout.h"
 #include "bit.h"
 #include "utils/flow.h"
-#include "memory/memcopy.h"
 
 #define MAXIMUM_ORDERS (21) // The maximum number of orders in the buddy allocation tree for 32-bit memory.
 

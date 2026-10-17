@@ -14,7 +14,7 @@ typedef union
         unsigned GateType : 4;
 
         /// @brief Reserved; always 0.
-        unsigned ZeroReserved : 1;
+        unsigned : 1;
 
         /// @brief The CPU privilege level of this interrupt.
         unsigned PrivilegeLevel : 2;

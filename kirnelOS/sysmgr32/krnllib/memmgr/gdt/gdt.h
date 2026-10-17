@@ -70,8 +70,8 @@ typedef struct __attribute__((packed))
     /// @brief The higher limit bits that determine the end of this segment. Note that it will be scaled if the granularity is set.
     unsigned LimitHigh : 4;
 
-    /// @brief Reserved; always zero.
-    unsigned Reserved : 1;
+    /// @brief Reserved; always 0.
+    unsigned : 1;
 
     /// @brief Determines if this segment is a long-mode segment or not. Note that the DescriptorSize must be clear if this is set.
     unsigned LongMode : 1;

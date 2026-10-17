@@ -1,6 +1,5 @@
 #include "gdt.h"
 #include "memmgr/kernel_virtual_layout.h"
-#include "memmgr/paging/page_alloc.h"
 #include "memmgr/paging/paging.h"
 #include "memory/memcopy.h"
 
@@ -37,7 +36,6 @@ void add_segment(unsigned short index, unsigned long base, unsigned long limit, 
         .Attributes = attributes,
         .LimitHigh = (limit >> 16) & 0x000F, // Extract next 4 bits of the limit.
 
-        .Reserved = 0,
         .LongMode = size == Bits64,
         .DescriptorSize = size == Bits32,
         .Granularity = granular,

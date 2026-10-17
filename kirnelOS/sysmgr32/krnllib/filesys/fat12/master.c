@@ -48,4 +48,6 @@ void fat12_close_file(FileInfo file)
 _Bool fat12_load_all(FileInfo file, char *buffer)
 {
     load_entire_entry((const Entry *)file.Internal, buffer);
+
+    return 1;
 }

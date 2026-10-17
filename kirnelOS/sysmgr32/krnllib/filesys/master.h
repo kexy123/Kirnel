@@ -56,7 +56,7 @@ typedef struct
     FileInfo (*open_file)(FilePath path, FileUsagePermissions permissions);
 
     /// @brief Closes a file.
-    /// @param path The file to close.
+    /// @param file The file to close.
     void (*close_file)(FileInfo file);
 
     /// @brief Loads the entire file onto a contiguous buffer.
