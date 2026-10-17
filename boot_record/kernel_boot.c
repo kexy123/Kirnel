@@ -1,6 +1,5 @@
 #include "disksys/floppy/fdc.h"
-#include "filesys/fat12/cluster.h"
-#include "filesys/fat12/dir.h"
+#include "filesys/master.h"
 #include "interrupts/master.h"
 #include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/master.h"
@@ -11,12 +10,10 @@
 /// @brief The starting method upon boot being initiated by the boot sector.
 void load_kernel()
 {
-    // Read from FAT12 the kirnelOS/sysmgr32/syskrnl.bin file.
-    const char *kernelPath = "KIRNELOS   SYSMGR32   SYSKRNL BIN";
+    FilePath kernelPath = "KIRNELOS/SYSMGR32/SYSKRNL.BIN";
+    FileInfo kernel = fileSystem->open_file(kernelPath, Read);
 
-    Entry kernel;
-    FindEntryStatus findEntry = find_entry_by_path((EntryName *)kernelPath, &kernel);
-    if (findEntry != FINDENTRY_FOUND)
+    if (!kernel.Success)
     {
         print_ln("The kernel loader could not be found.");
         while (1)
@@ -31,8 +28,10 @@ void load_kernel()
 
         map(self, kernelSpace, location, numPages + remainder, 1, 0, 1); // Dedicated kernel space. Note that map_to_free will not work here.
 
-        load_entire_entry(&kernel, (char *)location);
+        fileSystem->load_all(kernel, (char *)location);
     }
+
+    fileSystem->close_file(kernel);
 }
 
 /// @brief Loads the kernel into memory at 0xD000 to jump to later.
@@ -51,6 +50,7 @@ void krnl_boot(void)
     init_mem();
 
     print_ln("Locating kernel. . .");
+    identify_file_system();
     load_kernel();
 
     jump_next_stage();
