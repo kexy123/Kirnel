@@ -1,13 +1,13 @@
 #include "memcopy.h"
 
-void copy_to(void *source, void *destination, short byteCount)
+void copy_to(void *source, void *destination, unsigned long byteCount)
 {
     char *sourcePtr = (char *)source;
     char *destinationPtr = (char *)destination;
 
-    for (short i = 0; i < byteCount; i++)
+    for (unsigned long i = 0; i < byteCount; i++)
     {
-        sourcePtr[i] = destinationPtr[i];
+        destinationPtr[i] = sourcePtr[i];
     }
 }
 
@@ -28,5 +28,15 @@ void one_fill(void *source, unsigned long bytes)
     for (unsigned long i = 0; i < bytes; i++)
     {
         sourcePtr[i]= 0xFF;
+    }
+}
+
+void byte_fill(void *source, unsigned long bytes, char character)
+{
+    char *sourcePtr = (char *)source;
+
+    for (unsigned long i = 0; i < bytes; i++)
+    {
+        sourcePtr[i] = character;
     }
 }

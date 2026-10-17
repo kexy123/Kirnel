@@ -43,7 +43,7 @@ FindEntryStatus find_entry_in_memcluster(MemCluster cluster, unsigned short entr
     {
         if (entries_are_equal(name, &entry[i].Name))
         {
-            copy_to(entryBuffer, entry + i, sizeof(Entry));
+            copy_to(entry + i, entryBuffer, sizeof(Entry));
             return FINDENTRY_FOUND;
         }
     }
