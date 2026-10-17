@@ -1,6 +1,7 @@
 #include "dir.h"
 #include "cluster.h"
 #include "fat.h"
+#include "filesys/master.h"
 #include "memory/memcopy.h"
 
 /// @brief Compares if two entry names are equal in value.
@@ -112,24 +113,27 @@ FindEntryStatus find_entry_in_root(EntryName *name, Entry *entryBuffer)
 
     return FINDENTRY_NOT_FOUND;
 }
-
-FindEntryStatus find_entry_by_path(EntryName *path, Entry *entryBuffer)
+FindEntryStatus find_entry_by_path(FilePath path, Entry *entryBuffer)
 {
-    FindEntryStatus findEntry = find_entry_in_root(path, entryBuffer);
+    EntryName name;
+    _Bool result = next_entry(path, &name, &path);
 
-    path++;
-    while (path->Name[0] != '\0')
+    if (!result)
     {
-        if (findEntry != FINDENTRY_FOUND)
-        {
-            return FINDENTRY_NOT_FOUND;
-        }
+        return FINDENTRY_MALFORMED_PATH;
+    };
 
+    FindEntryStatus findEntry = find_entry_in_root(&name, entryBuffer);
+    while (findEntry == FINDENTRY_FOUND && (result = next_entry(path, &name, &path)))
+    {
         // TODO: Check if the entry is a folder.
 
         // Find next entry in folder.
-        findEntry = find_entry_in_folder(entryBuffer, path, entryBuffer);
-        path++;
+        findEntry = find_entry_in_folder(entryBuffer, &name, entryBuffer);
+        if (path == (const char *)0x00000000)
+        {
+            break;
+        }
     }
 
     if (findEntry != FINDENTRY_FOUND)
@@ -137,5 +141,72 @@ FindEntryStatus find_entry_by_path(EntryName *path, Entry *entryBuffer)
         return FINDENTRY_NOT_FOUND;
     }
 
+    if (!result)
+    {
+        return FINDENTRY_MALFORMED_PATH;
+    }
+
     return FINDENTRY_FOUND;
+}
+
+_Bool next_entry(const char *path, EntryName *entry, const char **nextPath)
+{
+    const char *endPoint = path, *extensionPoint = (const char *)0x00000000;
+    for (unsigned long i = 0; i < 13; i++)
+    {
+        switch (path[i])
+        {
+        case '\0':
+            *nextPath = (const char *)0x00000000;
+            goto endEarly;
+
+        case '\\':
+        case '/':
+            // This entry must be a directory.
+            extensionPoint = (const char *)0x00000000;
+            *nextPath = endPoint + 1;
+            goto endEarly;
+
+        case '.':
+            // File extension.
+            extensionPoint = endPoint + 1;
+            break;
+
+        default:
+            break;
+        }
+
+        endPoint++;
+    }
+
+    return 0;
+
+endEarly:
+    byte_fill((void *)entry, sizeof(EntryName), ' '); // Empty characters must be spaces.
+    if (extensionPoint)
+    {
+        if (endPoint - extensionPoint > 3)
+        {
+            return 0;
+        }
+
+        copy_to((void *)path, (void *)&(entry->Name), extensionPoint - path - 1); // Ignore the file extension period.
+        copy_to((void *)extensionPoint, (void *)&(entry->FileExtension), endPoint - extensionPoint);
+    }
+    else if (endPoint == path)
+    {
+        // Simply equivalent to /./
+        entry->Name[0] = '.';
+    }
+    else
+    {
+        if (endPoint - path > 8)
+        {
+            return 0;
+        }
+
+        copy_to((void *)path, (void *)(entry->Name), endPoint - path);
+    }
+
+    return 1;
 }

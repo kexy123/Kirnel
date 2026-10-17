@@ -1,5 +1,7 @@
 #pragma once
 
+#include "filesys/master.h"
+
 #define ENTRY_NAME_BYTES (8)     // The maximum length that a file name can be.
 #define ENTRY_FILE_EXT_BYTES (3) // The maximum length that a file extension can be.
 
@@ -89,12 +91,22 @@ typedef enum
     /// @brief The entry was not found in the cluster. Note that this doesn't immediately mark the entry as nonexistent in the folder.
     FINDENTRY_NOT_FOUND_IN_CLUSTER = 0x2,
 
+    /// @brief The file path is malformed.
+    FINDENTRY_MALFORMED_PATH = 0x3,
+
     /// @brief An internal error occurred while trying to find an entry.
-    FINDENTRY_INTERNAL_ERROR = 0x3
+    FINDENTRY_INTERNAL_ERROR = 0x4,
 } FindEntryStatus;
 
 /// @brief Finds an entry by an array of EntryNames forming an absolute path.
 /// @param path The absolute path which is an array of EntryNames.
 /// @param entryBuffer The Entry buffer that will be loaded onto when the entry is found; otherwise returns the last common directory.
 /// @return The status of when the entry was found or not.
-FindEntryStatus find_entry_by_path(EntryName *path, Entry *entryBuffer);
+FindEntryStatus find_entry_by_path(FilePath path, Entry *entryBuffer);
+
+/// @brief Converts the first file/folder in the path to an EntryName.
+/// @param path The path to convert.
+/// @param entry The result to load onto.
+/// @param nextPath The pointer to the next path name to load onto.
+/// @return True if the entry is valid; otherwise false.
+_Bool next_entry(const char *path, EntryName *entry, const char **nextPath);
