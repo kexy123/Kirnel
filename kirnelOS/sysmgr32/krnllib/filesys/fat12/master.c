@@ -42,12 +42,12 @@ void fat12_close_file(FileInfo file)
     destroy_string(file.Name);
     destroy_string(file.Extension);
 
-    free(file.Internal);
+    free((void *)file.Internal);
 }
 
 _Bool fat12_load_all(FileInfo file, char *buffer)
 {
-    load_entire_entry((const Entry *)file.Internal, buffer);
+    load_entire_entry((Entry *)file.Internal, buffer);
 
     return 1;
 }

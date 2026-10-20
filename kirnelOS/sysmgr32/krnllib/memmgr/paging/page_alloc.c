@@ -298,7 +298,7 @@ void init_allocator()
     // TODO: Functions that allow allocation at specific locations.
     add_range(segment->BaseAddress + allocationTreeLength, segment->BaseAddress + segment->SegmentLength);
 
-    treeLocation = (char *)segment->BaseAddress;
+    treeLocation = (char *)(unsigned long)segment->BaseAddress;
 }
 
 void locate_allocator()

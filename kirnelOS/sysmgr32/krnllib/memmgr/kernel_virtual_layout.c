@@ -7,7 +7,7 @@ const Address kernelSpace = {.Raw = 0xC0000000};
 
 const Address kernelVGA = {.Raw = 0xC00B8000};
 
-const Address kernelStackStart = {.Raw = 0xDFFFE000};
+const Address kernelStackStart = {.Raw = 0xDFFFB000};
 
 const Address kernelStackEnd = {.Raw = 0xDFFFF000};
 

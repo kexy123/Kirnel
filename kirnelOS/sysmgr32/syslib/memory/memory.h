@@ -23,6 +23,11 @@
 /// @return The starting pointer of the free memory.
 void *malloc(unsigned long size);
 
+/// @brief Allocates memory from the heap and clears out the garbage beforehand.
+/// @param size The number of bytes to allocate. Note that you may not get the exact number of bytes.
+/// @return The starting pointer of the free cleared memory.
+void *calloc(unsigned long size);
+
 /// @brief Frees memory from the heap.
 /// @param object The object to free.
 void free(void *object);

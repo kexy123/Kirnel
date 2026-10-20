@@ -19,17 +19,19 @@ typedef union
 } HeapFlags;
 
 /// @brief The starting metadata of a free heap block.
-typedef struct __attribute__((packed)) FreeHeapBlock
+typedef struct FreeHeap FreeHeap;
+
+struct __attribute__((packed)) FreeHeap
 {
     /// @brief The length of the free heap block in bytes.
     HeapLength Length;
 
     /// @brief The previous heap block in its order free list.
-    struct FreeHeapBlock *Previous;
+    FreeHeap *Previous;
 
     /// @brief The next heap block in its order free list.
-    struct FreeHeapBlock *Next;
-} FreeHeap;
+    FreeHeap *Next;
+};
 
 /// @brief The ending metadata of a heap block.
 typedef struct __attribute__((packed))
@@ -168,6 +170,13 @@ void *malloc(unsigned long size)
     }
 
     return expand(size);
+}
+
+void *calloc(unsigned long size)
+{
+    void *heapMemory = malloc(size);
+    zero_fill(heapMemory, size);
+    return heapMemory;
 }
 
 void free(void *object)
