@@ -5,7 +5,7 @@
 jmp short _start
 nop
 
-; FAT12 BIOS parameter block
+; FAT12 BIOS parameter block. Note that this must be consistent with the structure file in the FAT12 file system folder.
 oem_name:               db "KIRNELOS"       ; 8 bytes.
 
 bytes_per_sector:       dw 512

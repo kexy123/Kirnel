@@ -11,9 +11,9 @@ NextClusterStatus get_next_cluster(DiskCluster *cluster)
         return NEXTCLUSTER_CORRUPTED;
     }
 
-    unsigned char buffer[BPB->SectorsPerFAT * BPB->BytesPerSector];
+    unsigned char buffer[bpbObject->SectorsPerFAT * bpbObject->BytesPerSector];
     MemFAT fatTable = buffer;
-    read_data(DRIVE_NUMBER, FAT1_START_SECT, BPB->SectorsPerFAT, fatTable);
+    read_data(DRIVE_NUMBER, FAT1_START_SECT, bpbObject->SectorsPerFAT, fatTable);
 
     fatTable += *cluster + *cluster / 2;
     if (*cluster & 1)

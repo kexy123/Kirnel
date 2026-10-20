@@ -2,18 +2,6 @@
 
 #include "dir.h"
 
-#define BOOT_SECTOR (0x7C00)                               // The location of the boot sector.
-#define BPB ((const BIOSParameterBlock *const)BOOT_SECTOR) // The BIOS Parameter Block.
-
-#define DRIVE_NUMBER (BPB->Extended.DriveNumber) // The drive number.
-
-#define SECTORS_IN_ROOT (BPB->RootEntryCount * sizeof(Entry) / BPB->BytesPerSector) // The number of sectors in the root.
-#define BYTES_PER_CLUSTER (BPB->SectorsPerCluster * BPB->BytesPerSector)            // The number of bytes in a cluster.
-
-#define FAT1_START_SECT (BPB->ReservedSectors)                                 // The FAT1 table lives directly after the reserved sectors.
-#define ROOT_START_SECT (FAT1_START_SECT + BPB->FATCount * BPB->SectorsPerFAT) // The root directory lives directly after the FATs.
-#define CLUSTER_START_SECT (ROOT_START_SECT + SECTORS_IN_ROOT)                 // The starting cluster lives directly after the root directory.
-
 /// @brief A uint8_t.
 typedef unsigned char byte;
 
@@ -84,3 +72,15 @@ typedef struct __attribute__((packed))
     /// @brief The extended parameter block.
     ExtendedBIOSParameterBlock Extended;
 } BIOSParameterBlock;
+
+/// @brief The boot sector.
+extern const BIOSParameterBlock *bpbObject;
+
+#define DRIVE_NUMBER (bpbObject->Extended.DriveNumber) // The drive number.
+
+#define SECTORS_IN_ROOT (bpbObject->RootEntryCount * sizeof(Entry) / bpbObject->BytesPerSector) // The number of sectors in the root.
+#define BYTES_PER_CLUSTER (bpbObject->SectorsPerCluster * bpbObject->BytesPerSector)            // The number of bytes in a cluster.
+
+#define FAT1_START_SECT (bpbObject->ReservedSectors)                                 // The FAT1 table lives directly after the reserved sectors.
+#define ROOT_START_SECT (FAT1_START_SECT + bpbObject->FATCount * bpbObject->SectorsPerFAT) // The root directory lives directly after the FATs.
+#define CLUSTER_START_SECT (ROOT_START_SECT + SECTORS_IN_ROOT)                 // The starting cluster lives directly after the root directory.

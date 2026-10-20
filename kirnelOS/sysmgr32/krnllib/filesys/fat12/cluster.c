@@ -28,7 +28,7 @@ ReadClusterStatus read_cluster(DiskCluster diskCluster, MemCluster memCluster)
     else
     {
         LogicalBlockAddress sectorPosition = CLUSTER_START_SECT + diskCluster - START_CLUSTER;
-        status = read_data(DRIVE_NUMBER, sectorPosition, BPB->SectorsPerCluster, memCluster);
+        status = read_data(DRIVE_NUMBER, sectorPosition, bpbObject->SectorsPerCluster, memCluster);
     }
 
     if (status == FLOPPY_READ_OK)

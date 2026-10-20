@@ -75,7 +75,7 @@ FindEntryStatus find_entry_in_folder(Entry *folder, EntryName *name, Entry *entr
         }
 
         // Check if entry exists in that cluster.
-        FindEntryStatus findEntry = find_entry_in_memcluster(memCluster, BPB->SectorsPerCluster * BPB->BytesPerSector / sizeof(Entry), name, entryBuffer);
+        FindEntryStatus findEntry = find_entry_in_memcluster(memCluster, bpbObject->SectorsPerCluster * bpbObject->BytesPerSector / sizeof(Entry), name, entryBuffer);
         if (findEntry == FINDENTRY_FOUND)
         {
             return FINDENTRY_FOUND;
@@ -94,7 +94,7 @@ FindEntryStatus find_entry_in_folder(Entry *folder, EntryName *name, Entry *entr
 /// @return The status of when the entry was found or not.
 FindEntryStatus find_entry_in_root(EntryName *name, Entry *entryBuffer)
 {
-    char buffer[SECTORS_IN_ROOT * BPB->BytesPerSector];
+    char buffer[SECTORS_IN_ROOT * bpbObject->BytesPerSector];
     MemCluster memCluster = buffer;
 
     // Read cluster, which is the entirety of the root directory.
@@ -105,7 +105,7 @@ FindEntryStatus find_entry_in_root(EntryName *name, Entry *entryBuffer)
     }
 
     // Check if the entry is in that cluster.
-    FindEntryStatus findEntry = find_entry_in_memcluster(memCluster, BPB->RootEntryCount, name, entryBuffer);
+    FindEntryStatus findEntry = find_entry_in_memcluster(memCluster, bpbObject->RootEntryCount, name, entryBuffer);
     if (findEntry == FINDENTRY_FOUND)
     {
         return FINDENTRY_FOUND;
@@ -113,6 +113,7 @@ FindEntryStatus find_entry_in_root(EntryName *name, Entry *entryBuffer)
 
     return FINDENTRY_NOT_FOUND;
 }
+
 FindEntryStatus find_entry_by_path(FilePath path, Entry *entryBuffer)
 {
     EntryName name;
