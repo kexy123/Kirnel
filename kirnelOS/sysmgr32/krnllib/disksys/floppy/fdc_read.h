@@ -15,6 +15,6 @@ typedef enum
 /// @param driveNumber The drive number.
 /// @param location The location in the floppy disk.
 /// @param numberOfSectors The number of sectors to read from. The buffer must be able to fit that many sectors.
-/// @param buffer The buffer to load the data onto.
+/// @param buffer The virtual address of the buffer to load the data onto. Note that it must be physically contiguous.
 /// @return The floppy disk read status.
 FloppyDiskReadStatus read_data(unsigned char driveNumber, LogicalBlockAddress location, unsigned short numberOfSectors, char *buffer);

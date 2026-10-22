@@ -2,6 +2,7 @@
 #include "fdc.h"
 #include "fdc_location.h"
 #include "fdc_read.h"
+#include "memmgr/paging/paging.h"
 
 /// @brief Sets up the 2nd channel of the direct memory address to perform any read/write access in the floppy disk to/from the buffer location.
 /// @param buffer The location of where to read or write data to.
@@ -35,7 +36,11 @@ FloppyDiskReadStatus read_data(unsigned char driveNumber, LogicalBlockAddress lo
 
     seek(driveNumber, head, cylinder);
 
-    setup_dma(buffer, numberOfSectors * 512);
+    // Translate to physical address.
+    void *result;
+    virt_to_phys((Address){.Address = (void *)buffer}, &result);
+
+    setup_dma((char *)result, numberOfSectors * 512);
     prepare_dma_for_read();
 
     // https://wiki.osdev.org/Floppy_Disk_Controller#Read/Write
