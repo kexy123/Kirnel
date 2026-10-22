@@ -23,6 +23,11 @@ enable_paging:
     or eax, 0x80000001
     mov cr0, eax
 
+    ; Enable global pages.
+    mov eax, cr4
+    or eax, 0x00000080
+    mov cr4, eax
+
     mov [pagingEnabled], byte 0x01
 
     ret
