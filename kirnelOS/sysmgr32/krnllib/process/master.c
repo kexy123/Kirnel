@@ -1,7 +1,6 @@
 #include "bit.h"
 #include "filesys/master.h"
 #include "master.h"
-#include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/paging/page_alloc.h"
 #include "memmgr/paging/paging.h"
 #include "memory/memory.h"
@@ -16,7 +15,8 @@ Process *create_process(FilePath executable)
     FileInfo program = fileSystem->open_file(executable, Read);
     if (!program.Success)
     {
-        return (Process *)0x00000000;
+        free((void *)newProcess);
+        return (Process *)0xFFFFFFFF;
     }
 
     // Load then close file.
@@ -27,8 +27,9 @@ Process *create_process(FilePath executable)
     fileSystem->close_file(program);
     if (!success)
     {
+        free((void *)newProcess);
         deallocate(lowest_exp2(numPages), location);
-        return (Process *)0x00000000;
+        return (Process *)0xFFFFFFFF;
     }
 
     // Create primary thread.
@@ -39,9 +40,7 @@ Process *create_process(FilePath executable)
     newProcess->PageDirectory = directory;
 
     // Map the code space.
-    switch_page(directory);
-    map(self, (Address){.Raw = __CODE_SPACE}, location, numPages + remainder, 0, 1, 0);
-    switch_page((PageDirectory *)kernelPagingDirectory.Address); // TODO: Make this efficient?
+    map(directory, (Address){.Raw = __CODE_SPACE}, location, numPages + remainder, 0, 1, 0);
 
     currentProcID++;
     newProcess->ProcessID = currentProcID;

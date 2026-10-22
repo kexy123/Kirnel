@@ -465,7 +465,7 @@ PageDirectory *create_directory()
     PageDirectory *directory = allocate_strict(1, &_);
 
     PageTable *page = map_page_table(directory, (Address){.Raw = SELF_REFERENCING_POINTER}, (PageTable *)0xFFFFFFFF, 1, 0);
-        map_page(directory, page, (Address){.Raw = SELF_REFERENCING_POINTER}, directory, 1, 0, 0);
+    map_page(directory, page, (Address){.Raw = SELF_REFERENCING_POINTER}, directory, 1, 0, 0);
 
     return directory;
 }
