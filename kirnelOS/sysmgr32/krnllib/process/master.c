@@ -1,6 +1,7 @@
 #include "bit.h"
 #include "filesys/master.h"
 #include "master.h"
+#include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/paging/page_alloc.h"
 #include "memmgr/paging/paging.h"
 #include "memory/memory.h"
@@ -40,7 +41,7 @@ Process *create_process(FilePath executable)
     newProcess->PageDirectory = directory;
 
     // Map the code space.
-    map(directory, (Address){.Raw = __CODE_SPACE}, location, numPages + remainder, 0, 1, 0);
+    map(directory, (Address){.Raw = __CODE_SPACE}, location, numPages + remainder, 1, 1, 0);
 
     currentProcID++;
     newProcess->ProcessID = currentProcID;
