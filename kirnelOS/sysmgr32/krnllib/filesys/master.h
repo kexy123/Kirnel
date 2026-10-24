@@ -61,7 +61,7 @@ typedef struct
 
     /// @brief Loads the entire file onto a contiguous buffer.
     /// @param file The file to open.
-    /// @param buffer The buffer to load the entire file onto.
+    /// @param buffer The physical address of buffer to load the entire file onto.
     /// @return True if the file can be read to; otherwise false.
     _Bool (*load_all)(FileInfo file, char *buffer);
 } FileSystem;

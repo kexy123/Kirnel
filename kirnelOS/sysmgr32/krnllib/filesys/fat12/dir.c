@@ -3,6 +3,7 @@
 #include "fat.h"
 #include "filesys/master.h"
 #include "memory/memcopy.h"
+#include "memmgr/paging/paging.h"
 
 /// @brief Compares if two entry names are equal in value.
 /// @param a The first EntryName.
@@ -62,20 +63,21 @@ FindEntryStatus find_entry_in_folder(Entry *folder, EntryName *name, Entry *entr
     DiskCluster cluster = folder->FirstClusterLow;
 
     char buffer[BYTES_PER_CLUSTER];
-    MemCluster memCluster = buffer;
+    void *physicalBuffer;
+    virt_to_phys((Address){.Address = (void *)buffer}, &physicalBuffer);
 
     NextClusterStatus nextCluster;
     do
     {
         // Check current cluster.
-        ReadClusterStatus readStatus = read_cluster(cluster, memCluster);
+        ReadClusterStatus readStatus = read_cluster(cluster, (MemCluster)physicalBuffer);
         if (readStatus != CLUSTER_OK)
         {
             return FINDENTRY_INTERNAL_ERROR;
         }
 
         // Check if entry exists in that cluster.
-        FindEntryStatus findEntry = find_entry_in_memcluster(memCluster, bpbObject->SectorsPerCluster * bpbObject->BytesPerSector / sizeof(Entry), name, entryBuffer);
+        FindEntryStatus findEntry = find_entry_in_memcluster((MemCluster)buffer, bpbObject->SectorsPerCluster * bpbObject->BytesPerSector / sizeof(Entry), name, entryBuffer);
         if (findEntry == FINDENTRY_FOUND)
         {
             return FINDENTRY_FOUND;
@@ -95,17 +97,18 @@ FindEntryStatus find_entry_in_folder(Entry *folder, EntryName *name, Entry *entr
 FindEntryStatus find_entry_in_root(EntryName *name, Entry *entryBuffer)
 {
     char buffer[SECTORS_IN_ROOT * bpbObject->BytesPerSector];
-    MemCluster memCluster = buffer;
+    void *physicalBuffer;
+    virt_to_phys((Address){.Address = (void *)buffer}, &physicalBuffer);
 
     // Read cluster, which is the entirety of the root directory.
-    ReadClusterStatus readStatus = read_cluster(ROOT_CLUSTER, memCluster);
+    ReadClusterStatus readStatus = read_cluster(ROOT_CLUSTER, (MemCluster)physicalBuffer);
     if (readStatus != CLUSTER_OK)
     {
         return FINDENTRY_INTERNAL_ERROR;
     }
 
     // Check if the entry is in that cluster.
-    FindEntryStatus findEntry = find_entry_in_memcluster(memCluster, bpbObject->RootEntryCount, name, entryBuffer);
+    FindEntryStatus findEntry = find_entry_in_memcluster((MemCluster)buffer, bpbObject->RootEntryCount, name, entryBuffer);
     if (findEntry == FINDENTRY_FOUND)
     {
         return FINDENTRY_FOUND;

@@ -36,11 +36,7 @@ FloppyDiskReadStatus read_data(unsigned char driveNumber, LogicalBlockAddress lo
 
     seek(driveNumber, head, cylinder);
 
-    // Translate to physical address.
-    void *result;
-    virt_to_phys((Address){.Address = (void *)buffer}, &result);
-
-    setup_dma((char *)result, numberOfSectors * 512);
+    setup_dma((char *)buffer, numberOfSectors * 512);
     prepare_dma_for_read();
 
     // https://wiki.osdev.org/Floppy_Disk_Controller#Read/Write
