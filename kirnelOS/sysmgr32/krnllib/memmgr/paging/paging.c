@@ -133,8 +133,12 @@ void add_translation(PageDirectory *directory, Address virtual, Address physical
     PageTable *table;
     if (!get_page_table(directory, physical, &_, &table))
     {
-        void *location;
-        phys_to_virt((Address){.Address = map_page_table(directory, physical, (void *)0xFFFFFFFF, 1, 0)}, &location);
+        void *location = (void *)map_page_table(directory, physical, (void *)0xFFFFFFFF, 1, 0);
+        if (pagingEnabled)
+        {
+            map(self, kernelPagingBuffer, (void *)location, 1, 1, 0, 0);
+            location = kernelPagingBuffer.Address;
+        }
 
         table = (PageTable *)location;
     }
@@ -142,8 +146,12 @@ void add_translation(PageDirectory *directory, Address virtual, Address physical
     Page *page;
     if (!traverse(directory, physical, ForPage, &page))
     {
-        void *location;
-        phys_to_virt((Address){.Address = map_page(directory, table, physical, (void *)0xFFFFFFFF, 1, 0, 0)}, &location);
+        void *location = (void *)map_page(directory, table, physical, (void *)0xFFFFFFFF, 1, 0, 0);
+        if (pagingEnabled)
+        {
+            map(self, kernelPagingBuffer, (void *)location, 1, 1, 0, 0);
+            location = kernelPagingBuffer.Address;
+        }
 
         page = (Page *)location;
         one_fill(page, sizeof(Page));
@@ -277,25 +285,24 @@ PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, Page
     virtualAddress.Page = virtualAddress.Directory;
     virtualAddress.Directory = 1023; // Self-referencing page tables.
 
-    PageTable *table;
     Page *page;
+    void *location;
     if (!traverse(directory, virtualAddress, ForPageTable, &page))
     {
         // Create the page table if it doesn't exist.
-        void *location = map_page_table(directory, virtualAddress, (PageTable *)0xFFFFFFFF, 1, 0);
-        if (pagingEnabled && directory == self)
-        {
-            phys_to_virt((Address){.Address = location}, &location);
-        }
-
-        table = (PageTable *)location;
+        location = map_page_table(directory, virtualAddress, (PageTable *)0xFFFFFFFF, 1, 0);
     }
     else
     {
-        table = (PageTable *)page;
+        location = (void *)page;
     }
 
-    map_page(directory, table, virtualAddress, physicalPageTable, 1, 0, 0);
+    if (pagingEnabled && directory == self)
+    {
+        phys_to_virt((Address){.Address = location}, &location);
+    }
+
+    map_page(directory, (PageTable *)location, virtualAddress, physicalPageTable, 1, 0, 0);
 
     return physicalPageTable;
 }
@@ -459,6 +466,26 @@ void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, Pag
     }
 }
 
+/// @brief Adds the kernel space as a protected region in the given directory.
+/// @param directory The directory to link the kernel space onto.
+void add_kernel_to_directory(PageDirectory *directory)
+{
+    Address address = {.Directory = 768};
+    for (unsigned long pageNum = 768; pageNum < 1022; pageNum++)
+    {
+        PageDirectoryEntry *entry;
+        PageTable *_;
+
+        if (get_page_table(self, address, &entry, &_))
+        {
+            PageTable *table = (PageTable *)(entry->Page << PAGE_SIZE_EXP);
+            map_page_table(directory, address, table, 0, 1);
+        }
+
+        address.Directory++;
+    }
+}
+
 PageDirectory *create_directory()
 {
     unsigned long _;
@@ -466,6 +493,11 @@ PageDirectory *create_directory()
 
     PageTable *page = map_page_table(directory, (Address){.Raw = SELF_REFERENCING_POINTER}, (PageTable *)0xFFFFFFFF, 1, 0);
     map_page(directory, page, (Address){.Raw = SELF_REFERENCING_POINTER}, directory, 1, 0, 0);
+
+    if (pagingEnabled)
+    {
+        add_kernel_to_directory(directory);
+    }
 
     return directory;
 }
