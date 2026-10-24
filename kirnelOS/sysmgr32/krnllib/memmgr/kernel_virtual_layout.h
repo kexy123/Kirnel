@@ -2,6 +2,8 @@
 
 #include "paging/paging.h"
 
+#define KERNEL_DIRECTORY (*(PageDirectory **)kernelPagingDirectory.Address) // The physical location of the kernel page directory.
+
 /// @brief The old location of the kernel space. Is only used to be transferred to the dedicated kernel space.
 extern const Address oldKernelSpace;
 
