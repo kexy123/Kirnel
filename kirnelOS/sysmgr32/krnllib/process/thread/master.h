@@ -58,8 +58,8 @@ typedef struct
 {
     // Move these manually.
 
-    /// @brief A segment register.
-    unsigned short DS, ES, FS, GS;
+    /// @brief A segment register. Must only be an unsigned short.
+    unsigned long DS, ES, FS, GS;
 
     // In order of the POPAD instruction: https://intel.github.io/SDM/instruction/POPA-POPAD.html
 
@@ -80,8 +80,8 @@ typedef struct
     /// @brief The instruction pointer.
     void *EIP;
 
-    /// @brief The code segment selector.
-    unsigned short CS;
+    /// @brief The code segment selector. Must only be an unsigned short.
+    unsigned long CS;
 
     /// @brief The execution flags.
     EFlags EFLAGS;
@@ -89,8 +89,8 @@ typedef struct
     /// @brief The stack pointer.
     void *ESP;
 
-    /// @brief The stack segment selector.
-    unsigned short SS;
+    /// @brief The stack segment selector. Must only be an unsigned short.
+    unsigned long SS;
 } CPUContext;
 
 typedef enum : unsigned char
