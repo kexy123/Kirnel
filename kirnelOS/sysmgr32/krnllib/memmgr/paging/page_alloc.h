@@ -1,6 +1,6 @@
 #pragma once
 
-#define PAGE_SIZE_EXP (12)             // The exponent of the size of a page in bytes in memory.
+#define PAGE_SIZE_EXP (12)               // The exponent of the size of a page in bytes in memory.
 #define PAGE_SIZE (1UL << PAGE_SIZE_EXP) // The number of bytes in a page in memory.
 
 /// @brief An allocation node. The position of the allocation node and in its order determines the size of the starting page it's pointing to.
@@ -16,7 +16,7 @@ typedef struct __attribute__((packed))
 /// @brief The number of bytes of the allocation tree.
 extern unsigned long allocationTreeLength;
 
-/// @brief The address of the alloocation tree.
+/// @brief The address of the allocation tree.
 extern const char *treeLocation;
 
 /// @brief Allocates and returns the starting physical address to a free zeroed-out memory chunk of the given number of pages.

@@ -87,7 +87,7 @@ typedef struct __attribute__((packed))
 } SegmentEntry;
 
 /// @brief The descriptor table. Can have up to 4096 segment entries.
-typedef SegmentEntry DescriptorTable[4096];
+typedef SegmentEntry DescriptorTable[16];
 
 /// @brief The descriptor that defines the metadata of the global descriptor table.
 typedef struct __attribute__((packed))

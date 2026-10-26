@@ -15,7 +15,7 @@ typedef enum : unsigned long
     /// @brief Memory that must be preserved by the [ACPI](https://en.wikipedia.org/wiki/ACPI).
     ACPINVS = 4,
 
-    /// @brief Unusuable memory and must be avoided.
+    /// @brief Unusable memory and must be avoided.
     Unusable = 5,
 
     /// @brief Memory that must be accepted before use.
