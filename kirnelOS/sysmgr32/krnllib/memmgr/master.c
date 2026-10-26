@@ -22,8 +22,8 @@ void init_mem()
     treeLocation = (const char *)kernelPageAllocTree.Address;
 
     // The kernel stack.
-    unsigned long stack_length = (kernelStackEnd.Raw - kernelStackStart.Raw) >> PAGE_SIZE_EXP; // The number of pages in the kernel stack.
-    map_to_free(root, kernelStackStart, stack_length, 1, 0, 0);
+    unsigned long stack_length = (kernelStack1End.Raw - kernelStack1Start.Raw) >> PAGE_SIZE_EXP; // The number of pages in the kernel stack.
+    map_to_free(root, kernelStack1Start, stack_length, 1, 0, 0);
 
     enable_paging(root);
 

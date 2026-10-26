@@ -13,11 +13,11 @@ extern const Address kernelSpace;
 /// @brief The dedicated location of the VGA.
 extern const Address kernelVGA;
 
-/// @brief The start (bottom) of the kernel stack space.
-extern const Address kernelStackStart;
+/// @brief The start (bottom) of the kernel stack space for kernel booting and the first kernel thread.
+extern const Address kernelStack1Start;
 
-/// @brief The end (top) of the kernel stack space.
-extern const Address kernelStackEnd;
+/// @brief The end (top) of the kernel stack space for kernel booting and the first kernel thread.
+extern const Address kernelStack1End;
 
 /// @brief The dedicated location of the global descriptor table. Only has one page.
 extern const Address kernelGDT;
