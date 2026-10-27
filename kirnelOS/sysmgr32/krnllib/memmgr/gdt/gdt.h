@@ -109,7 +109,8 @@ void generate_descriptor();
 /// @param attributes The segment attributes.
 /// @param granular The segment's address is in pages instead of bytes.
 /// @param size The segment size type.
-void add_segment(unsigned short index, unsigned long base, unsigned long limit, SegmentAttributes attributes, _Bool granular, SegmentSize size);
+/// @return The segment selector for the given segment.
+unsigned short add_segment(unsigned short index, unsigned long base, unsigned long limit, SegmentAttributes attributes, _Bool granular, SegmentSize size);
 
 /// Loads the recently generated global descriptor table to the CPU.
 void init_gdt();

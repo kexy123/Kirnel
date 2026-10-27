@@ -28,7 +28,7 @@ void generate_descriptor()
     memDescriptor.Length = sizeof(SegmentEntry) - 1;
 }
 
-void add_segment(unsigned short index, unsigned long base, unsigned long limit, SegmentAttributes attributes, _Bool granular, SegmentSize size)
+unsigned short add_segment(unsigned short index, unsigned long base, unsigned long limit, SegmentAttributes attributes, _Bool granular, SegmentSize size)
 {
     (*table)[index] = (SegmentEntry){
         .LimitLow = (unsigned short)limit, // Extract low 16 bits of the limit.
@@ -49,6 +49,8 @@ void add_segment(unsigned short index, unsigned long base, unsigned long limit, 
         maxEntries = index;
         memDescriptor.Length = maxEntries * sizeof(SegmentEntry) - 1;
     }
+
+    return ((index - 1) * 0x08) | attributes.PrivilegeLevel;
 }
 
 void init_gdt()

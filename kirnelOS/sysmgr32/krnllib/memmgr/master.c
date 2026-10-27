@@ -34,6 +34,7 @@ void init_mem()
 
 void finalize_mem()
 {
+    check_os_gdt();
     analyse_mem_segments();
     check_paging();
     locate_allocator();

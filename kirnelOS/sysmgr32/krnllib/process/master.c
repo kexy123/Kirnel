@@ -1,7 +1,6 @@
 #include "bit.h"
 #include "filesys/master.h"
 #include "master.h"
-#include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/paging/page_alloc.h"
 #include "memmgr/paging/paging.h"
 #include "memory/memory.h"
