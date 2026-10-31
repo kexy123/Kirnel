@@ -6,7 +6,7 @@
 /// @brief Switches to the given thread via the given CPU context.
 /// @param directory The page directory to switch to.
 /// @param context The CPU context to switch to.
-extern void context_switch(PageDirectory *directory, CPUContext context);
+__attribute__((__cdecl__)) extern void context_switch(PageDirectory *directory, CPUContext context);
 
 Thread *create_thread(Process *parentProcess, void *atInstruction, void *stack)
 {

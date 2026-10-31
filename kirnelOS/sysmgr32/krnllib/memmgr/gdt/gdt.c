@@ -14,7 +14,7 @@ unsigned short maxEntries;
 
 /// @brief Loads the given global descriptor table to the CPU.
 /// @param descriptor The descriptor of the global descriptor table.
-extern void load_gdt(TableDescriptorRegister *descriptor);
+__attribute__((__cdecl__)) extern void load_gdt(TableDescriptorRegister *descriptor);
 
 void generate_descriptor()
 {

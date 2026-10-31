@@ -1,7 +1,7 @@
 #pragma once
 
 /// @brief Halts the CPU thread until an interrupt is raised.
-extern void halt();
+__attribute__((__cdecl__)) extern void halt();
 
 /// @brief Halts the CPU permanently as the kernel has reached an unrecoverable state.
-extern void panic();
+__attribute__((__cdecl__)) extern void panic();

@@ -2,4 +2,4 @@
 
 /// @brief Jumps to the next stage of the boot loader.
 [[noreturn]]
-extern void jump_next_stage();
+__attribute__((__cdecl__)) extern void jump_next_stage();

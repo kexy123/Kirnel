@@ -7,8 +7,8 @@ ELF_GPP := i386-elf-g++
 NASM := nasm
 MAKE_DIR = @mkdir -p $(dir $@)
 
-C_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syslib -std=c23 -fdata-sections -ffunction-sections
-CPP_FLAGS := -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syslib -std=c++23 -fdata-sections -ffunction-sections
+C_FLAGS := -Wall -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syslib -std=c23 -fdata-sections -ffunction-sections
+CPP_FLAGS := -Wall -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/syslib -std=c++23 -fdata-sections -ffunction-sections
 
 # OBJECTS
 C_SOURCES := $(shell find kirnelOS/sysmgr32/syslib -name '*.c')

@@ -1,12 +1,10 @@
 #include "master.h"
-#include "interrupts/interrupts.h"
-#include "interrupts/interrupt_state.h"
 #include "structure.h"
 #include "utils/portcall.h"
 
 /// @brief Loads the given interrupt descriptor table with the given address to the descriptor.
 /// @param descriptor The address of the IDTDescriptor.
-extern void load_idt(IDTDescriptor *descriptor);
+__attribute__((__cdecl__)) extern void load_idt(IDTDescriptor *descriptor);
 
 void init_idt()
 {

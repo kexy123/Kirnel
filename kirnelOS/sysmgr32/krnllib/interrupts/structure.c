@@ -2,7 +2,6 @@
 #include "interrupts/interrupts.h"
 #include "interrupts/interrupt_state.h"
 #include "structure.h"
-#include "utils/portcall.h"
 
 IDTEntry idtTable[256];
 

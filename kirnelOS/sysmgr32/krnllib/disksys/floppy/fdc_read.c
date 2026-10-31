@@ -2,15 +2,14 @@
 #include "fdc.h"
 #include "fdc_location.h"
 #include "fdc_read.h"
-#include "memmgr/paging/paging.h"
 
 /// @brief Sets up the 2nd channel of the direct memory address to perform any read/write access in the floppy disk to/from the buffer location.
 /// @param buffer The location of where to read or write data to.
 /// @param bytes The number of bytes in the buffer.
-extern void setup_dma(char *buffer, unsigned short bytes);
+__attribute__((__cdecl__)) extern void setup_dma(char *buffer, unsigned short bytes);
 
 /// @brief Prepares the direct memory address for reading from the floppy disk.
-extern void prepare_dma_for_read();
+__attribute__((__cdecl__)) extern void prepare_dma_for_read();
 
 /// @brief Locates the location in the floppy disk by the drive number, the head, and the cylinder.
 /// @param driveNumber The drive number.
@@ -53,9 +52,13 @@ FloppyDiskReadStatus read_data(unsigned char driveNumber, LogicalBlockAddress lo
 
     yield_fdc_finish(0);
 
+    // Status variables.
     unsigned char status0 = read_fdc_command(DATA_FIFO);
-    unsigned char status1 = read_fdc_command(DATA_FIFO);
-    unsigned char status2 = read_fdc_command(DATA_FIFO);
+    // unsigned char status1 = read_fdc_command(DATA_FIFO);
+    // unsigned char status2 = read_fdc_command(DATA_FIFO);
+    read_fdc_command(DATA_FIFO);
+    read_fdc_command(DATA_FIFO);
+
     read_fdc_command(DATA_FIFO); // Cylinder.
     read_fdc_command(DATA_FIFO); // Ending head.
     read_fdc_command(DATA_FIFO); // Ending sector.

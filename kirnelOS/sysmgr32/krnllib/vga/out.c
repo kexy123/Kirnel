@@ -82,7 +82,7 @@ void print_bool(_Bool boolean)
 
 void print_hex(void *source, unsigned long numBytes)
 {
-    unsigned char *sourcePtr = (char *)source;
+    unsigned char *sourcePtr = (unsigned char *)source;
 
     for (unsigned long i = 0; i < numBytes; i++)
     {

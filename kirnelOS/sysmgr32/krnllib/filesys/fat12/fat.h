@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cluster.h"
-#include "structure.h"
 
 /// @brief Refers to the address of the starting byte of a FAT in memory.
 typedef unsigned char *MemFAT;

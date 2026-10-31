@@ -203,15 +203,15 @@ PageDirectory *create_directory();
 
 /// @brief Enables paging and global paging and switches to the given PageDirectory.
 /// @param pageDirectory The PageDirectory to use.
-extern void enable_paging(PageDirectory *pageDirectory);
+__attribute__((__cdecl__)) extern void enable_paging(PageDirectory *pageDirectory);
 
 /// @brief Checks if paging is enabled and sets pagingEnabled.
-extern void check_paging();
+__attribute__((__cdecl__)) extern void check_paging();
 
 /// @brief Invalidates a page by a given virtual address. Is used for setting or clearing the presence of pages from within the self page directory.
 /// @param virtualAddress The page-aligned virtual address whose page to invalidate.
-extern void invalidate_page(void *virtualAddress);
+__attribute__((__cdecl__)) extern void invalidate_page(void *virtualAddress);
 
 /// @brief Switches to a given PageDirectory without changing the current paging state.
 /// @param PageDirectory The PageDirectory to switch to.
-extern void switch_page(PageDirectory *PageDirectory);
+__attribute__((__cdecl__)) extern void switch_page(PageDirectory *PageDirectory);

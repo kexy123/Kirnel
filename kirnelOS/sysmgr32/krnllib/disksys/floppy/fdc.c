@@ -54,7 +54,8 @@ void calibrate_fdc()
     send_fdc_command(DATA_FIFO, 0x00); // Drive 0.
     yield_fdc_finish(1);
 
-    unsigned char status = read_fdc_command(DATA_FIFO);
+    // unsigned char status = read_fdc_command(DATA_FIFO);
+    read_fdc_command(DATA_FIFO); // TODO: Use status variable.
     unsigned char presentCylinder = read_fdc_command(DATA_FIFO);
 
     if (presentCylinder != 0)

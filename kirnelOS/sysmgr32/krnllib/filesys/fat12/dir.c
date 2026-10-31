@@ -4,6 +4,7 @@
 #include "filesys/master.h"
 #include "memory/memcopy.h"
 #include "memmgr/paging/paging.h"
+#include "structure.h"
 
 /// @brief Compares if two entry names are equal in value.
 /// @param a The first EntryName.

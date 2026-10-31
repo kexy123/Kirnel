@@ -5,11 +5,11 @@ static _Bool hasCPUID = 0;
 /// @brief Gets the CPUID bitset of features from the given register type.
 /// @param registerType The register to read from. 0 for EBX, 1 for ECX, and 2 for EDX.
 /// @return The bitset of the specified register.
-extern unsigned long get_cpuid_feature(unsigned long registerType);
+__attribute__((__cdecl__)) extern unsigned long get_cpuid_feature(unsigned long registerType);
 
 /// @brief Checks if the CPU contains a CPUID.
 /// @return True if the CPU contains a CPUID; otherwise false.
-extern _Bool has_cpuid();
+__attribute__((__cdecl__)) extern _Bool has_cpuid();
 
 _Bool check_cpuid()
 {
