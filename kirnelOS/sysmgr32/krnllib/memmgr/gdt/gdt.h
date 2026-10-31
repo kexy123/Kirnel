@@ -103,14 +103,13 @@ typedef struct __attribute__((packed))
 void generate_descriptor();
 
 /// @brief Adds a descriptor segment to the table.
-/// @param index The location to add the segment at.
 /// @param base The starting byte address of the segment.
 /// @param limit The ending byte/page address of the segment, which depends on the segment's attributes.
 /// @param attributes The segment attributes.
 /// @param granular The segment's address is in pages instead of bytes.
 /// @param size The segment size type.
 /// @return The segment selector for the given segment.
-unsigned short add_segment(unsigned short index, unsigned long base, unsigned long limit, SegmentAttributes attributes, _Bool granular, SegmentSize size);
+unsigned short append_segment(unsigned long base, unsigned long limit, SegmentAttributes attributes, _Bool granular, SegmentSize size);
 
 /// Loads the recently generated global descriptor table to the CPU.
 void init_gdt();
