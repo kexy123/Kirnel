@@ -31,3 +31,8 @@ void *calloc(unsigned long size);
 /// @brief Frees memory from the heap.
 /// @param object The object to free.
 void free(void *object);
+
+/// @brief Moves the heap.
+/// @param heapMinimum The heap's lower boundary.
+/// @param heapMaximum The heap's upper boundary.
+void move_heap(unsigned long heapMinimum, unsigned long heapMaximum);

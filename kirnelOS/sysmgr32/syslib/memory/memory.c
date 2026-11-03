@@ -49,6 +49,9 @@ FreeHeap *heapTop[__HEAP_NUM_ORDERS];
 /// @brief The byte after the last byte of the heap.
 static char *heapEnd = (char *)__HEAP_START;
 
+/// @brief The upper boundary of the heap.
+static char *heapMax = (char *)__HEAP_END;
+
 /// @brief Adds a free block to the start of the free list that it should be in.
 /// @param location The location of the block. This starts at the metadata point.
 void push(void *location)
@@ -147,7 +150,7 @@ void *expand(unsigned long size)
     unsigned long blockSize = __HEAP_HEADER_SIZE + size;
 
     heapEnd += blockSize;
-    if (heapEnd > (char *)__HEAP_END)
+    if (heapEnd > heapMax)
     {
         // TODO: Abort process.
     }
@@ -221,4 +224,10 @@ void free(void *object)
 
     // Reinstantiate the new merged block.
     init_block(freeLocation, totalLength, 1);
+}
+
+void move_heap(unsigned long heapMinimum, unsigned long heapMaximum)
+{
+    heapEnd = (char *)heapMinimum;
+    heapMax = (char *)heapMaximum;
 }

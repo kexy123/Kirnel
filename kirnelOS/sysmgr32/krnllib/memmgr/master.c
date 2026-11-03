@@ -1,4 +1,5 @@
 #include "master.h"
+#include "memory/memory.h"
 #include "gdt/master.h"
 #include "kernel_virtual_layout.h"
 #include "paging/mem_segments.h"
@@ -38,6 +39,7 @@ void finalize_mem()
     analyse_mem_segments();
     check_paging();
     locate_allocator();
+    move_heap(kernelHeapStart.Raw, kernelHeapEnd.Raw);
 
     map(self, kernelVGA, (void *)0x000B8000, 1, 1, 0, 0); // Remapping the VGA buffer.
     change_vga_output((VGACharacter *)kernelVGA.Address);
