@@ -15,18 +15,15 @@ void create_os_gdt()
 
     kernelCodeSegment = append_segment(0x00000000, 0xFFFFF, (SegmentAttributes){.Raw = 0b10011010}, 1, Bits32); // 0x08
     kernelDataSegment = append_segment(0x00000000, 0xFFFFF, (SegmentAttributes){.Raw = 0b10010010}, 1, Bits32); // 0x10
-
-    userCodeSegment = append_segment(0x00000000, 0xBFFFF, (SegmentAttributes){.Raw = 0b11111010}, 1, Bits32); // 0x1B
-    userDataSegment = append_segment(0x00000000, 0xBFFFF, (SegmentAttributes){.Raw = 0b11110010}, 1, Bits32); // 0x23
-
-    init_gdt();
 }
 
 void check_os_gdt()
 {
+    check_descriptor();
+
     kernelCodeSegment = 0x08;
     kernelDataSegment = 0x10;
 
-    userCodeSegment = 0x1B;
-    userDataSegment = 0x23;
+    userCodeSegment = append_segment(0x00000000, 0xBFFFF, (SegmentAttributes){.Raw = 0b11111010}, 1, Bits32); // 0x1B
+    userDataSegment = append_segment(0x00000000, 0xBFFFF, (SegmentAttributes){.Raw = 0b11110010}, 1, Bits32); // 0x23
 }

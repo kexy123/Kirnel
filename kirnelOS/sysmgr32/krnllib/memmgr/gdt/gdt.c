@@ -7,7 +7,7 @@
 DescriptorTable *table;
 
 /// @brief The descriptor defining metadata of the global descriptor table.
-TableDescriptorRegister memDescriptor;
+TableDescriptorRegister *memDescriptor;
 
 /// @brief The number of entries in the current descriptor table.
 unsigned short maxEntries;
@@ -19,13 +19,22 @@ __attribute__((__cdecl__)) extern void load_gdt(TableDescriptorRegister *descrip
 void generate_descriptor()
 {
     map_to_free(self, kernelGDT, 1, 1, 0, 1);
-    memDescriptor.SegmentStart = table = (DescriptorTable *)kernelGDT.Address;
+    memDescriptor = (TableDescriptorRegister *)kernelGDT.Address;
+    memDescriptor->SegmentStart = table = (DescriptorTable *)(kernelGDT.Raw + sizeof(TableDescriptorRegister));
 
     // Zero-fill the first entry.
     zero_fill(table, sizeof(SegmentEntry));
 
     maxEntries = 1;
-    memDescriptor.Length = sizeof(SegmentEntry) - 1;
+    memDescriptor->Length = sizeof(SegmentEntry) - 1;
+}
+
+void check_descriptor()
+{
+    memDescriptor = (TableDescriptorRegister *)kernelGDT.Address;
+    table = memDescriptor->SegmentStart;
+
+    maxEntries = memDescriptor->Length / sizeof(SegmentEntry) + 1;
 }
 
 unsigned short append_segment(unsigned long base, unsigned long limit, SegmentAttributes attributes, _Bool granular, SegmentSize size)
@@ -44,12 +53,9 @@ unsigned short append_segment(unsigned long base, unsigned long limit, SegmentAt
     };
 
     maxEntries++;
-    memDescriptor.Length = maxEntries * sizeof(SegmentEntry) - 1;
+    memDescriptor->Length = maxEntries * sizeof(SegmentEntry) - 1;
 
-    return ((maxEntries - 1) * 0x08) | attributes.PrivilegeLevel;
-}
+    load_gdt(memDescriptor);
 
-void init_gdt()
-{
-    load_gdt(&memDescriptor);
+    return ((maxEntries - 1) * sizeof(SegmentEntry)) | attributes.PrivilegeLevel;
 }
