@@ -120,7 +120,6 @@ disk_read_error:
     jmp boot_halt
 
 
-; Similar implementation to boot_record/bios/print_chp.asm
 bios_log:
     lodsb
 

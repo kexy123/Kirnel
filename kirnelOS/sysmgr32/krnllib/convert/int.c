@@ -21,9 +21,9 @@ const char *uint_to_str(unsigned long num)
 const char *uint_to_strx(unsigned long num, unsigned char leadingZeros)
 {
     static char result[9];
-    unsigned char leadingZeroSentinel = 9 - leadingZeros;
+    unsigned char leadingZeroSentinel = 8 - leadingZeros;
 
-    int i = 9;
+    int i = 8;
     result[i] = '\0';
 
     // Base-16 conversion using capital letters.

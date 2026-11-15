@@ -46,6 +46,9 @@ typedef struct __attribute__((packed))
 /// @brief The free list of heap blocks.
 FreeHeap *heapTop[__HEAP_NUM_ORDERS];
 
+/// @brief The lower boundary of the heap.
+static char *heapMin = (char *)__HEAP_START;
+
 /// @brief The byte after the last byte of the heap.
 static char *heapEnd = (char *)__HEAP_START;
 
@@ -63,6 +66,7 @@ void push(void *location)
     FreeHeap *nextBlock = heapTop[index];
     heapTop[index] = freeBlock;
 
+    freeBlock->Previous = (FreeHeap *)0x00000000;
     freeBlock->Next = nextBlock;
     if (nextBlock != 0)
     {
@@ -160,7 +164,13 @@ void *expand(unsigned long size)
 
 void *malloc(unsigned long size)
 {
-    for (unsigned long orderIndex = lowest_exp2(size) - __HEAP_ATOMIC; orderIndex < __HEAP_NUM_ORDERS; orderIndex++)
+    unsigned long exponent = lowest_exp2(size);
+    if (exponent < __HEAP_ATOMIC)
+    {
+        exponent = __HEAP_ATOMIC;
+    }
+
+    for (unsigned long orderIndex = exponent - __HEAP_ATOMIC; orderIndex < __HEAP_NUM_ORDERS; orderIndex++)
     {
         char *location = (char *)heapTop[orderIndex];
         if (location == 0)
@@ -169,10 +179,11 @@ void *malloc(unsigned long size)
         }
 
         try_partition((void *)location, size);
+        dissolve(location);
         return (void *)(location + sizeof(HeapLength));
     }
 
-    return expand(size);
+    return expand(1UL << exponent);
 }
 
 void *calloc(unsigned long size)
@@ -194,7 +205,7 @@ void free(void *object)
 
     // Try and merge the left neighbour.
     EndHeap *previousEnd = (EndHeap *)(meta - sizeof(EndHeap));
-    if (previousEnd >= (EndHeap *)__HEAP_START && previousEnd->Flags.Free)
+    if (previousEnd > (EndHeap *)heapMin && previousEnd->Flags.Free)
     {
         // Merge this block and move the ending location of where to free the entire merged block.
         freeLocation = (void *)(meta - previousEnd->Length);
@@ -228,6 +239,6 @@ void free(void *object)
 
 void move_heap(unsigned long heapMinimum, unsigned long heapMaximum)
 {
-    heapEnd = (char *)heapMinimum;
+    heapMin = heapEnd = (char *)heapMinimum;
     heapMax = (char *)heapMaximum;
 }
