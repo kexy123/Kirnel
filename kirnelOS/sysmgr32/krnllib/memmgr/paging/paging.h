@@ -125,6 +125,10 @@ extern _Bool pagingEnabled;
 /// @brief The physical address of the page directory that the kernel is currently under.
 extern PageDirectory *selfMemorySpace;
 
+/// @brief Configures the virtual memory operations buffer for this CPU.
+/// @param bufferIndex The buffer index to give. It must be unique against other CPUs.
+void configure_mem_buffer(unsigned short bufferIndex);
+
 /// @brief Creates an empty PageDirectory.
 /// @return The physical address of where the PageDirectory was created.
 PageDirectory *create_directory();

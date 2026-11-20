@@ -11,6 +11,7 @@ void init_mem()
 {
     analyse_mem_segments();
     init_allocator();
+    configure_mem_buffer(0);
 
     PageDirectory *root = create_directory();
 
@@ -37,6 +38,7 @@ void finalize_mem()
 {
     check_os_gdt();
     analyse_mem_segments();
+    configure_mem_buffer(0);
     check_paging();
     locate_allocator();
     move_heap(kernelHeapStart.Raw, kernelHeapEnd.Raw);

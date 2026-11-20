@@ -3,9 +3,17 @@
 #include "memmgr/kernel_virtual_layout.h"
 #include "memory/memcopy.h"
 
-#define SELF_REFERENCING_POINTER (0xFF7FF000)                                       // The pointer where a self-referencing page directory references itself.
-#define VIRT_REFERENCING_POINTER ((PhysicalToVirtualTranslationPage *)(0xFF800000)) // The starting page table of translating physical addresses to virtual addresses.
-#define PAGE_REFERENCING_POINTER (0xFFC00000)                                       // The starting pointer of the page table metadata.
+/// @brief The structure of the virtual memory operations buffer page table.
+typedef struct
+{
+    /// @brief The buffer that points to its own page table.
+    PageTable self;
+
+    /// @brief All the usable buffers, extensible for more than one logical CPU processor.
+    Page buffers[1023];
+} VirtualMemoryOperations;
+
+#define VIRT_MEMOP_BUFFER ((VirtualMemoryOperations *)(0xFFC00000)) // The starting pointer of the virtual memory operations buffer.
 
 /// @brief The behavior for when traversing through a page directory.
 typedef enum
@@ -18,10 +26,82 @@ typedef enum
 } TraversalType;
 
 _Bool pagingEnabled = 0;
-
 PageDirectory *selfMemorySpace = (PageDirectory *)0xFFFFFFFF;
+
+// TODO: Change this if we are using more than one CPU processor. Note that it cannot be 0.
+unsigned short cpuBufferIndex;
+Page *cpuBuffer;
+
+void configure_mem_buffer(unsigned short bufferIndex)
+{
+    cpuBufferIndex = bufferIndex + 1;
+    cpuBuffer = &(VIRT_MEMOP_BUFFER->buffers[bufferIndex]);
+}
+
+/// @brief Loads the given physicalPage onto the assigned virtual memory operations buffer for this CPU. Paging must be enabled.
+/// @param physicalPage The physical page to load.
+void load(void *physicalPage)
+{
+    PageTable *dir = &VIRT_MEMOP_BUFFER->self;
+    (*dir)[cpuBufferIndex] = (PageTableEntry){
+        .Page = (unsigned long)physicalPage >> PAGE_SIZE_EXP,
+        .Present = 1,
+        .ReadOrWrite = 1,
+        .UserOrSuper = 0,
+    };
+
+    invalidate_page(dir + cpuBufferIndex);
+}
+
+/// @brief Sets up the given page directory to be able to perform virtual memory operations on itself.
+/// @param directory The physical address of the page directory to bootstrap.
+void bootstrap(PageDirectory *directory)
+{
+    // Bootstrap the page table into the directory.
+    PageDirectory *dirLocation = directory;
+    if (pagingEnabled)
+    {
+        load(directory);
+        dirLocation = (PageDirectory *)cpuBuffer;
+    }
+
+    unsigned long _;
+    PageTable *virtMemOpTable = allocate_strict(1, &_);
+
+    (*dirLocation)[1023] = (PageDirectoryEntry){
+        .Page = (unsigned long)virtMemOpTable >> PAGE_SIZE_EXP,
+        .Present = 1,
+        .ReadOrWrite = 1,
+        .UserOrSuper = 0,
+    };
+
+    // Bootstrap the page table into itself.
+    PageTable *memOpLocation;
+    if (pagingEnabled)
+    {
+        load(virtMemOpTable);
+        memOpLocation = (PageTable *)cpuBuffer;
+    }
+
+    (*memOpLocation)[0] = (PageTableEntry){
+        .Page = (unsigned long)virtMemOpTable >> PAGE_SIZE_EXP,
+        .Present = 1,
+        .ReadOrWrite = 1,
+        .UserOrSuper = 0,
+    };
+}
 
 PageDirectory *create_directory()
 {
-    
+    unsigned long _;
+    PageDirectory *directory = allocate_strict(1, &_);
+
+    bootstrap(directory);
+
+    if (pagingEnabled)
+    {
+        // TODO: Load.
+    }
+
+    return directory;
 }
