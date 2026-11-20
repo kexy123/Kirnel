@@ -119,93 +119,21 @@ typedef PageDirectoryEntry PageDirectory[NUM_ENTRIES];
 /// @brief A physical page.
 typedef unsigned char Page[PAGE_SIZE];
 
-/// @brief A special page that is used to translate a physical address to the most-recently mapped virtual address.
-typedef Address PhysicalToVirtualTranslationPage[NUM_ENTRIES];
-
 /// @brief Is set if paging is enabled.
 extern _Bool pagingEnabled;
 
-/// @brief The location of the self-referencing page directory in virtual memory if this page directory is being used.
-extern PageDirectory *self;
-
-/// @brief Gets a page table from the given page directory and index.
-/// @param directory The PageDirectory to look in. Must be either physical or the self directory.
-/// @param virtualAddress The virtual address corresponding to this traversal.
-/// @param entryResult The location to load the directory entry onto.
-/// @param result The location to load the page table location onto. This acknowledges self-referencing.
-/// @return True if the page table exists; otherwise false. In contradictory cases a kernel panic may occur.
-_Bool get_page_table(PageDirectory *directory, Address virtualAddress, PageDirectoryEntry **entryResult, PageTable **result);
-
-/// @brief Gets a page from the given page table and index.
-/// @param directory The PageDirectory this page table is in. Must be either physical or the self directory.
-/// @param table The PageTable to look in. Must be either physical or self-referential.
-/// @param virtualAddress The virtual address corresponding to this traversal.
-/// @param entryResult The location to load the table entry onto.
-/// @param result The location to load the page location onto. This acknowledges self-referencing.
-/// @return True if the page exists; otherwise false. In contradictory cases a kernel panic may occur.
-_Bool get_page(PageDirectory *directory, PageTable *table, Address virtualAddress, PageTableEntry **entryResult, Page **result);
-
-/// @brief Maps a page from the page directory at the given page table and address to the given physical address or a free page.
-/// @param directory The PageDirectory the page table is in. Must be either physical or the self directory.
-/// @param table The PageTable to modify. Must be either physical or the self directory.
-/// @param virtualAddress The virtual address to map from.
-/// @param physicalAddress The physical address to map to. 0xFFFFFFFF to map to a free page.
-/// @param canWrite The pages can be written to; otherwise it is read-only.
-/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
-/// @param global The pages are global regardless of when switching between page directories.
-/// @return The physical address that was mapped to.
-void *map_page(PageDirectory *directory, PageTable *table, Address virtualAddress, void *physicalAddress, _Bool canWrite, _Bool userAccessible, _Bool global);
-
-/// @brief Maps a page table from a page directory to the given page table address or a free page.
-/// @param directory The PageDirectory to modify. Must be either physical or the self directory.
-/// @param virtualAddress The virtual address to map from.
-/// @param physicalPageTable The physical PageTable address to map to. 0xFFFFFFFF to map to a free page.
-/// @param canWrite The pages can be written to; otherwise it is read-only.
-/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
-/// @return The physical address that was mapped to.
-PageTable *map_page_table(PageDirectory *directory, Address virtualAddress, PageTable *physicalPageTable, _Bool canWrite, _Bool userAccessible);
-
-/// @brief Translates a virtual address to its physical address. If paging is disabled, simply returns the address.
-/// @param virtual The virtual address.
-/// @param result The location to translate the physical address onto.
-/// @return True if the virtual-to-physical mapping exists or paging is disabled; otherwise false.
-_Bool virt_to_phys(Address virtual, void **result);
-
-/// @brief Maps one-to-one the physical page to the virtual page by the given number of contiguous pages.
-/// @param root The PageDirectory to modify. Must be either physical or the self directory.
-/// @param virtualAddress The starting virtual page-aligned address.
-/// @param physicalAddress The starting physical page-aligned address.
-/// @param contiguous The number of physical contiguous pages to map.
-/// @param canWrite The pages can be written to; otherwise it is read-only.
-/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
-/// @param global The pages are global regardless of when switching between page directories.
-void map(PageDirectory *root, Address virtualAddress, void *physicalAddress, unsigned long contiguous, _Bool canWrite, _Bool userAccessible, _Bool global);
-
-/// @brief Maps a virtual page location by the given number of wanted free pages.
-/// @param root The PageDirectory to modify. Must be either physical or the self directory.
-/// @param virtualAddress The starting virtual page-aligned address.
-/// @param pages The number of pages to allocate and map to. Note that they do not need to be contiguous.
-/// @param canWrite The pages can be written to; otherwise it is read-only.
-/// @param userAccessible The pages can be accessed by the user; otherwise it is only accessible to the supervisor.
-/// @param global The pages are global regardless of when switching between page directories.
-void map_to_free(PageDirectory *root, Address virtualAddress, unsigned long pages, _Bool canWrite, _Bool userAccessible, _Bool global);
-
-/// @brief Unmaps and frees the given number at pages by a starting virtual page address.
-/// @param root The PageDirectory to modify. Must be either physical or the self directory.
-/// @param virtualAddress The starting virtual page-aligned address.
-/// @param pages The number of pages to unmap.
-/// @param free The page freeing behavior.
-void unmap(PageDirectory *root, Address virtualAddress, unsigned long pages, PageFreeType free);
+/// @brief The physical address of the page directory that the kernel is currently under.
+extern PageDirectory *selfMemorySpace;
 
 /// @brief Creates an empty PageDirectory.
-/// @return The virtual address of where the PageDirectory was created.
+/// @return The physical address of where the PageDirectory was created.
 PageDirectory *create_directory();
 
 /// @brief Enables paging and global paging and switches to the given PageDirectory.
 /// @param pageDirectory The PageDirectory to use.
 __attribute__((__cdecl__)) extern void enable_paging(PageDirectory *pageDirectory);
 
-/// @brief Checks if paging is enabled and sets pagingEnabled.
+/// @brief Checks if paging is enabled and sets pagingEnabled and the selfMemorySpace.
 __attribute__((__cdecl__)) extern void check_paging();
 
 /// @brief Invalidates a page by a given virtual address. Is used for setting or clearing the presence of pages from within the self page directory.
@@ -213,5 +141,5 @@ __attribute__((__cdecl__)) extern void check_paging();
 __attribute__((__cdecl__)) extern void invalidate_page(void *virtualAddress);
 
 /// @brief Switches to a given PageDirectory without changing the current paging state.
-/// @param PageDirectory The PageDirectory to switch to.
+/// @param PageDirectory The PageDirectory by its physical address to switch to.
 __attribute__((__cdecl__)) extern void switch_page(PageDirectory *PageDirectory);

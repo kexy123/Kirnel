@@ -4,6 +4,8 @@ section .text
 
 extern pagingEnabled
 
+extern selfMemorySpace
+
 global enable_paging
 
 global switch_page
@@ -16,6 +18,7 @@ enable_paging:
     ; https://wiki.osdev.org/X86_Paging#32-bit_Paging
     ; Move the address to CR3.
     mov eax, [esp + 4] ; The PageDirectory address.
+    mov [selfMemorySpace], eax
     mov cr3, eax
 
     ; Enable the paging and protection bits of CR0.
@@ -34,6 +37,7 @@ enable_paging:
 
 switch_page:
     mov eax, [esp + 4] ; The PageDirectory address.
+    mov [selfMemorySpace], eax
     mov cr3, eax
 
     ret
@@ -47,6 +51,8 @@ check_paging:
     test eax, 0x80000000
     jz skip_set
 
+    mov eax, cr3
+    mov [selfMemorySpace], eax
     mov [pagingEnabled], byte 0x01
 
 skip_set:
