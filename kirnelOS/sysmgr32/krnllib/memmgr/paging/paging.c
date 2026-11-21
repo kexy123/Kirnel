@@ -342,11 +342,18 @@ void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long num
     }
 }
 
-/// @brief Maps the kernel space.
+/// @brief Maps the kernel space, assuming paging is already enabled and the current page directory contains the kernel space.
 /// @param directory The physical page directory to map the kernel space onto.
 void map_kernel_space(PageDirectory *directory)
 {
+    load(directory);
 
+    // TODO: Move these magic numbers into constexpr functions.
+    // Essentially computes the starting pointers of page table index 768 in the directories (which is 0xC0000000).
+    void *kernelSpaceSource = (void *)&(VIRT_MEMOP_BUFFER->selfDirectory[768]);
+    void *kernelSpaceDestination = (void *)&((*(PageTable *)cpuBuffer)[768]);
+
+    copy_to(kernelSpaceSource, kernelSpaceDestination, (1023 - 768) * sizeof(PageDirectoryEntry));
 }
 
 PageDirectory *create_directory()
