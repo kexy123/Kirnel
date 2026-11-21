@@ -11,7 +11,6 @@ void init_mem()
 {
     analyse_mem_segments();
     init_allocator();
-    configure_mem_buffer(0);
 
     PageDirectory *root = create_directory();
 
@@ -28,6 +27,7 @@ void init_mem()
     map_to_free(root, kernelStack1Start, stack_length, 1, 0, 0);
 
     enable_paging(root);
+    configure_mem_buffer(0);
 
     *(PageDirectory **)kernelPagingDirectory.Address = root; // Add the kernel page directory.
 
@@ -43,8 +43,8 @@ void finalize_mem()
     locate_allocator();
     move_heap(kernelHeapStart.Raw, kernelHeapEnd.Raw);
 
-    map(self, kernelVGA, (void *)0x000B8000, 1, 1, 0, 0); // Remapping the VGA buffer.
+    map(selfMemorySpace, kernelVGA, (void *)0x000B8000, 1, 1, 0, 0); // Remapping the VGA buffer.
     change_vga_output((VGACharacter *)kernelVGA.Address);
 
-    unmap(self, oldKernelSpace, 0x1000, FreePageTables);
+    unmap(selfMemorySpace, oldKernelSpace, 0x1000, FreePageTables);
 }

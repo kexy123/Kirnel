@@ -64,8 +64,7 @@ FindEntryStatus find_entry_in_folder(Entry *folder, EntryName *name, Entry *entr
     DiskCluster cluster = folder->FirstClusterLow;
 
     char buffer[BYTES_PER_CLUSTER];
-    void *physicalBuffer;
-    virt_to_phys((Address){.Address = (void *)buffer}, &physicalBuffer);
+    void *physicalBuffer = virt_to_phys(selfMemorySpace, (Address){.Address = (void *)buffer});
 
     NextClusterStatus nextCluster;
     do
@@ -98,8 +97,7 @@ FindEntryStatus find_entry_in_folder(Entry *folder, EntryName *name, Entry *entr
 FindEntryStatus find_entry_in_root(EntryName *name, Entry *entryBuffer)
 {
     char buffer[SECTORS_IN_ROOT * bpbObject->BytesPerSector];
-    void *physicalBuffer;
-    virt_to_phys((Address){.Address = (void *)buffer}, &physicalBuffer);
+    void *physicalBuffer = virt_to_phys(selfMemorySpace, (Address){.Address = (void *)buffer});
 
     // Read cluster, which is the entirety of the root directory.
     ReadClusterStatus readStatus = read_cluster(ROOT_CLUSTER, (MemCluster)physicalBuffer);

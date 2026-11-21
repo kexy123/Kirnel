@@ -26,7 +26,7 @@ void load_kernel()
         unsigned long numPages = (kernel.FileSize >> PAGE_SIZE_EXP) + 1, remainder;
         void *location = allocate_strict(numPages, &remainder);
 
-        map(self, kernelSpace, location, numPages + remainder, 1, 0, 1); // Dedicated kernel space. Note that map_to_free will not work here.
+        map(selfMemorySpace, kernelSpace, location, numPages + remainder, 1, 0, 1); // Dedicated kernel space. Note that map_to_free will not work here.
 
         fileSystem->load_all(kernel, (char *)location);
     }

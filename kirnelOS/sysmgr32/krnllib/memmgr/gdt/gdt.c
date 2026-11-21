@@ -18,7 +18,7 @@ __attribute__((__cdecl__)) extern void load_gdt(TableDescriptorRegister *descrip
 
 void generate_descriptor()
 {
-    map_to_free(self, kernelGDT, 1, 1, 0, 1);
+    map_to_free(selfMemorySpace, kernelGDT, 1, 1, 0, 1);
     memDescriptor = (TableDescriptorRegister *)kernelGDT.Address;
     memDescriptor->SegmentStart = table = (DescriptorTable *)(kernelGDT.Raw + sizeof(TableDescriptorRegister));
 
