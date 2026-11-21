@@ -19,6 +19,4 @@ const Address kernelGDT = {.Raw = 0xDFFFF000};
 
 const Address kernelPageAllocTree = {.Raw = 0xE0000000};
 
-const Address kernelPagingDirectory = {.Raw = 0xFF7FDFFC};
-
-const Address kernelPagingBuffer = {.Raw = 0xFF7FE000};
+const Address kernelPagingDirectory = {.Raw = 0xFFBFFFFC};

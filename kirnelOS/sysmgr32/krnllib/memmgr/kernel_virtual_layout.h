@@ -38,6 +38,3 @@ extern const Address kernelPageAllocTree;
 
 /// @brief The dedicated global location of the physical address to the page directory for the kernel.
 extern const Address kernelPagingDirectory;
-
-/// @brief The dedicated location of the paging buffer for when the kernel needs to perform paging operations.
-extern const Address kernelPagingBuffer;
