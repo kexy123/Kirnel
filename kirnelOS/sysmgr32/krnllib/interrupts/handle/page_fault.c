@@ -10,9 +10,23 @@ void page_fault_handle(InterruptCPUState *state)
     {
         switch_page(KERNEL_DIRECTORY);
         map_to_free(selfMemorySpace, (Address){.Raw = state->CR2}, 1, 1, 0, state->CR2 >= kernelSpace.Raw);
+        return;
     }
-    else
+
+    if (state->CS == userCodeSegment)
     {
-        panic();
+        if (state->CR2 < kernelSpace.Raw)
+        {
+            check_paging();
+            map_to_free(selfMemorySpace, (Address){.Raw = state->CR2}, 1, 1, 1, 0);
+        }
+        else
+        {
+            // Segmentation fault, so dump user process.
+        }
+
+        return;
     }
+
+    panic();
 }
