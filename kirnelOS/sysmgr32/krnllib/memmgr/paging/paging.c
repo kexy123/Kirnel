@@ -191,11 +191,12 @@ void unmap_page(unsigned long index, PageFreeType type)
     PageTable *table = (PageTable *)cpuBuffer;
     PageTableEntry entry = (*table)[index];
 
-    entry.Present = 0;
-    if (type | FreePages)
+    if (type | FreePages && entry.Present)
     {
-        deallocate(0, (void *)(entry.Page << PAGE_SIZE_EXP));
+        deallocate(1, (void *)(entry.Page << PAGE_SIZE_EXP));
     }
+
+    entry.Present = 0;
 }
 
 /// @brief Unmaps a page table from a given index.
@@ -207,11 +208,12 @@ void unmap_page_table(unsigned long index, PageFreeType type)
     PageDirectory *table = (PageDirectory *)cpuBuffer;
     PageDirectoryEntry entry = (*table)[index];
 
-    entry.Present = 0;
-    if (type | FreePageTables)
+    if (type | FreePageTables && entry.Present)
     {
-        deallocate(0, (void *)(entry.Page << PAGE_SIZE_EXP));
+        deallocate(1, (void *)(entry.Page << PAGE_SIZE_EXP));
     }
+
+    entry.Present = 0;
 }
 
 void *virt_to_phys(PageDirectory *directory, Address virtualAddress)
@@ -246,9 +248,14 @@ void map(PageDirectory *directory, Address virtualPageStart, void *physicalPageS
             {
                 // Create a new page table.
                 pageTable = map_page_table(virtualPageStart.Directory, (void *)KERNEL_NULL_PTR, canWrite, userAccessible);
+                load(pageTable);
+                zero_fill((void *)cpuBuffer, sizeof(PageTable));
+            }
+            else
+            {
+                load(pageTable);
             }
 
-            load(pageTable);
             updatePageTable = 0;
         }
 
