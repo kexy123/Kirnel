@@ -115,7 +115,9 @@ void *init_block(void *location, unsigned long size, _Bool free)
     *length = size;
 
     HeapFlags *flags = (HeapFlags *)((char *)length - sizeof(HeapFlags));
-    flags->Free = free;
+    *flags = (HeapFlags){
+        .Free = free,
+    };
 
     if (free)
     {
@@ -140,6 +142,8 @@ void try_partition(void *location, unsigned long size)
         // The remainder cannot be used to initialize a free block.
         return;
     }
+
+    dissolve(location);
 
     init_block(location, partitionLength, 0);
     init_block(location + partitionLength, remainder, 1);
