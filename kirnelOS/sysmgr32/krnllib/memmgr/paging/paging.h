@@ -140,7 +140,7 @@ __attribute__((__cdecl__)) extern void enable_paging(PageDirectory *pageDirector
 /// @brief Checks if paging is enabled and sets pagingEnabled and the selfMemorySpace.
 __attribute__((__cdecl__)) extern void check_paging();
 
-/// @brief Invalidates a page by a given virtual address. Is used for setting or clearing the presence of pages from within the self page directory.
+/// @brief Invalidates a page by a given virtual address. Is used for setting or clearing the presence of pages from within the selfMemorySpace page directory.
 /// @param virtualAddress The page-aligned virtual address whose page to invalidate.
 __attribute__((__cdecl__)) extern void invalidate_page(void *virtualAddress);
 

@@ -26,7 +26,7 @@ typedef enum
 } TraversalType;
 
 _Bool pagingEnabled = 0;
-PageDirectory *selfMemorySpace = (PageDirectory *)0xFFFFFFFF;
+PageDirectory *selfMemorySpace = (PageDirectory *)KERNEL_NULL_PTR;
 
 // TODO: Change this if we are using more than one CPU processor. Note that it cannot be 0.
 unsigned short cpuBufferIndex;
@@ -42,6 +42,13 @@ void configure_mem_buffer(unsigned short bufferIndex)
 /// @param physicalPage The physical page to load.
 void load(void *physicalPage)
 {
+    if (!pagingEnabled)
+    {
+        // Paging is not enabled; simply set the buffer to the location.
+        cpuBuffer = physicalPage;
+        return;
+    }
+
     PageTable *dir = &VIRT_MEMOP_BUFFER->self;
     (*dir)[cpuBufferIndex] = (PageTableEntry){
         .Page = (unsigned long)physicalPage >> PAGE_SIZE_EXP,
@@ -58,12 +65,8 @@ void load(void *physicalPage)
 void bootstrap(PageDirectory *directory)
 {
     // Bootstrap the page table into the directory.
-    PageDirectory *dirLocation = directory;
-    if (pagingEnabled)
-    {
         load(directory);
-        dirLocation = (PageDirectory *)cpuBuffer;
-    }
+    PageDirectory *dirLocation = (PageDirectory *)cpuBuffer;
 
     unsigned long _;
     PageTable *virtMemOpTable = allocate_strict(1, &_);
@@ -76,12 +79,8 @@ void bootstrap(PageDirectory *directory)
     };
 
     // Bootstrap the page table into itself.
-    PageTable *memOpLocation;
-    if (pagingEnabled)
-    {
         load(virtMemOpTable);
-        memOpLocation = (PageTable *)cpuBuffer;
-    }
+    PageTable *memOpLocation = (PageTable *)cpuBuffer;
 
     (*memOpLocation)[0] = (PageTableEntry){
         .Page = (unsigned long)virtMemOpTable >> PAGE_SIZE_EXP,
@@ -97,11 +96,6 @@ PageDirectory *create_directory()
     PageDirectory *directory = allocate_strict(1, &_);
 
     bootstrap(directory);
-
-    if (pagingEnabled)
-    {
-        // TODO: Load.
-    }
 
     return directory;
 }
