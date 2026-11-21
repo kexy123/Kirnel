@@ -189,14 +189,14 @@ void unmap_page(unsigned long index, PageFreeType type)
 {
     // Note: this assumes that the necessary page table is loaded into the correct CPU buffer; otherwise it is undefined behavior.
     PageTable *table = (PageTable *)cpuBuffer;
-    PageTableEntry entry = (*table)[index];
+    PageTableEntry *entry = &(*table)[index];
 
-    if (type | FreePages && entry.Present)
+    if (type | FreePages && entry->Present)
     {
-        deallocate(1, (void *)(entry.Page << PAGE_SIZE_EXP));
+        deallocate(1, (void *)(entry->Page << PAGE_SIZE_EXP));
     }
 
-    entry.Present = 0;
+    entry->Present = 0;
 }
 
 /// @brief Unmaps a page table from a given index.
@@ -206,14 +206,14 @@ void unmap_page_table(unsigned long index, PageFreeType type)
 {
     // Note: this assumes that the necessary page directory is loaded into the correct CPU buffer; otherwise it is undefined behavior.
     PageDirectory *table = (PageDirectory *)cpuBuffer;
-    PageDirectoryEntry entry = (*table)[index];
+    PageDirectoryEntry *entry = &(*table)[index];
 
-    if (type | FreePageTables && entry.Present)
+    if (type | FreePageTables && entry->Present)
     {
-        deallocate(1, (void *)(entry.Page << PAGE_SIZE_EXP));
+        deallocate(1, (void *)(entry->Page << PAGE_SIZE_EXP));
     }
 
-    entry.Present = 0;
+    entry->Present = 0;
 }
 
 void *virt_to_phys(PageDirectory *directory, Address virtualAddress)
@@ -310,6 +310,7 @@ void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long num
                 if (numPages > NUM_ENTRIES)
                 {
                     numPages -= NUM_ENTRIES;
+                    virtualPageStart.Directory++;
                     continue;
                 }
                 return;
@@ -323,6 +324,7 @@ void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long num
             }
 
             load(pageTable);
+            updatePageTable = 0;
         }
 
         // Unmap page.
