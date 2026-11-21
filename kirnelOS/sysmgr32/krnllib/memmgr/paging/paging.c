@@ -6,11 +6,14 @@
 /// @brief The structure of the virtual memory operations buffer page table.
 typedef struct
 {
+    /// @brief The buffer that points to its own page directory.
+    PageDirectory selfDirectory;
+
     /// @brief The buffer that points to its own page table.
-    PageTable self;
+    PageTable selfTable;
 
     /// @brief All the usable buffers, extensible for more than one logical CPU processor.
-    Page buffers[1023];
+    Page buffers[1022];
 } VirtualMemoryOperations;
 
 #define VIRT_MEMOP_BUFFER ((VirtualMemoryOperations *)(0xFFC00000)) // The starting pointer of the virtual memory operations buffer.
@@ -28,13 +31,13 @@ typedef enum
 _Bool pagingEnabled = 0;
 PageDirectory *selfMemorySpace = (PageDirectory *)KERNEL_NULL_PTR;
 
-// TODO: Change this if we are using more than one CPU processor. Note that it cannot be 0.
+// TODO: Change this if we are using more than one CPU processor.
 unsigned short cpuBufferIndex;
 Page *cpuBuffer;
 
 void configure_mem_buffer(unsigned short bufferIndex)
 {
-    cpuBufferIndex = bufferIndex + 1;
+    cpuBufferIndex = bufferIndex;
     cpuBuffer = &(VIRT_MEMOP_BUFFER->buffers[bufferIndex]);
 }
 
@@ -49,15 +52,15 @@ void load(void *physicalPage)
         return;
     }
 
-    PageTable *dir = &VIRT_MEMOP_BUFFER->self;
-    (*dir)[cpuBufferIndex] = (PageTableEntry){
+    PageTable *dir = &VIRT_MEMOP_BUFFER->selfTable;
+    (*dir)[cpuBufferIndex + 2] = (PageTableEntry){
         .Page = (unsigned long)physicalPage >> PAGE_SIZE_EXP,
         .Present = 1,
         .ReadOrWrite = 1,
         .UserOrSuper = 0,
     };
 
-    invalidate_page(dir + cpuBufferIndex);
+    invalidate_page((void *)cpuBuffer);
 }
 
 /// @brief Sets up the given page directory to be able to perform virtual memory operations on itself.
@@ -78,11 +81,20 @@ void bootstrap(PageDirectory *directory)
         .UserOrSuper = 0,
     };
 
-    // Bootstrap the page table into itself.
+    // Bootstrap the page directory and page table into itself.
     load(virtMemOpTable);
     PageTable *memOpLocation = (PageTable *)cpuBuffer;
 
+    // Page directory.
     (*memOpLocation)[0] = (PageTableEntry){
+        .Page = (unsigned long)directory >> PAGE_SIZE_EXP,
+        .Present = 1,
+        .ReadOrWrite = 1,
+        .UserOrSuper = 0,
+    };
+
+    // Page table of index 1023.
+    (*memOpLocation)[1] = (PageTableEntry){
         .Page = (unsigned long)virtMemOpTable >> PAGE_SIZE_EXP,
         .Present = 1,
         .ReadOrWrite = 1,
@@ -242,6 +254,10 @@ void map(PageDirectory *directory, Address virtualPageStart, void *physicalPageS
 
         // Map the page.
         map_page(virtualPageStart.Page, physical.Address, canWrite, userAccessible, global);
+        if (directory == selfMemorySpace)
+        {
+            invalidate_page(virtualPageStart.Address);
+        }
 
         virtualPageStart.Raw += PAGE_SIZE;
         physical.Raw += PAGE_SIZE;
@@ -294,6 +310,7 @@ void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long num
 
             if (canUnmapPageTable)
             {
+                // TODO: Invalidate all pages in the page table.
                 // Unmap page table.
                 unmap_page_table(virtualPageStart.Directory, type);
             }
@@ -303,6 +320,10 @@ void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long num
 
         // Unmap page.
         unmap_page(virtualPageStart.Page, type);
+        if (directory == selfMemorySpace)
+        {
+            invalidate_page(virtualPageStart.Address);
+        }
 
         virtualPageStart.Raw += PAGE_SIZE;
         numPages--;
@@ -314,12 +335,23 @@ void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long num
     }
 }
 
+/// @brief Maps the kernel space.
+/// @param directory The physical page directory to map the kernel space onto.
+void map_kernel_space(PageDirectory *directory)
+{
+
+}
+
 PageDirectory *create_directory()
 {
     unsigned long _;
     PageDirectory *directory = allocate_strict(1, &_);
 
     bootstrap(directory);
+    if (pagingEnabled)
+    {
+        map_kernel_space(directory);
+    }
 
     return directory;
 }
