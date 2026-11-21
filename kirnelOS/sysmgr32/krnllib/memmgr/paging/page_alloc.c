@@ -56,8 +56,8 @@ void dissolve_page(int order, AllocationNode *node)
     next->Previous = node->Previous;
 
     // Invalidate the AllocationNode.
-    node->Previous = 1;
-    node->Next = 1;
+    node->Previous = 0;
+    node->Next = 0;
 }
 
 /// @brief Inserts an AllocationNode at the given index, without performing any cascading merge operations, to the end of the linked list of its order.
@@ -90,7 +90,7 @@ void cascade_add(int order, unsigned long index)
     {
         // We cascade first before adding the merged block.
         AllocationNode *buddy = get_allocation_node(order, (index ^ 1) + 2);
-        if (buddy->Next <= 1 && buddy->Previous <= 1)
+        if (buddy->Next == 0 && buddy->Previous == 0)
         {
             // There is no buddy at this point so add the new block.
             break;
@@ -176,17 +176,20 @@ void add_range(unsigned long baseAddress, unsigned long endAddress)
     unsigned long current = pageStart;
     while (range > 0)
     {
-        unsigned long maxOrder = __builtin_ctz(current);
+        unsigned long maxOrder;
         unsigned long rangeMaxOrder = 31 - __builtin_clz(range);
 
         if (current == 0) // 0 is aligned to the highest possible order.
         {
             maxOrder = rangeMaxOrder;
         }
-
-        if (maxOrder > rangeMaxOrder)
+        else
         {
-            maxOrder = rangeMaxOrder;
+            maxOrder = __builtin_ctz(current);
+            if (maxOrder > rangeMaxOrder)
+            {
+                maxOrder = rangeMaxOrder;
+            }
         }
 
         append(maxOrder, (current >> maxOrder));
