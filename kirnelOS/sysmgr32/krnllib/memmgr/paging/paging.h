@@ -129,6 +129,38 @@ extern PageDirectory *selfMemorySpace;
 /// @param bufferIndex The buffer index to give. It must be unique against other CPUs.
 void configure_mem_buffer(unsigned short bufferIndex);
 
+/// @brief Translates a virtual into a physical address. The null pointer cannot be used as an address to translate.
+/// @param directory The directory to translate.
+/// @param virtualAddress The virtual address to translate.
+/// @return The physical address; the null pointer if the translation does not exist.
+void *virt_to_phys(PageDirectory *directory, Address virtualAddress);
+
+/// @brief Maps starting from the given virtual page onto a starting physical page and maps the next numPages.
+/// @param directory The directory to map to.
+/// @param virtualPageStart The starting virtual page-aligned address to map to.
+/// @param physicalPageStart The starting physical page-aligned address to map to.
+/// @param numPages The number of pages to map.
+/// @param canWrite The pages can be written to; otherwise they are read-only.
+/// @param userAccessible The pages can be accessible by the user; otherwise they are only accessible by the supervisor.
+/// @param global The pages are global regardless of page directory changes.
+void map(PageDirectory *directory, Address virtualPageStart, void *physicalPageStart, unsigned long numPages, _Bool canWrite, _Bool userAccessible, _Bool global);
+
+/// @brief Allocates pages and maps them at the given starting virtual address.
+/// @param directory The directory to map to.
+/// @param virtualPageStart The starting virtual page-aligned address to map to.
+/// @param numPages The number of free pages to map.
+/// @param canWrite The pages can be written to; otherwise they are read-only.
+/// @param userAccessible The pages can be accessible by the user; otherwise they are only accessible by the supervisor.
+/// @param global The pages are global regardless of page directory changes.
+void map_to_free(PageDirectory *directory, Address virtualPageStart, unsigned long numPages, _Bool canWrite, _Bool userAccessible, _Bool global);
+
+/// @brief Unmaps starting from the given virtual page by the numPages.
+/// @param directory The directory to unmap.
+/// @param virtualPageStart The starting virtual page-aligned address to unmap.
+/// @param numPages The number of pages to unmap.
+/// @param type Additional instructions for unmapping pages.
+void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long numPages, PageFreeType type);
+
 /// @brief Creates an empty PageDirectory.
 /// @return The physical address of where the PageDirectory was created.
 PageDirectory *create_directory();

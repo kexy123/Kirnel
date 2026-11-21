@@ -65,7 +65,7 @@ void load(void *physicalPage)
 void bootstrap(PageDirectory *directory)
 {
     // Bootstrap the page table into the directory.
-        load(directory);
+    load(directory);
     PageDirectory *dirLocation = (PageDirectory *)cpuBuffer;
 
     unsigned long _;
@@ -79,7 +79,7 @@ void bootstrap(PageDirectory *directory)
     };
 
     // Bootstrap the page table into itself.
-        load(virtMemOpTable);
+    load(virtMemOpTable);
     PageTable *memOpLocation = (PageTable *)cpuBuffer;
 
     (*memOpLocation)[0] = (PageTableEntry){
@@ -88,6 +88,230 @@ void bootstrap(PageDirectory *directory)
         .ReadOrWrite = 1,
         .UserOrSuper = 0,
     };
+}
+
+/// @brief Gets the physical page-aligned address of the given page from the loaded page table.
+/// @param index The index from the page table to find.
+/// @return The physical page-aligned address. If it doesn't exist, it is a null pointer.
+void *get_page(unsigned long index)
+{
+    // Note: this assumes that the necessary page table is loaded into the correct CPU buffer; otherwise it is undefined behavior.
+    PageTableEntry entry = (*(PageTable *)cpuBuffer)[index];
+    if (!entry.Present)
+    {
+        return (void *)KERNEL_NULL_PTR;
+    }
+
+    return (void *)(entry.Page << PAGE_SIZE_EXP);
+}
+
+/// @brief Gets the physical page-aligned address of the given page table from the loaded page directory.
+/// @param index The index from the page directory to find.
+/// @return The physical page-aligned address. If it doesn't exist, it is a null pointer.
+void *get_page_table(unsigned long index)
+{
+    // Note: this assumes that the necessary page directory is loaded into the correct CPU buffer; otherwise it is undefined behavior.
+    PageDirectoryEntry entry = (*(PageDirectory *)cpuBuffer)[index];
+    if (!entry.Present)
+    {
+        return (void *)KERNEL_NULL_PTR;
+    }
+
+    return (void *)(entry.Page << PAGE_SIZE_EXP);
+}
+
+/// @brief Maps a page by the index to a physicalPage.
+/// @param index The index in the loaded page table to map.
+/// @param physicalPage The physical page-aligned address to map to.
+/// @param canWrite The page can be written to; otherwise it is read-only.
+/// @param userAccessible The page can be accessible by the user; otherwise it is only accessible by the supervisor.
+/// @param global The page is global regardless of page directory changes.
+/// @return The physical page that was mapped to.
+Page *map_page(unsigned long index, void *physicalPage, _Bool canWrite, _Bool userAccessible, _Bool global)
+{
+    // Note: this assumes that the necessary page table is loaded into the correct CPU buffer; otherwise it is undefined behavior.
+    PageTable *table = (PageTable *)cpuBuffer;
+
+    (*table)[index] = (PageTableEntry){
+        .Page = (unsigned long)physicalPage >> PAGE_SIZE_EXP,
+        .Present = 1,
+        .ReadOrWrite = canWrite,
+        .UserOrSuper = userAccessible,
+        .Global = global,
+    };
+
+    return (Page *)physicalPage;
+}
+
+/// @brief Maps a page table by the index to a physicalPage.
+/// @param index The index in the loaded page directory to map.
+/// @param physicalPage The physical page-aligned address to map to. Null pointer to allocate a new page.
+/// @param canWrite The page can be written to; otherwise it is read-only.
+/// @param userAccessible The page can be accessible by the user; otherwise it is only accessible by the supervisor.
+/// @return The physical page that was mapped to.
+PageTable *map_page_table(unsigned long index, void *physicalPage, _Bool canWrite, _Bool userAccessible)
+{
+    if (physicalPage == (void *)KERNEL_NULL_PTR)
+    {
+        unsigned long _;
+        physicalPage = allocate_strict(1, &_);
+    }
+
+    // Note: this assumes that the necessary page directory is loaded into the correct CPU buffer; otherwise it is undefined behavior.
+    PageDirectory *directory = (PageDirectory *)cpuBuffer;
+
+    (*directory)[index] = (PageDirectoryEntry){
+        .Page = (unsigned long)physicalPage >> PAGE_SIZE_EXP,
+        .Present = 1,
+        .ReadOrWrite = canWrite,
+        .UserOrSuper = userAccessible,
+    };
+
+    return (PageTable *)physicalPage;
+}
+
+/// @brief Unmaps a page from a given index.
+/// @param index The index in the loaded page table to unmap.
+/// @param type Additional instructions for unmapping pages.
+void unmap_page(unsigned long index, PageFreeType type)
+{
+    // Note: this assumes that the necessary page table is loaded into the correct CPU buffer; otherwise it is undefined behavior.
+    PageTable *table = (PageTable *)cpuBuffer;
+    PageTableEntry entry = (*table)[index];
+
+    entry.Present = 0;
+    if (type | FreePages)
+    {
+        deallocate(0, (void *)(entry.Page << PAGE_SIZE_EXP));
+    }
+}
+
+/// @brief Unmaps a page table from a given index.
+/// @param index The index in the loaded page directory to unmap.
+/// @param type Additional instructions for unmapping page tables.
+void unmap_page_table(unsigned long index, PageFreeType type)
+{
+    // Note: this assumes that the necessary page directory is loaded into the correct CPU buffer; otherwise it is undefined behavior.
+    PageDirectory *table = (PageDirectory *)cpuBuffer;
+    PageDirectoryEntry entry = (*table)[index];
+
+    entry.Present = 0;
+    if (type | FreePageTables)
+    {
+        deallocate(0, (void *)(entry.Page << PAGE_SIZE_EXP));
+    }
+}
+
+void *virt_to_phys(PageDirectory *directory, Address virtualAddress)
+{
+    load(directory);
+
+    // Get the address of the page table.
+    PageTable *table = (PageTable *)get_page_table(virtualAddress.Directory);
+    load(table);
+
+    // Get the address of the page.
+    Page *page = (Page *)get_page(virtualAddress.Page);
+    return (void *)((char *)page + virtualAddress.Offset);
+}
+
+void map(PageDirectory *directory, Address virtualPageStart, void *physicalPageStart, unsigned long numPages, _Bool canWrite, _Bool userAccessible, _Bool global)
+{
+    Address physical = (Address){.Address = physicalPageStart};
+    physical.Offset = 0;
+    virtualPageStart.Offset = 0;
+
+    _Bool updatePageTable = 1;
+    while (numPages > 0)
+    {
+        if (updatePageTable)
+        {
+            // Go to the next page table.
+            load(directory);
+            PageTable *pageTable = get_page_table(virtualPageStart.Directory);
+
+            if (pageTable == (PageTable *)KERNEL_NULL_PTR)
+            {
+                // Create a new page table.
+                pageTable = map_page_table(virtualPageStart.Directory, (void *)KERNEL_NULL_PTR, canWrite, userAccessible);
+            }
+
+            load(pageTable);
+            updatePageTable = 0;
+        }
+
+        // Map the page.
+        map_page(virtualPageStart.Page, physical.Address, canWrite, userAccessible, global);
+
+        virtualPageStart.Raw += PAGE_SIZE;
+        physical.Raw += PAGE_SIZE;
+        numPages--;
+        if (virtualPageStart.Page == 0)
+        {
+            updatePageTable = 1;
+        }
+    }
+}
+
+void map_to_free(PageDirectory *directory, Address virtualPageStart, unsigned long numPages, _Bool canWrite, _Bool userAccessible, _Bool global)
+{
+    virtualPageStart.Offset = 0;
+
+    while (numPages > 0)
+    {
+        unsigned long remainder;
+        void *physicalPage = try_allocate(numPages, &remainder);
+
+        map(directory, virtualPageStart, physicalPage, numPages - remainder, canWrite, userAccessible, global);
+
+        virtualPageStart.Raw += (numPages - remainder) << PAGE_SIZE_EXP;
+        numPages = remainder;
+    }
+}
+
+void unmap(PageDirectory *directory, Address virtualPageStart, unsigned long numPages, PageFreeType type)
+{
+    virtualPageStart.Offset = 0;
+
+    _Bool updatePageTable = 1, canUnmapPageTable = virtualPageStart.Page == 0;
+    while (numPages > 0)
+    {
+        if (updatePageTable)
+        {
+            // Go to the next page table.
+            load(directory);
+
+            PageTable *pageTable = get_page_table(virtualPageStart.Directory);
+            if (pageTable == (PageTable *)KERNEL_NULL_PTR)
+            {
+                if (numPages > NUM_ENTRIES)
+                {
+                    numPages -= NUM_ENTRIES;
+                    continue;
+                }
+                return;
+            }
+
+            if (canUnmapPageTable)
+            {
+                // Unmap page table.
+                unmap_page_table(virtualPageStart.Directory, type);
+            }
+
+            load(pageTable);
+        }
+
+        // Unmap page.
+        unmap_page(virtualPageStart.Page, type);
+
+        virtualPageStart.Raw += PAGE_SIZE;
+        numPages--;
+        if (virtualPageStart.Page == 0)
+        {
+            updatePageTable = 1;
+            canUnmapPageTable = 1;
+        }
+    }
 }
 
 PageDirectory *create_directory()
