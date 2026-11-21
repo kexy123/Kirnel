@@ -1,5 +1,6 @@
 #include "mem_segments.h"
 #include "utils/flow.h"
+#include "memmgr/kernel_virtual_layout.h"
 
 #define MEMORY_SEGMENT_START ((const MemorySegmentEntry *const)(0x00007E00))
 
@@ -31,7 +32,7 @@ void count_memory_segments()
 /// @brief Gets the range of memory that was specified by the BIOS.
 void get_memory_range()
 {
-    unsigned long low = 0xFFFFFFFF;
+    unsigned long low = KERNEL_NULL_PTR;
     unsigned long high = 0x00000000;
 
     for (int i = 0; i < numSegments; i++)

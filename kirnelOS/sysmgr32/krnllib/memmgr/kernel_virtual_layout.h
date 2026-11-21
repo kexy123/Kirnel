@@ -7,6 +7,8 @@
 #define KERNEL_HEAP_START (0xD0000000) // The starting address of the kernel heap.
 #define KERNEL_HEAP_END (0xD8000000)   // The ending address of the kernel heap.
 
+#define KERNEL_NULL_PTR (0xFFFFFFFF) // The assigned null pointer for the kernel.
+
 /// @brief The old location of the kernel space. Is only used to be transferred to the dedicated kernel space.
 extern const Address oldKernelSpace;
 

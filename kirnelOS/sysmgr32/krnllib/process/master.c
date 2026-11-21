@@ -1,6 +1,7 @@
 #include "bit.h"
 #include "filesys/master.h"
 #include "master.h"
+#include "memmgr/kernel_virtual_layout.h"
 #include "memmgr/paging/page_alloc.h"
 #include "memmgr/paging/paging.h"
 #include "memory/memory.h"
@@ -16,7 +17,7 @@ Process *create_process(FilePath executable)
     if (!program.Success)
     {
         free((void *)newProcess);
-        return (Process *)0xFFFFFFFF;
+        return (Process *)KERNEL_NULL_PTR;
     }
 
     // Load then close file.
@@ -29,7 +30,7 @@ Process *create_process(FilePath executable)
     {
         free((void *)newProcess);
         deallocate(lowest_exp2(numPages), location);
-        return (Process *)0xFFFFFFFF;
+        return (Process *)KERNEL_NULL_PTR;
     }
 
     // Create primary thread.
