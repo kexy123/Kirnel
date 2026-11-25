@@ -8,7 +8,7 @@ ELF_OBJCPY := i386-elf-objcopy
 NASM := nasm
 MAKE_DIR = @mkdir -p $(dir $@)
 
-CPP_FLAGS := -Wall -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/shell -std=c++23 -fdata-sections -ffunction-sections
+CPP_FLAGS := -Wall -ffreestanding -nostdlib -m32 -IkirnelOS/sysmgr32/shell -IkirnelOS/sysmgr32/syslib/declaration -std=c++23 -fdata-sections -ffunction-sections
 
 # OBJECTS
 CPP_SOURCES := $(shell find kirnelOS/sysmgr32/shell -name '*.cpp')

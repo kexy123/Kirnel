@@ -8,7 +8,7 @@ ELF_OBJCPY := i386-elf-objcopy
 NASM := nasm
 MAKE_DIR = @mkdir -p $(dir $@)
 
-C_FLAGS := -ffreestanding -nostdlib -m32 -Iboot_record -IkirnelOS/sysmgr32/krnllib -IkirnelOS/sysmgr32/syslib -std=c23 -fdata-sections -ffunction-sections
+C_FLAGS := -ffreestanding -nostdlib -m32 -Iboot_record -IkirnelOS/sysmgr32/krnllib -IkirnelOS/sysmgr32/syslib/declaration -std=c23 -fdata-sections -ffunction-sections
 
 # OBJECTS
 C_SOURCES := $(shell find boot_record -name '*.c')

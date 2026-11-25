@@ -1,6 +1,6 @@
 #include "bit.h"
-#include "memcopy.h"
-#include "memory.h"
+#include "memory/memcopy.h"
+#include "memory/memory.h"
 
 /// @brief The length of a block in the heap in bytes.
 typedef unsigned long HeapLength;

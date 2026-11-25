@@ -1,6 +1,6 @@
-#include "alloc.hpp"
+#include "memory/alloc.hpp"
+#include "memory/memory.h"
 #include "size.hpp"
-#include "memory.h"
 
 void *operator new(SizeType size)
 {
