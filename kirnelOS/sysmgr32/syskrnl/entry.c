@@ -4,6 +4,7 @@
 #include "filesys/master.h"
 #include "process/master.h"
 #include "process/task/master.h"
+#include "system_calls/master.h"
 
 /// @brief The entry point for the system kernel.
 __attribute__((section(".text.krnl_start"))) void krnl_start()
@@ -19,6 +20,9 @@ __attribute__((section(".text.krnl_start"))) void krnl_start()
 
     init_tss();
     print_ln("Scheduler initialized.");
+
+    init_syscalls();
+    print_ln("System calls initialized.");
     
     print_ln("Hello from the SYSKRNL!");
 
