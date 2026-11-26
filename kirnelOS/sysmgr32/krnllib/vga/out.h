@@ -1,5 +1,7 @@
 #pragma once
 
+#include "string.hpp"
+
 /// @brief A character in the [VGA (video graphics array)](https://en.wikipedia.org/wiki/Video_Graphics_Array).
 typedef struct __attribute__((packed))
 {
@@ -14,6 +16,7 @@ typedef struct __attribute__((packed))
     _Generic((message), \
         char *: print_s, \
         const char *: print_s, \
+        StringView: print_sv, \
         char: print_c, \
         unsigned char: print_uint, \
         unsigned short: print_uint, \
@@ -33,6 +36,10 @@ void print_c(char character);
 /// @brief Prints a null-terminating message to the VGA and moves the cursor to the end of the string.
 /// @param message The null-terminating string.
 void print_s(const char *message);
+
+/// @brief Prints a message to the VGA by a StringView.
+/// @param message The StringView to print out.
+void print_sv(StringView message);
 
 /// @brief Prints an unsigned integer to the VGA in base-10 and moves the cursor.
 /// @param num The number to print in base-10.

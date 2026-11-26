@@ -55,6 +55,18 @@ void print_s(const char *message)
     }
 }
 
+void print_sv(StringView message)
+{
+    const char *str = message.String;
+    for (unsigned long i = 0; i < message.Length; i++)
+    {
+        print_c(*str);
+
+        // Move the pointer.
+        str++;
+    }
+}
+
 void print_uint(unsigned long num)
 {
     const char *result = uint_to_str(num);
