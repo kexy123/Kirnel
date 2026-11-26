@@ -2,7 +2,7 @@
 #include "filesys/master.h"
 #include "master.h"
 #include "memory/memory.h"
-#include "string.h"
+#include "string.hpp"
 
 FileInfo fat12_open_file(FilePath path, FileUsagePermissions permissions)
 {

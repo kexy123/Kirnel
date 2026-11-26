@@ -1,6 +1,6 @@
 #pragma once
 
-#include "string.h"
+#include "string.hpp"
 
 /// @brief The permissions of using a file.
 typedef enum : unsigned char
