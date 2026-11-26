@@ -39,4 +39,6 @@ void make_gates()
     create_idt_gate(0x0E, (unsigned long)service14, page_fault_handle, 0x08, (IDTEntryFlags){.Raw = 0b10001110}); // Interrupt 14 (#PF): page fault.
 
     create_idt_gate(0x26, (unsigned long)irq6, fdc_interrupt_handle, 0x08, (IDTEntryFlags){.Raw = 0b10001110}); // IRQ6: floppy disk controller.
+
+    create_idt_gate(0x80, (unsigned long)service128, syscall_handle, 0x08, (IDTEntryFlags){.Raw = 0b11101110}); // Interrupt 128: user process system call.
 }

@@ -49,6 +49,8 @@ service_error 14 ; Page fault.
 
 int_req_service 6, 0x26 ; IRQ6; floppy disk controller hardware interrupt.
 
+service_noerror 128 ; User program system call.
+
 
 ;;;;; INTERRUPT HANDLE ;;;;;
 

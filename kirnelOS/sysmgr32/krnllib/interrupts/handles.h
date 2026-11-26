@@ -3,3 +3,4 @@
 #include "handle/double_fault.h"
 #include "handle/page_fault.h"
 #include "handle/fdc_interrupts.h"
+#include "handle/syscall.h"
